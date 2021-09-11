@@ -8,6 +8,7 @@ class Coord
 {
  public:
   Coord(int x, int y, int h);
+  Coord() : Coord(0, 0, 0) {}
 
   std::string toString();
 

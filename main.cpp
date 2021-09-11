@@ -267,7 +267,10 @@ public:
 
     switch (mode.modeID) {
     case GM_HIGHWAY:
-      updateHighwayMode(fElapsedSeconds);
+      bool cont = updateHighwayMode(fElapsedSeconds);
+      if (!cont) {
+	setGameMode(mode.escMode);
+      }	
       break;
     }
   }
@@ -411,9 +414,9 @@ public:
     m_highwayGameMode.draw();
   }
 
-  void updateHighwayMode(float elapsedSeconds)
+  bool updateHighwayMode(float elapsedSeconds)
   {
-    m_highwayGameMode.update(elapsedSeconds);
+    return m_highwayGameMode.update(elapsedSeconds);
   }
 
   bool updateButtons() {
