@@ -7,7 +7,7 @@ SOUND_TEST_HS = olc_pgex_sound.h
 all: sparkle cwg cwg.html
 
 clean:
-	rm -f sparkle cwg cwg-opt cwg.html cwg.wasm cwg.data
+	rm -f sparkle cwg cwg-opt cwg.js cwg.html cwg.wasm cwg.data
 
 sparkle: sparkle.cpp
 	g++ -o sparkle sparkle.cpp -lX11 -lGL -lpthread -lpng -lstdc++fs -std=c++17
