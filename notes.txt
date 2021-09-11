@@ -1,0 +1,16 @@
+Set up Emscripten (each reboot!)
+cd emsdk
+source emsdk_env.sh
+
+
+Makefile
+
+https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
+
+
+OLC wiki
+
+https://github.com/OneLoneCoder/olcPixelGameEngine/wiki
+
+ENTT
+https://github.com/skypjack/entt

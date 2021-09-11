@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Emacs
+*~
+
+# git token
+git.token
