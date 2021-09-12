@@ -2,6 +2,9 @@
 
 #include "node.h"
 
+#include <stdlib.h>
+
+#include "bdg_random.h"
 #include "city.h"
 #include "constants.h"
 #include "coord.h"
@@ -182,6 +185,12 @@ bool Node::isOrigin() const
 void Node::constrainFromNothing()
 {
   // TODO constrain from nothing
+  unsigned int seed = makeSeedKey(0, 0, 0, "COLOR");
+  srand(seed);
+  int cr = randomrange(0, 256);
+  int cg = randomrange(0, 256);
+  int cb = randomrange(0, 256);
+  m_color = olc::Pixel(cr, cg, cb);
 }
 
 void Node::constrainFromChild(Node& childNode)
