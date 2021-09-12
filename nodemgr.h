@@ -25,6 +25,10 @@ class NodeMgr
 
   Node* getNode(Coord c, TileLayer layer);
 
+ protected:
+  int getCacheSizeForHeight(int height);
+  void pruneCacheForHeight(int height);
+
  private:
   unsigned int m_baseCacheSize;
   GameClock* m_gameClock;

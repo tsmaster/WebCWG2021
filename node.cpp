@@ -18,6 +18,11 @@ Node::Node(int x, int y, int h, NodeMgr* nodeMgr)
   m_populatedLayer = TileLayer::EMPTY;
 }
 
+void Node::destroy()
+{
+  delete m_coord;
+}
+
 void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 {
   int xLeft, yBottom, xRight, yTop;

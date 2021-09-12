@@ -1,5 +1,7 @@
 #include "nodemgr.h"
 
+#include <vector>
+
 #include "coord.h"
 #include "node.h"
 
@@ -27,9 +29,56 @@ std::vector<Node*> NodeMgr::getNodes()
   return outNodes;
 }
 
+int NodeMgr::getCacheSizeForHeight(int h)
+{
+  int hCounter = 0;
+  int retSize = m_baseCacheSize;
+
+  while (hCounter < h) {
+    retSize = retSize / 2;
+    ++hCounter;
+  }
+  return std::max(1, retSize);
+}
+
 void NodeMgr::update()
 {
-  // TODO port LRU flushing
+  for (int h = 0; h < m_nodesByHeight.size(); ++h) {
+    int cacheSize = getCacheSizeForHeight(h);
+
+    int nbhs = m_nodesByHeight[h].size();
+    printf("h: %d cs: %d nbhs: %d\n", h, cacheSize, nbhs);
+
+    if (m_nodesByHeight[h].size() > cacheSize) {
+      pruneCacheForHeight(h);
+    }
+  }
+}
+
+void NodeMgr::pruneCacheForHeight(int h)
+{
+  int cacheSize = getCacheSizeForHeight(h);
+
+  NodeCache& nc = m_nodesByHeight[h];
+
+  std::vector<Node*> nodePtrs;
+  
+  for (auto np = nc.begin();
+       np != nc.end();
+       ++np) {
+    nodePtrs.push_back(np->second);
+  }
+  
+  std::sort(nodePtrs.begin(), nodePtrs.end(), [](Node* np1, Node* np2) {
+    return np1->getLastUsed() < np2->getLastUsed();
+  });
+
+  for (int i = 0; i < nc.size() - cacheSize; ++i) {
+    Node* n = nodePtrs[i];
+    Coord* c = n->getCoord();
+    nc.erase(*c);
+    n->destroy();
+  }
 }
 
 void NodeMgr::populate(Coord c, TileLayer layer)
@@ -54,6 +103,8 @@ Node* NodeMgr::getNode(Coord c, TileLayer layer)
     nc[c] = nodePtr;
   }
   nodePtr->populate(layer);
+  
+  nodePtr->updateLastUsed(m_gameClock->getTime());
   //printf("returning node for %s\n", c.toString().c_str());
   return nodePtr;
 }

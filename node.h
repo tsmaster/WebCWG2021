@@ -6,8 +6,10 @@
 #include <vector>
 
 #include "olcPixelGameEngine.h"
-#include "layers.h"
+
 #include "coord.h"
+#include "gameclock.h"
+#include "layers.h"
 
 class City;
 class HighwayGameMode;
@@ -19,6 +21,8 @@ class Node
   Node(int x, int y, int h, NodeMgr* nodeMgr);
   Node(Coord c, NodeMgr* nodeMgr) : Node(c.x, c.y, c.h, nodeMgr) {}
 
+  void destroy();
+
   static void calcExtents(int x, int y, int h,
 			  int& outLeft, int& outBottom,
 			  int& outRight, int& outTop);
@@ -27,6 +31,7 @@ class Node
 
   void populate(TileLayer newLayer);
 
+  Coord* getCoord() { return m_coord; }
   Coord getParentCoord();
 
   void constrainFromNothing();
@@ -49,7 +54,8 @@ class Node
 
   bool isLocnInNodesExtents(Coord coord);
 
-  Coord* getCoord() { return m_coord; }
+  void updateLastUsed(unsigned int tm) { m_lastAccessed = tm; }
+  unsigned int getLastUsed() { return m_lastAccessed; }
 
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
