@@ -13,6 +13,7 @@
 HighwayGameMode::HighwayGameMode()
 {
   m_tileScale = 10.0f;
+  m_viewRadius = 4.5f;
 }
 
 void HighwayGameMode::init()
@@ -31,9 +32,69 @@ void HighwayGameMode::destroy()
   m_nodeMgr = NULL;
 }
 
-bool HighwayGameMode::update(float elapsedSeconds)
+bool HighwayGameMode::update(olc::PixelGameEngine* pge, float elapsedSeconds)
 {
-  return true;
+  return handleUserInput(pge);
+}
+
+bool HighwayGameMode::handleUserInput(olc::PixelGameEngine* pge)
+{
+  bool bTicked = false;
+
+  bool bContinue = true;
+
+  if (pge->GetKey(olc::Key::ESCAPE).bPressed) {
+    bContinue = false;
+  }
+
+  int cx = m_centerCoord.x;
+  int cy = m_centerCoord.y;
+  
+  if (pge->GetKey(olc::Key::LEFT).bPressed) {
+    m_centerCoord = Coord(cx - 1, cy, 0);
+    bTicked = true;
+  }
+
+  if (pge->GetKey(olc::Key::RIGHT).bPressed) {
+    m_centerCoord = Coord(cx + 1, cy, 0);
+    bTicked = true;
+  }
+
+  if (pge->GetKey(olc::Key::DOWN).bPressed) {
+    m_centerCoord = Coord(cx, cy - 1, 0);
+    bTicked = true;
+  }
+
+  if (pge->GetKey(olc::Key::UP).bPressed) {
+    m_centerCoord = Coord(cx, cy + 1, 0);
+    bTicked = true;
+  }
+
+  if (pge->GetKey(olc::Key::PGUP).bPressed) {
+    m_tileScale = std::min((m_tileScale * 3) / 2, 64.0f);
+  }
+
+  if (pge->GetKey(olc::Key::PGDN).bPressed) {
+    m_tileScale = std::max((m_tileScale * 2) / 3, 2.0f);
+  }
+  
+  if (pge->GetKey(olc::Key::NP_ADD).bPressed) {
+    m_viewRadius = std::min(m_viewRadius + 0.25f, 32.0f);
+  }
+
+  if (pge->GetKey(olc::Key::NP_SUB).bPressed) {
+    m_viewRadius = std::min(m_viewRadius - 0.25f, 1.0f);
+  }
+  
+  if (pge->GetKey(olc::Key::K1).bPressed) {
+    printf("center: %s\n", m_centerCoord.toString().c_str());
+  }
+
+  if (bTicked) {
+    m_gameClock->increment();
+  }
+
+  return bContinue;
 }
 
 void HighwayGameMode::draw(olc::PixelGameEngine* pge)

@@ -24,12 +24,14 @@ class HighwayGameMode
 
   void destroy();
 
-  bool update(float elapsedSeconds);
+  bool update(olc::PixelGameEngine* pge, float elapsedSeconds);
 
   void draw(olc::PixelGameEngine* pge);
 
   Vec2f screenToTileCoord(olc::PixelGameEngine* pge, Vec2f screenCoord);
   Vec2f tileToScreenCoord(olc::PixelGameEngine* pge, Vec2f tileCoord);
+
+  bool handleUserInput(olc::PixelGameEngine* pge);
 
 private:
   Coord m_centerCoord;
@@ -37,6 +39,7 @@ private:
   NodeMgr* m_nodeMgr;
 
   float m_tileScale;
+  float m_viewRadius;
 };
 
 #endif // MODE_HIGHWAY_H

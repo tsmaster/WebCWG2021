@@ -15,9 +15,13 @@ Coord::Coord(int ix, int iy, int ih)
 std::string Coord::toString()
 {
   std::ostringstream stringStream;
+  stringStream << "<";
   stringStream << x;
+  stringStream << ", ";
   stringStream << y;
+  stringStream << " / ";
   stringStream << h;
+  stringStream << ">";
   return stringStream.str();
 }
 
@@ -32,21 +36,22 @@ bool Coord::lessThan(Coord& other)
 {
   if (h < other.h) {
     return true;
-  }
+  }  
   if (h > other.h) {
     return false;
   }
 
   if (y < other.y) {
     return true;
-  }
+  }  
   if (y > other.y) {
     return false;
   }
-
+  
   if (x < other.x) {
     return true;
   }
+  
   return false;  
 }
 

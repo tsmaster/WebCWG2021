@@ -416,7 +416,7 @@ public:
 
   bool updateHighwayMode(float elapsedSeconds)
   {
-    return m_highwayGameMode.update(elapsedSeconds);
+    return m_highwayGameMode.update(this, elapsedSeconds);
   }
 
   bool updateButtons() {
