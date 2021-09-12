@@ -9,6 +9,8 @@ City::City(int x, int y)
   m_name = makeName();
 }
 
+// TODO rewrite name generation
+
 std::string City::makeName()
 {
   return std::string("???");

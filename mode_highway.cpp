@@ -8,6 +8,7 @@
 
 // Reference ../PyCWG2021/fractal.py
 
+// TODO finish porting HighwayGameMode from fractal.py
 
 HighwayGameMode::HighwayGameMode()
 {
