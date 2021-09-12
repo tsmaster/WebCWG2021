@@ -2,6 +2,7 @@
 
 #include "node.h"
 
+#include "constants.h"
 #include "coord.h"
 #include "mode_highway.h"
 
@@ -62,10 +63,43 @@ void Node::drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 void Node::getBaseExtents(int& outLeft, int& outBottom,
 			  int& outRight, int& outTop)
 {
-  // TODO extents
-  outLeft = 0;
-  outRight = 0;
-  outBottom = 0;
-  outTop = 0;
   
+  Node::calcExtents(m_coord->x,
+		    m_coord->y,
+		    m_coord->h,
+		    outLeft, outBottom,
+		    outRight, outTop);
+}
+
+
+void Node::calcExtents(int x, int y, int h,
+		       int& outLeft, int& outBottom,
+		       int& outRight, int& outTop)
+{
+  if (h == 0) {
+    outLeft = x;
+    outBottom = y;
+    outRight = x+1;
+    outTop = y+1;
+    return;
+  }
+
+  // TODO handle odd and even height offset correctly
+  int newH = h - 1;
+  int newLeft = x * SCALE_FACTOR - ODD_HEIGHT_OFFSET;
+  int newBottom = y * SCALE_FACTOR - ODD_HEIGHT_OFFSET;
+
+  int newRight = newLeft + SCALE_FACTOR;
+  int newTop = newBottom + SCALE_FACTOR;
+
+  int newBLL, newBLB, newBLR, newBLT;
+  int newTRL, newTRB, newTRR, newTRT;
+  
+  calcExtents(newLeft, newBottom, newH, newBLL, newBLB, newBLR, newBLT);
+  calcExtents(newRight, newTop, newH, newTRL, newTRB, newTRR, newTRT);
+
+  outLeft = newBLL;
+  outBottom = newBLB;
+  outRight = newTRR;
+  outTop = newTRT;
 }
