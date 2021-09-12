@@ -13,6 +13,16 @@ float radToDeg(float radians);
 const float PI = 3.141592654f;
 const float TAU = PI * 2.0f;
 
+
+class Vec2f
+{
+ public:
+  Vec2f(float x, float y);
+
+  float x;
+  float y;
+};
+
 #endif //BDG_MATH_H
 
 

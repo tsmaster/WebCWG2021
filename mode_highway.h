@@ -5,6 +5,10 @@
 #ifndef MODE_HIGHWAY_H
 #define MODE_HIGHWAY_H
 
+#include "olcPixelGameEngine.h"
+
+#include "bdg_math.h"
+
 #include "coord.h"
 #include "gameclock.h"
 #include "nodemgr.h"
@@ -22,12 +26,17 @@ class HighwayGameMode
 
   bool update(float elapsedSeconds);
 
-  void draw();
+  void draw(olc::PixelGameEngine* pge);
+
+  Vec2f screenToTileCoord(olc::PixelGameEngine* pge, Vec2f screenCoord);
+  Vec2f tileToScreenCoord(olc::PixelGameEngine* pge, Vec2f tileCoord);
 
 private:
   Coord m_centerCoord;
   GameClock* m_gameClock;
-  NodeMgr* m_nodeMgr;  
+  NodeMgr* m_nodeMgr;
+
+  float m_tileScale;
 };
 
 #endif // MODE_HIGHWAY_H

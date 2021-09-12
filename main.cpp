@@ -411,7 +411,7 @@ public:
 
   void drawHighwayMode()
   {
-    m_highwayGameMode.draw();
+    m_highwayGameMode.draw(this);
   }
 
   bool updateHighwayMode(float elapsedSeconds)

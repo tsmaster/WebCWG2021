@@ -43,3 +43,10 @@ float degToRad(float degrees) {
 float radToDeg(float radians) {
   return 180.0f * radians / PI;
 }
+
+
+
+Vec2f::Vec2f(float ix, float iy) {
+  x = ix;
+  y = iy;
+}
