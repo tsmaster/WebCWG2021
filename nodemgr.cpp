@@ -47,7 +47,7 @@ void NodeMgr::update()
     int cacheSize = getCacheSizeForHeight(h);
 
     int nbhs = m_nodesByHeight[h].size();
-    printf("h: %d cs: %d nbhs: %d\n", h, cacheSize, nbhs);
+    //printf("h: %d cs: %d nbhs: %d\n", h, cacheSize, nbhs);
 
     if (m_nodesByHeight[h].size() > cacheSize) {
       pruneCacheForHeight(h);

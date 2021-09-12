@@ -28,9 +28,6 @@ void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
   int xLeft, yBottom, xRight, yTop;
   getBaseExtents(xLeft, yBottom, xRight, yTop);
 
-  //printf("drawing node at %s\n", m_coord->toString().c_str());
-  //printf("l: %d, b: %d r: %d t: %d\n", xLeft, yBottom, xRight, yTop);
-
   Vec2f screenBottomLeft = mode->tileToScreenCoord(pge, Vec2f(xLeft, yBottom));
   Vec2f screenTopRight = mode->tileToScreenCoord(pge, Vec2f(xRight, yTop));
 
@@ -51,6 +48,9 @@ void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 		      olc::Pixel(50, 50, 50));
     }      
   } else {
+    //printf("drawing node at %s\n", m_coord->toString().c_str());
+    //printf("l: %d, b: %d r: %d t: %d\n", xLeft, yBottom, xRight, yTop);
+    
     pge->DrawRect(sLeft, sTop, sRight-sLeft, sBottom-sTop, m_color);
   }
 }
@@ -83,7 +83,6 @@ void Node::drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 void Node::getBaseExtents(int& outLeft, int& outBottom,
 			  int& outRight, int& outTop)
 {
-  
   Node::calcExtents(m_coord->x,
 		    m_coord->y,
 		    m_coord->h,
@@ -91,7 +90,8 @@ void Node::getBaseExtents(int& outLeft, int& outBottom,
 		    outRight, outTop);
 }
 
-
+/// outLeft is left
+/// outRight is outside
 void Node::calcExtents(int x, int y, int h,
 		       int& outLeft, int& outBottom,
 		       int& outRight, int& outTop)
@@ -104,6 +104,7 @@ void Node::calcExtents(int x, int y, int h,
     return;
   }
 
+  //printf("calcing extents for x %d y %d h %d\n", x, y, h);
   // TODO handle odd and even height offset correctly
   int newH = h - 1;
   int newLeft = x * SCALE_FACTOR - ODD_HEIGHT_OFFSET;
@@ -120,8 +121,10 @@ void Node::calcExtents(int x, int y, int h,
 
   outLeft = newBLL;
   outBottom = newBLB;
-  outRight = newTRR;
-  outTop = newTRT;
+  outRight = newTRL;
+  outTop = newTRB;
+
+  //printf("outLeft: %d outRight: %d\n", outLeft, outRight);
 }
 
 
@@ -131,7 +134,70 @@ void Node::populate(TileLayer newLayer)
     return;
   }
 
-  // TODO most of populating a node
-
   m_populatedLayer = newLayer;
+
+  /*
+    printf("populating x %d y %d h %d l %d\n",
+	 m_coord->x,
+	 m_coord->y,
+	 m_coord->h,
+	 int(newLayer));
+  */
+
+  if (isOrigin()) {
+    if (m_coord->h == 0) {
+      constrainFromNothing();
+    } else {
+      Coord childCoord = Coord(m_coord->x,
+			       m_coord->y,
+			       m_coord->h - 1);
+      
+      Node* childNode = m_nodeMgr->getNode(childCoord, newLayer);
+      constrainFromChild(*childNode);
+    }
+  } else {
+    Coord parentCoord = getParentCoord();
+    Node* parentNode = m_nodeMgr->getNode(parentCoord, newLayer);
+    constrainFromParent(*parentNode);
+  }
+
+  // roads
+  if (newLayer >= TileLayer::H1_CROSS_TILE_ROADS) {
+    if (m_coord->h == 1) {
+      // TODO neighborNode
+      //paveCrossTileRoad(neighborNode);
+    } else if (m_coord->h == 0) {
+      Coord parentCoord = getParentCoord();
+      Node* parentNode = m_nodeMgr->getNode(parentCoord, newLayer);
+    }
+  }
+}
+
+bool Node::isOrigin() const
+{
+  return ((m_coord->x == 0) &&
+	  (m_coord->y == 0));
+}
+
+void Node::constrainFromNothing()
+{
+  // TODO constrain from nothing
+}
+
+void Node::constrainFromChild(Node& childNode)
+{
+  // TODO constrain from child
+}
+
+void Node::constrainFromParent(Node& parentNode)
+{
+  // TODO constrain from parent
+}
+
+Coord Node::getParentCoord()
+{
+  // TODO handle odd height offset
+  int px = (m_coord->x + ODD_HEIGHT_OFFSET) / SCALE_FACTOR;
+  int py = (m_coord->y + ODD_HEIGHT_OFFSET) / SCALE_FACTOR;
+  return Coord(px, py, m_coord->h + 1);
 }
