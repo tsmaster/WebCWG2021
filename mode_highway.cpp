@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
+#include "node.h"
 
 // Reference ../PyCWG2021/fractal.py
 
@@ -134,15 +135,15 @@ void HighwayGameMode::draw(olc::PixelGameEngine* pge)
     pge->DrawLine(0, sy, sw, sy, lineColor);
   }
 
-  // TODO draw the tiles from the nodeMgr
-  /*
-        nodeList = list(self.nodeMgr.getNodes())
-        for n in nodeList:
-            n.draw(self)
+  std::vector<Node *> nodeVec = m_nodeMgr->getNodes();
 
-        for n in nodeList:
-            n.drawLabels(self)
-   */
+  for (Node* n : nodeVec) {
+    n->draw(pge, this);
+  }
+
+  for (Node* n : nodeVec) {
+    n->drawLabel(pge, this);
+  }
 
   olc::Pixel crossHairsColor = olc::Pixel(125, 0, 0);
   pge->DrawLine(pcx - 5, pcy,

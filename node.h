@@ -7,9 +7,10 @@
 
 #include "olcPixelGameEngine.h"
 
-class NodeMgr;
 class City;
 class Coord;
+class HighwayGameMode;
+class NodeMgr;
 
 class Node
 {
@@ -33,10 +34,11 @@ class Node
 
   void constrainFromChild(Node& childNode);
   
-  void draw();
-  void drawLabels();
+  void draw(olc::PixelGameEngine* pge, HighwayGameMode* mode);
+  void drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode);
 
-  void getBaseExtents();
+  void getBaseExtents(int& outLeft, int& outBottom,
+		      int& outRight, int& outTop);
 
   void paveRoads();
 
@@ -47,8 +49,7 @@ class Node
   bool isLocnInNodesExtents(Coord coord);
 
  private:
-  void drawRoads();
-
+  void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
   
   NodeMgr* m_nodeMgr;
 

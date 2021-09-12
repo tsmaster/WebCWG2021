@@ -33,6 +33,8 @@ class HighwayGameMode
 
   bool handleUserInput(olc::PixelGameEngine* pge);
 
+  float getTileScale() {return m_tileScale;}
+
 private:
   Coord m_centerCoord;
   GameClock* m_gameClock;
