@@ -5,11 +5,8 @@
 #include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
+#include "layers.h"
 #include "node.h"
-
-// Reference ../PyCWG2021/fractal.py
-
-// TODO finish porting HighwayGameMode from fractal.py
 
 HighwayGameMode::HighwayGameMode()
 {
@@ -35,7 +32,28 @@ void HighwayGameMode::destroy()
 
 bool HighwayGameMode::update(olc::PixelGameEngine* pge, float elapsedSeconds)
 {
-  return handleUserInput(pge);
+  bool bContinue = handleUserInput(pge);
+
+  float vrSqr = m_viewRadius * m_viewRadius;
+
+  for (int px = int(floor(m_centerCoord.x - m_viewRadius));
+       px <= int(ceil(m_centerCoord.x + m_viewRadius));
+       ++px) {
+    int dx = m_centerCoord.x - px;
+    for (int py = int(floor(m_centerCoord.y - m_viewRadius));
+	 py <= int(ceil(m_centerCoord.y + m_viewRadius));
+	 ++py) {
+      int dy = m_centerCoord.y - py;
+      int distSqr = dx*dx + dy*dy;
+      if (distSqr <= vrSqr) {
+	m_nodeMgr->populate(Coord(px, py, 0), TileLayer::H1_CROSS_TILE_ROADS);
+      }
+    }
+  }
+
+  m_nodeMgr->update();
+  
+  return bContinue;
 }
 
 bool HighwayGameMode::handleUserInput(olc::PixelGameEngine* pge)
@@ -138,6 +156,7 @@ void HighwayGameMode::draw(olc::PixelGameEngine* pge)
   std::vector<Node *> nodeVec = m_nodeMgr->getNodes();
 
   for (Node* n : nodeVec) {
+    //printf("Drawing node at coord %s\n", n->getCoord()->toString().c_str());
     n->draw(pge, this);
   }
 

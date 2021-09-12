@@ -32,7 +32,7 @@ bool Coord::isEqual(Coord& other)
 	  (h == other.h));
 }
 
-bool Coord::lessThan(Coord& other)
+bool Coord::lessThan(const Coord& other) const
 {
   if (h < other.h) {
     return true;

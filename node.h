@@ -6,9 +6,10 @@
 #include <vector>
 
 #include "olcPixelGameEngine.h"
+#include "layers.h"
+#include "coord.h"
 
 class City;
-class Coord;
 class HighwayGameMode;
 class NodeMgr;
 
@@ -16,7 +17,7 @@ class Node
 {
  public:
   Node(int x, int y, int h, NodeMgr* nodeMgr);
-  Node(Coord c, NodeMgr* nodeMgr);
+  Node(Coord c, NodeMgr* nodeMgr) : Node(c.x, c.y, c.h, nodeMgr) {}
 
   static void calcExtents(int x, int y, int h,
 			  int& outLeft, int& outBottom,
@@ -24,7 +25,7 @@ class Node
 
   bool isOrigin() const;
 
-  void populate(int newLayer);
+  void populate(TileLayer newLayer);
 
   Coord getParentCoord();
 
@@ -48,6 +49,8 @@ class Node
 
   bool isLocnInNodesExtents(Coord coord);
 
+  Coord* getCoord() { return m_coord; }
+
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
   
@@ -67,7 +70,7 @@ class Node
   // pavedDirs
 
   // the layer to which this tile has been populated  
-  int m_populatedLayer; 
+  TileLayer m_populatedLayer; 
 };
 
 #endif // node_h

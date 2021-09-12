@@ -12,7 +12,7 @@ class City
  public:
   City(int x, int y);
 
-  std::string getName();
+  std::string getName() { return m_name; }
   
  private:
   Coord m_coord;

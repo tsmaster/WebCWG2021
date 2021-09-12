@@ -2,29 +2,29 @@
 
 #include "node.h"
 
+#include "city.h"
 #include "constants.h"
 #include "coord.h"
 #include "mode_highway.h"
-
-// TODO port node
 
 
 Node::Node(int x, int y, int h, NodeMgr* nodeMgr)
 {
   m_nodeMgr = nodeMgr;
   m_coord = new Coord(x, y, h);
-}
-
-Node::Node(Coord c, NodeMgr* nodeMgr)
-{
-  m_nodeMgr = nodeMgr;
-  m_coord = new Coord(c.x, c.y, c.h);
+  m_color = olc::Pixel(0, 0, 200);
+  m_isCity = false;
+  m_city = NULL;
+  m_populatedLayer = TileLayer::EMPTY;
 }
 
 void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 {
   int xLeft, yBottom, xRight, yTop;
   getBaseExtents(xLeft, yBottom, xRight, yTop);
+
+  //printf("drawing node at %s\n", m_coord->toString().c_str());
+  //printf("l: %d, b: %d r: %d t: %d\n", xLeft, yBottom, xRight, yTop);
 
   Vec2f screenBottomLeft = mode->tileToScreenCoord(pge, Vec2f(xLeft, yBottom));
   Vec2f screenTopRight = mode->tileToScreenCoord(pge, Vec2f(xRight, yTop));
@@ -34,8 +34,10 @@ void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
   int sRight = int(screenTopRight.x);
   int sTop = int(screenTopRight.y);
 
+  //printf("sl: %d sb: %d sr: %d st: %d\n", sLeft, sBottom, sRight, sTop);
+
   if (m_coord->h == 0) {
-    pge->FillRect(sLeft, sBottom, sRight-sLeft, sTop-sBottom, m_color);
+    pge->FillRect(sLeft, sTop, sRight-sLeft, sBottom-sTop, m_color);
     drawRoads(pge, mode);
     if (m_isCity) {
       pge->FillCircle((sRight + sLeft) / 2,
@@ -44,13 +46,26 @@ void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 		      olc::Pixel(50, 50, 50));
     }      
   } else {
-    pge->DrawRect(sLeft, sBottom, sRight-sLeft, sTop-sBottom, m_color);
+    pge->DrawRect(sLeft, sTop, sRight-sLeft, sBottom-sTop, m_color);
   }
 }
 
 void Node::drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 {
-  // TODO label
+  if (m_isCity) {
+    int xLeft, yBottom, xRight, yTop;
+    getBaseExtents(xLeft, yBottom, xRight, yTop);
+
+    Vec2f screenBottomLeft = mode->tileToScreenCoord(pge, Vec2f(xLeft, yBottom));
+
+    olc::Pixel color = olc::Pixel(0, 0, 150);
+    std::string cityName = std::string("C");
+    if (m_city != NULL) {
+      cityName = m_city->getName();
+    }
+    pge->DrawString(int(screenBottomLeft.x), int(screenBottomLeft.y),
+		    cityName, color);
+  }
 }
 
 void Node::drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode)
@@ -102,4 +117,16 @@ void Node::calcExtents(int x, int y, int h,
   outBottom = newBLB;
   outRight = newTRR;
   outTop = newTRT;
+}
+
+
+void Node::populate(TileLayer newLayer)
+{
+  if (m_populatedLayer >= newLayer) {
+    return;
+  }
+
+  // TODO most of populating a node
+
+  m_populatedLayer = newLayer;
 }

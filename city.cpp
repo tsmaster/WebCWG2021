@@ -13,7 +13,7 @@ City::City(int x, int y)
 
 std::string City::makeName()
 {
-  return std::string("???");
+  return std::string("??? City ???");
 
   /*
         random.seed(seed)

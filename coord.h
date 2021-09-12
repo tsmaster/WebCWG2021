@@ -14,9 +14,11 @@ class Coord
 
   bool isEqual(Coord& other);
 
-  bool lessThan(Coord& other);
+  bool lessThan(const Coord& other) const;
 
   int manhattanDist(Coord& other);
+
+  bool operator < (const Coord &other) const { return lessThan(other); }
 
   int x;
   int y;
