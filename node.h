@@ -62,6 +62,9 @@ class Node
 
   std::vector<Coord> getPavedCoords();
 
+  bool isCity() { return m_isCity; }
+  City* getCity() { return m_city; }
+
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
 
@@ -69,6 +72,8 @@ class Node
 
   void getH0CityFromParent();
 
+  void distributeH2CityPopulation();
+  
   void generateH1TileRoads();
 
   void paveCrossTileRoads();

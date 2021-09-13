@@ -2,6 +2,8 @@
 
 #include "node.h"
 
+#include <algorithm>
+#include <random>
 #include <stdlib.h>
 
 #include "bdg_random.h"
@@ -214,6 +216,19 @@ void Node::populate(TileLayer newLayer)
       (newLayer >= TileLayer::H0_CITY_LOCN) &&
       (m_coord->h == 0)) {
     getH0CityFromParent();
+  }
+
+  if ((oldLayer < TileLayer::H2_CITY_POPULATION_DISTRIBUTION) &&
+      (newLayer >= TileLayer::H2_CITY_POPULATION_DISTRIBUTION)) {
+    if (m_coord->h == 0) {
+      Coord h1Coord = getParentCoord();
+      Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H2_CITY_POPULATION_DISTRIBUTION);
+
+      Coord h2Coord = h1Node->getParentCoord();
+      Node* h2Node = m_nodeMgr->getNode(h2Coord, TileLayer::H2_CITY_POPULATION_DISTRIBUTION);
+    } else if (m_coord->h == 2) {
+      distributeH2CityPopulation();
+    }
   }
 
   // roads
@@ -564,4 +579,44 @@ std::vector<Coord> Node::getPavedCoords()
     }
   }
   return outCoords;
+}
+
+void Node::distributeH2CityPopulation()
+{
+  std::vector<Coord> cityCoords;
+
+  int xLeft, yBottom, xRight, yTop;
+  getBaseExtents(xLeft, yBottom, xRight, yTop);
+
+  for (int x = xLeft; x < xRight; ++x) {
+    for (int y = yBottom; y < yTop; ++y) {
+      Coord childCoord(x, y, 0);
+      Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::H0_CITY_LOCN);
+      if (childNode->isCity()) {
+	cityCoords.push_back(childCoord);
+      }
+    }
+  }
+
+  unsigned int seed = makeSeedKey(m_coord->x,
+				  m_coord->y,
+				  m_coord->h,
+				  "H2 ZIPF DISTR");
+  
+  std::shuffle(cityCoords.begin(),
+	       cityCoords.end(),
+	       std::default_random_engine(seed));
+
+  int primaryCityPopulation = randomrange(MIN_PRIMARY_CITY_POPULATION,
+					  MAX_PRIMARY_CITY_POPULATION);
+
+  for (int i = 0; i < cityCoords.size(); ++i) {
+    int zipf_pop = primaryCityPopulation / (i+1);
+
+    Node* childNode = m_nodeMgr->getNode(cityCoords[i], TileLayer::H0_CITY_LOCN);
+    City* city = childNode->getCity();
+    city->setPopulation(zipf_pop);
+
+    //printf("City: %s pop: %d\n", city->getName().c_str(), zipf_pop);
+  }
 }

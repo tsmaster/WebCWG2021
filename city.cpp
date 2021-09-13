@@ -2,6 +2,7 @@
 
 #include "city.h"
 
+#include <cctype>
 #include <cstring>
 
 #include "bdg_random.h"
@@ -44,6 +45,8 @@ std::string City::makeName()
     }
     ++s;
   }
+
+  nameBuffer[0] = toupper(nameBuffer[0]);
 
   return std::string(nameBuffer);
 }
