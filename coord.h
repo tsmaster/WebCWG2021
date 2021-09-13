@@ -20,6 +20,10 @@ class Coord
 
   bool operator < (const Coord &other) const { return lessThan(other); }
 
+  bool operator == (const Coord &other) const { return ((x == other.x) &&
+							(y == other.y) &&
+							(h == other.h)); }
+
   int x;
   int y;
   int h;

@@ -137,6 +137,7 @@ void Node::populate(TileLayer newLayer)
     return;
   }
 
+  TileLayer oldLayer = m_populatedLayer;
   m_populatedLayer = newLayer;
 
   /*
@@ -164,8 +165,23 @@ void Node::populate(TileLayer newLayer)
     constrainFromParent(*parentNode);
   }
 
+  // cities
+  if ((oldLayer < TileLayer::H1_CITY_CANDIDATE_LOCN) &&
+      (newLayer >= TileLayer::H1_CITY_CANDIDATE_LOCN) &&
+      (m_coord->h == 1)) {
+    // choose n candidate locations
+    pickH1CandidateLocations();
+  }
+
+  if ((oldLayer < TileLayer::H0_CITY_LOCN) &&
+      (newLayer >= TileLayer::H0_CITY_LOCN) &&
+      (m_coord->h == 0)) {
+    getH0CityFromParent();
+  }
+
   // roads
-  if (newLayer >= TileLayer::H1_CROSS_TILE_ROADS) {
+  if ((oldLayer < TileLayer::H1_CROSS_TILE_ROADS) &&
+      (newLayer >= TileLayer::H1_CROSS_TILE_ROADS)) {
     if (m_coord->h == 1) {
       // TODO neighborNode
       //paveCrossTileRoad(neighborNode);
@@ -184,29 +200,111 @@ bool Node::isOrigin() const
 
 void Node::constrainFromNothing()
 {
-  // TODO constrain from nothing
+  /*
   unsigned int seed = makeSeedKey(0, 0, 0, "COLOR");
   srand(seed);
   int cr = randomrange(0, 256);
   int cg = randomrange(0, 256);
   int cb = randomrange(0, 256);
-  m_color = olc::Pixel(cr, cg, cb);
+  m_color = olc::Pixel(cr, cg, cb); */
+
+  m_color = olc::Pixel(50, 150, 50);
+
+  // TODO rewrite this to use layers
+  unsigned int citySeed = makeSeedKey(0, 0, 0, "ISCITY");
+  m_isCity = true; //(randomrange(0, 25) == 0);
+  if (m_isCity) {
+    m_city = new City(0, 0);
+  }
 }
 
 void Node::constrainFromChild(Node& childNode)
 {
-  // TODO constrain from child
+  unsigned int seed = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "COLOR");
+  srand(seed);
+  olc::Pixel cp = childNode.m_color;
+  
+  int cr = std::clamp(cp.r + randomrange(-5, 6), 0, 255);
+  int cg = std::clamp(cp.g + randomrange(-5, 6), 0, 255);
+  int cb = std::clamp(cp.b + randomrange(-5, 6), 0, 255);
+  m_color = olc::Pixel(cr, cg, cb);
+
+  // TODO city (use layers)
+
+  // TODO roads
 }
 
 void Node::constrainFromParent(Node& parentNode)
 {
-  // TODO constrain from parent
+  unsigned int seed = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "COLOR");
+  srand(seed);
+  olc::Pixel pp = parentNode.m_color;
+
+  int variance = 25;
+  int cr = std::clamp(pp.r + randomrange(-variance, variance + 1), 0, 255);
+  int cg = std::clamp(pp.g + randomrange(-variance, variance + 1), 0, 255);
+  int cb = std::clamp(pp.b + randomrange(-variance, variance + 1), 0, 255);
+  m_color = olc::Pixel(cr, cg, cb);
+
+  // TODO city
+
+  // TODO roads
 }
 
 Coord Node::getParentCoord()
 {
   // TODO handle odd height offset
-  int px = (m_coord->x + ODD_HEIGHT_OFFSET) / SCALE_FACTOR;
-  int py = (m_coord->y + ODD_HEIGHT_OFFSET) / SCALE_FACTOR;
+  int px = int(floor((m_coord->x + ODD_HEIGHT_OFFSET) / float(SCALE_FACTOR)));
+  int py = int(floor((m_coord->y + ODD_HEIGHT_OFFSET) / float(SCALE_FACTOR)));
   return Coord(px, py, m_coord->h + 1);
+}
+
+void Node::pickH1CandidateLocations()
+{
+  unsigned int seedKey = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "ISCITY");
+
+  int left, bottom, right, top;
+  getBaseExtents(left, bottom, right, top);
+
+  while (m_childCityCoords.size() < CITY_COUNT_PER_CELL) {
+    int rx = randomrange(left, right);
+    int ry = randomrange(bottom, top);
+    Coord rCoord = Coord(rx, ry, 0);
+
+    bool tooClose = false;
+    for (auto existingCoord : m_childCityCoords) {
+      int dist = existingCoord.manhattanDist(rCoord);
+      if (dist < MIN_CITY_SPACE) {
+	tooClose = true;
+	break;
+      }
+    }
+    if (tooClose) {
+      continue;
+    }
+    m_childCityCoords.push_back(rCoord);
+  }
+}
+
+void Node::getH0CityFromParent()
+{
+  Coord parentCoord = getParentCoord();
+  Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_CITY_FINAL_LOCN);
+
+  if (parentNode->isCoordInChildCities(*m_coord)) {
+    m_isCity = true;
+    m_city = new City(m_coord->x, m_coord->y);
+  } else {
+    m_isCity = false;
+    m_city = NULL;
+  }  
+}
+
+bool Node::isCoordInChildCities(Coord& childCoord)
+{
+  auto coord_it = std::find(m_childCityCoords.begin(),
+			    m_childCityCoords.end(),
+			    childCoord);
+
+  return coord_it != m_childCityCoords.end();
 }

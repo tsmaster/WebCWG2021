@@ -57,8 +57,14 @@ class Node
   void updateLastUsed(unsigned int tm) { m_lastAccessed = tm; }
   unsigned int getLastUsed() { return m_lastAccessed; }
 
+  bool isCoordInChildCities(Coord& childCoord);
+
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
+
+  void pickH1CandidateLocations();
+
+  void getH0CityFromParent();
   
   NodeMgr* m_nodeMgr;
 

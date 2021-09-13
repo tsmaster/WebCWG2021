@@ -2,6 +2,9 @@
 
 #include "city.h"
 
+#include <cstring>
+
+#include "bdg_random.h"
 
 City::City(int x, int y)
 {
@@ -9,31 +12,41 @@ City::City(int x, int y)
   m_name = makeName();
 }
 
-// TODO rewrite name generation
-
 std::string City::makeName()
 {
-  return std::string("??? City ???");
+  unsigned int nameSeed = makeSeedKey(m_coord.x, m_coord.y, 0, "CITY NAME");
+  srand(nameSeed);
 
-  /*
-        random.seed(seed)
+  char* nameBuffer = (char*)calloc(20, 1);
 
-        s = ""
-        length = random.randrange(4, 10)
+  int nameLen = randomrange(4,10);
 
-        vowels = "aeiou"
-        consonants = "bcdfghjklmnprstvwxyz"
-        allletters = vowels+consonants
-        
-        while len(s) < length:
-            if len(s) == 0:
-                s = s + random.choice(allletters)
-            elif s[-1] in vowels:
-                s = s + random.choice(consonants)
-            else:
-                s = s + random.choice(vowels)
-        return s
-  */
+  std::string vowels = std::string("aeiou");
+  std::string consonants = std::string("bcdfghjklmnprstvwxyz");
+  std::string allLetters = vowels + consonants;
 
-  
+  char* s = nameBuffer;
+  while (strlen(nameBuffer) < nameLen) {
+    if (strlen(nameBuffer) == 0) {
+      *s = allLetters[randomrange(0, allLetters.length())];
+    } else {
+      char prevChar = *(s-1);
+
+      size_t charIndexInVowels = vowels.find(prevChar);
+
+      if (charIndexInVowels != std::string::npos) {
+	// prev was vowel, append a consonant
+	*s = consonants[randomrange(0, consonants.length())];
+      } else {
+	// prev was consonant, append a vowel
+	*s = vowels[randomrange(0, vowels.length())];
+      }
+    }
+    ++s;
+  }
+
+  //if (nameBuffer == std::string("egusa")) {
+  //  printf("generated egusa x %d y %d seed %u\n", m_coord.x, m_coord.y, nameSeed);
+  //}
+  return std::string(nameBuffer);
 }
