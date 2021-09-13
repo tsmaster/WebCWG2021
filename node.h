@@ -4,6 +4,7 @@
 #define node_h
 
 #include <vector>
+#include <set>
 
 #include "olcPixelGameEngine.h"
 
@@ -14,6 +15,8 @@
 class City;
 class HighwayGameMode;
 class NodeMgr;
+
+using PaveDirSet = std::set<int>;
 
 class Node
 {
@@ -48,16 +51,16 @@ class Node
 
   void paveRoads();
 
-  void paveTo();
+  void paveTo(Coord startCoord, Coord endCoord, Node* neighborNode);
 
-  void paveCrossTileRoad(Node& neighborNode);
-
-  bool isLocnInNodesExtents(Coord coord);
+  bool isInNodeExtents(Coord coord);
 
   void updateLastUsed(unsigned int tm) { m_lastAccessed = tm; }
   unsigned int getLastUsed() { return m_lastAccessed; }
 
   bool isCoordInChildCities(Coord& childCoord);
+
+  std::vector<Coord> getPavedCoords();
 
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
@@ -65,6 +68,18 @@ class Node
   void pickH1CandidateLocations();
 
   void getH0CityFromParent();
+
+  void generateH1TileRoads();
+
+  void paveCrossTileRoads();
+  
+  void paveCrossTileRoad(Node* neighborNode);
+  
+  void finalizeH0();
+
+  void pave(Coord startCoord, int direction);
+
+  PaveDirSet getPavedLinks(Coord childCoord);
   
   NodeMgr* m_nodeMgr;
 
@@ -77,9 +92,9 @@ class Node
 
   std::vector<Coord> m_childCityCoords;
   std::vector<Coord> m_connectedCities;
-  
-  // pavedLinks
-  // pavedDirs
+
+  std::map<Coord, PaveDirSet> m_pavedDirs;
+  PaveDirSet m_pavedLinksH0;
 
   // the layer to which this tile has been populated  
   TileLayer m_populatedLayer; 

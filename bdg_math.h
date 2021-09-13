@@ -23,6 +23,15 @@ class Vec2f
   float y;
 };
 
+class Vec2i
+{
+ public:
+  Vec2i(int ix, int iy) { x=ix; y=iy; }
+
+  int x;
+  int y;
+};
+
 #endif //BDG_MATH_H
 
 

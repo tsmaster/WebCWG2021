@@ -46,7 +46,7 @@ bool HighwayGameMode::update(olc::PixelGameEngine* pge, float elapsedSeconds)
       int dy = m_centerCoord.y - py;
       int distSqr = dx*dx + dy*dy;
       if (distSqr <= vrSqr) {
-	m_nodeMgr->populate(Coord(px, py, 0), TileLayer::H1_CROSS_TILE_ROADS);
+	m_nodeMgr->populate(Coord(px, py, 0), TileLayer::H0_FINAL);
       }
     }
   }

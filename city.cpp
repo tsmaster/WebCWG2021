@@ -45,8 +45,5 @@ std::string City::makeName()
     ++s;
   }
 
-  //if (nameBuffer == std::string("egusa")) {
-  //  printf("generated egusa x %d y %d seed %u\n", m_coord.x, m_coord.y, nameSeed);
-  //}
   return std::string(nameBuffer);
 }

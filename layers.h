@@ -16,6 +16,7 @@ enum class TileLayer {
   CITY_POPULATION,
   H1_LOCAL_ROADS,
   H1_CROSS_TILE_ROADS,
+  H0_FINAL,
 
   Last,
 };

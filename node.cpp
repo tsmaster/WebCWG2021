@@ -8,6 +8,7 @@
 #include "city.h"
 #include "constants.h"
 #include "coord.h"
+#include "kruskal.h"
 #include "mode_highway.h"
 
 
@@ -78,8 +79,44 @@ void Node::drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 
 void Node::drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode)
 {
-  // TODO draw roads
+  if (m_coord->h != 0) {
+    return;
+  }
 
+  int xLeft, yBottom, xRight, yTop;
+  getBaseExtents(xLeft, yBottom, xRight, yTop);
+
+  Vec2f screenBottomLeft = mode->tileToScreenCoord(pge, Vec2f(xLeft, yBottom));
+  Vec2f screenTopRight = mode->tileToScreenCoord(pge, Vec2f(xRight, yTop));
+
+  int sLeft = int(screenBottomLeft.x);
+  int sBottom = int(screenBottomLeft.y);
+  int sRight = int(screenTopRight.x);
+  int sTop = int(screenTopRight.y);
+
+  int sMidX = (sRight + sLeft) / 2;
+  int sMidY = (sTop + sBottom) / 2;
+
+  int offset = std::max(1, int(mode->getTileScale() * 0.2));
+
+  olc::Pixel color = olc::Pixel(90, 90, 90);
+
+  if (m_pavedLinksH0.find(0) != m_pavedLinksH0.end()) {
+    pge->FillRect(sMidX - offset, sMidY - offset,
+		  sRight - sMidX + offset, 2 * offset, color);
+  }
+  if (m_pavedLinksH0.find(1) != m_pavedLinksH0.end()) {
+    pge->FillRect(sMidX - offset, sTop,
+		  2 * offset, sMidY - sTop + offset, color);
+  }
+  if (m_pavedLinksH0.find(2) != m_pavedLinksH0.end()) {
+    pge->FillRect(sLeft, sMidY - offset,
+		  sMidX - sLeft + offset, 2 * offset, color);
+  }
+  if (m_pavedLinksH0.find(3) != m_pavedLinksH0.end()) {
+    pge->FillRect(sMidX - offset, sMidY - offset,
+		  2 * offset, sBottom - sMidY + offset, color);
+  }
 }
 
 
@@ -180,14 +217,26 @@ void Node::populate(TileLayer newLayer)
   }
 
   // roads
+  if ((oldLayer < TileLayer::H1_LOCAL_ROADS) &&
+      (newLayer >= TileLayer::H1_LOCAL_ROADS) &&
+      (m_coord->h == 1)) {
+    generateH1TileRoads();
+  }
+  
   if ((oldLayer < TileLayer::H1_CROSS_TILE_ROADS) &&
       (newLayer >= TileLayer::H1_CROSS_TILE_ROADS)) {
     if (m_coord->h == 1) {
-      // TODO neighborNode
-      //paveCrossTileRoad(neighborNode);
+      paveCrossTileRoads();
     } else if (m_coord->h == 0) {
       Coord parentCoord = getParentCoord();
       Node* parentNode = m_nodeMgr->getNode(parentCoord, newLayer);
+    }
+  }
+
+  if ((oldLayer < TileLayer::H0_FINAL) &&
+      (newLayer >= TileLayer::H0_FINAL)) {
+    if (m_coord->h == 0) {
+      finalizeH0();
     }
   }
 }
@@ -307,4 +356,212 @@ bool Node::isCoordInChildCities(Coord& childCoord)
 			    childCoord);
 
   return coord_it != m_childCityCoords.end();
+}
+
+void Node::generateH1TileRoads()
+{
+  // kruskal up some connections
+  std::vector<KruskPair> pairs = computeKruskal(m_childCityCoords);
+  
+  // foreach connection, pave the connection
+  for (auto pair : pairs) {
+    int i0 = pair.first;
+    int i1 = pair.second;
+
+    //printf("connecting %d to %d\n", i0, i1);
+
+    paveTo(m_childCityCoords[i0],
+	   m_childCityCoords[i1],
+	   NULL);
+  }
+}
+
+void Node::paveTo(Coord startCoord, Coord endCoord, Node* neighborNode)
+{
+  unsigned int paveSeed = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "PAVE LOCAL");
+  srand(paveSeed);
+
+  while (!(startCoord == endCoord)) {
+    int bestDist = -1;
+    std::vector<Coord> bestCandidates;
+
+    Vec2i deltas[] = {
+      Vec2i(-1, 0),
+      Vec2i(1, 0),
+      Vec2i(0, -1),
+      Vec2i(0, 1)};
+      
+    for (Vec2i delta : deltas) {
+      int dx = delta.x;
+      int dy = delta.y;
+
+      int nx = startCoord.x + dx;
+      int ny = startCoord.y + dy;
+
+      Coord newCoord = Coord(nx, ny, 0);
+      int newDist = newCoord.manhattanDist(endCoord);
+
+      if ((bestDist < 0) ||
+	  (newDist < bestDist)) {
+	bestDist = newDist;
+	bestCandidates.clear();
+	bestCandidates.push_back(newCoord);
+      } else if (newDist == bestDist) {
+	bestCandidates.push_back(newCoord);
+      }
+    }
+
+    int newIndex = randomrange(0, bestCandidates.size());
+    Coord newStartCoord = bestCandidates[newIndex];
+
+    using IntPair = std::pair<int, int>;
+    IntPair dirs;
+    
+    if (newStartCoord.x == startCoord.x) {
+      if (newStartCoord.y > startCoord.y) {
+	dirs = IntPair(1, 3);
+      } else {
+	dirs = IntPair(3, 1);
+      }
+    } else {
+      if (newStartCoord.x > startCoord.x) {
+	dirs = IntPair(0, 2);
+      } else {
+	dirs = IntPair(2, 0);
+      }
+    }
+
+    std::vector<Node*> nodesToPave;
+    nodesToPave.push_back(this);
+    if (neighborNode != NULL) {
+      nodesToPave.push_back(neighborNode);
+    }
+
+    for (Node* paveNode : nodesToPave) {
+      if (paveNode->isInNodeExtents(startCoord)) {
+	paveNode->pave(startCoord, dirs.first);
+      }
+      if (paveNode->isInNodeExtents(newStartCoord)) {
+	paveNode->pave(newStartCoord, dirs.second);
+      }
+    }
+
+    startCoord = newStartCoord;
+  }
+}
+
+void Node::pave(Coord startCoord, int direction) {
+  //printf("paving from %s in dir %d\n", startCoord.toString().c_str(), direction);
+  auto pd_it = m_pavedDirs.find(startCoord);
+
+  if (pd_it == m_pavedDirs.end()) {
+    // not found
+    PaveDirSet newSet;
+    newSet.insert(direction);
+    m_pavedDirs[startCoord] = newSet;
+  } else {
+    pd_it->second.insert(direction);
+  }
+}
+
+bool Node::isInNodeExtents(Coord c) {
+  int left, bottom, right, top;
+  getBaseExtents(left, bottom, right, top);
+
+  return ((c.x >= left) &&
+	  (c.y >= bottom) &&
+	  (c.x < right) &&
+	  (c.y < top));
+}
+
+void Node::finalizeH0() {
+  Coord parentCoord = getParentCoord();
+  Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_CROSS_TILE_ROADS);
+
+  m_pavedLinksH0 = parentNode->getPavedLinks(*m_coord);
+}
+
+PaveDirSet Node::getPavedLinks(Coord childCoord)
+{
+  auto pd_it = m_pavedDirs.find(childCoord);
+  
+  if (pd_it == m_pavedDirs.end()) {
+    // not found;
+    PaveDirSet empty;
+    return empty;
+  } else {
+    return pd_it->second;
+  }
+}
+
+void Node::paveCrossTileRoads()
+{
+  Vec2i deltas[] = {
+    Vec2i(-1, 0),
+    Vec2i(1, 0),
+    Vec2i(0, -1),
+    Vec2i(0, 1)};
+      
+  for (Vec2i delta : deltas) {
+    int nx = m_coord->x + delta.x;
+    int ny = m_coord->y + delta.y;
+
+    Coord newCoord = Coord(nx, ny, m_coord->h);
+    Node* neighborNode = m_nodeMgr->getNode(newCoord, TileLayer::H1_LOCAL_ROADS);
+
+    paveCrossTileRoad(neighborNode);
+  }    
+}
+
+void Node::paveCrossTileRoad(Node* neighborNode)
+{
+  int closestApproachDistance = -1;
+
+  using CoordPair = std::pair<Coord, Coord>;
+
+  std::vector<CoordPair> closestCoordPairs;
+
+  for (Coord thisCoord : getPavedCoords()) {
+    for (Coord neighborCoord : neighborNode->getPavedCoords()) {
+      int dist = neighborCoord.manhattanDist(thisCoord);
+
+      if ((closestApproachDistance < 0) ||
+	  (dist < closestApproachDistance)) {
+	closestApproachDistance = dist;
+	closestCoordPairs.clear();
+	CoordPair newCoordPair(thisCoord, neighborCoord);
+	closestCoordPairs.push_back(newCoordPair);
+      } else if (dist == closestApproachDistance) {
+	CoordPair newCoordPair(thisCoord, neighborCoord);
+	closestCoordPairs.push_back(newCoordPair);
+      }
+    }
+  }
+
+  Coord* nc = neighborNode->getCoord();
+  unsigned int seedKey = makeSeedKey(m_coord->x + nc->x,
+				     m_coord->y + nc->y,
+				     m_coord->h, "CROSS TILE ROAD");
+  srand(seedKey);
+
+  CoordPair chosenPair = closestCoordPairs[randomrange(0, closestCoordPairs.size())];
+
+  if (chosenPair.first < chosenPair.second) {
+    paveTo(chosenPair.first, chosenPair.second, neighborNode);
+  } else {
+    neighborNode->paveTo(chosenPair.second, chosenPair.first, this);
+  }
+}
+
+
+std::vector<Coord> Node::getPavedCoords()
+{
+  std::vector<Coord> outCoords;
+
+  for (auto paveMapItem : m_pavedDirs) {
+    if (paveMapItem.second.size() > 0) {
+      outCoords.push_back(paveMapItem.first);
+    }
+  }
+  return outCoords;
 }

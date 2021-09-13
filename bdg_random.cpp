@@ -3,7 +3,6 @@
 
 unsigned int makeSeedKey(int x, int y, int h, const char* str)
 {
-  //printf("making seed %d %d %d %s\n", x, y, h, str);
   unsigned int k = 0xDEADBEEF;
   k ^= (unsigned int) x;
   unsigned int chunk1 = k & 0x7f;
@@ -18,8 +17,6 @@ unsigned int makeSeedKey(int x, int y, int h, const char* str)
   k = k >> 7;
   k = k | (chunk3 << 25);
 
-  //printf("generated k [1]: %u\n", k);
-
   for (const char* c = str; *c != '\0'; ++c) {
     k ^= (unsigned int) (*c);
 
@@ -28,8 +25,6 @@ unsigned int makeSeedKey(int x, int y, int h, const char* str)
     k = k | (chunk << 24);
   }
 
-  //printf("generated k [2]: %u\n", k);
-  
   return k;
 }
 
