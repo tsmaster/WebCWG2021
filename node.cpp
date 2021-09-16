@@ -178,77 +178,41 @@ void Node::populate(TileLayer newLayer)
 
   TileLayer oldLayer = m_populatedLayer;
 
-  /*
-    printf("populating x %d y %d h %d l %d\n",
+  printf("populating x %d y %d h %d l %d\n",
 	 m_coord->x,
 	 m_coord->y,
 	 m_coord->h,
 	 int(newLayer));
-  */
-
-  if ((oldLayer < TileLayer::H1_FRACTAL_LAND_COLOR) &&
-      (newLayer >= TileLayer::H1_FRACTAL_LAND_COLOR)) {
-    if (isOrigin()) {
-      if (m_coord->h == 0) {
-	constrainFromNothing();
-      } else {
-	Coord childCoord = Coord(m_coord->x,
-				 m_coord->y,
-				 m_coord->h - 1);
-      
-	Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::H1_FRACTAL_LAND_COLOR);
-	constrainFromChild(*childNode);
-      }
-    } else {
-      Coord parentCoord = getParentCoord();
-      Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_FRACTAL_LAND_COLOR);
-      constrainFromParent(*parentNode);
-    }
-    
-    m_populatedLayer = TileLayer::H1_FRACTAL_LAND_COLOR;
-    //printf("fractal portion complete\n");
-  }
-
+  printf("old layer: %d\n", (int)oldLayer);
 
   // cities
   if ((oldLayer < TileLayer::H1_CITY_CANDIDATE_LOCN) &&
-      (newLayer >= TileLayer::H1_CITY_CANDIDATE_LOCN)) {
-    if (m_coord->h == 1) {
-      // choose n candidate locations
-      //printf("picking h1 city candidate locations for %s\n", m_coord->toString().c_str());
-      pickH1CandidateLocations();
+      (newLayer >= TileLayer::H1_CITY_CANDIDATE_LOCN) &&
+      (m_coord->h == 1)) {
+    // choose n candidate locations
+    printf("picking h1 city candidate locations for %s\n", m_coord->toString().c_str());
+    pickH1CandidateLocations();
     
-      m_populatedLayer = TileLayer::H1_CITY_CANDIDATE_LOCN;
-      //printf("H1 city candidate locations complete\n");
-    } else if (m_coord->h == 0) {
-      Coord h1Coord = getParentCoord();
-      //printf("about to request parent for h0 city candidate locations for %s\n", m_coord->toString().c_str());
-      
-      Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H1_CITY_CANDIDATE_LOCN);
-      //printf("got parent for h0 city candidate locations for %s\n", m_coord->toString().c_str());
-      
-      m_populatedLayer = TileLayer::H1_CITY_CANDIDATE_LOCN;
-      //printf("H0 city candidate locations complete\n");
-    }
+    m_populatedLayer = TileLayer::H1_CITY_CANDIDATE_LOCN;
+    //printf("H1 city candidate locations complete\n");
   }
 
   if ((oldLayer < TileLayer::H2_CITY_POPULATION_DISTRIBUTION) &&
-      (newLayer >= TileLayer::H2_CITY_POPULATION_DISTRIBUTION)) {
-    if (m_coord->h == 0) {
-      Coord h1Coord = getParentCoord();
-      Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H2_CITY_POPULATION_DISTRIBUTION);
+      (newLayer >= TileLayer::H2_CITY_POPULATION_DISTRIBUTION) &&
+      (m_coord->h == 2)) {
+    distributeH2CityPopulation();
+      
+    m_populatedLayer = TileLayer::H2_CITY_POPULATION_DISTRIBUTION;
+    printf("H2 city pop dist complete\n");
+  }
 
-      Coord h2Coord = h1Node->getParentCoord();
-      Node* h2Node = m_nodeMgr->getNode(h2Coord, TileLayer::H2_CITY_POPULATION_DISTRIBUTION);
+  if ((oldLayer < TileLayer::H0_CITY_LOCN_NAME_POP) &&
+      (newLayer >= TileLayer::H0_CITY_LOCN_NAME_POP) &&
+      (m_coord->h == 0)) {
+    populateCityLocationNamePopulation();
       
-      m_populatedLayer = TileLayer::H2_CITY_POPULATION_DISTRIBUTION;
-      //printf("H0 city pop dist complete\n");      
-    } else if (m_coord->h == 2) {
-      distributeH2CityPopulation();
-      
-      m_populatedLayer = TileLayer::H2_CITY_POPULATION_DISTRIBUTION;
-      //printf("H2 city pop dist complete\n");
-    }
+    m_populatedLayer = TileLayer::H0_CITY_LOCN_NAME_POP;
+    printf("H0 locn name pop complete\n");
   }
 
   // roads
@@ -265,15 +229,49 @@ void Node::populate(TileLayer newLayer)
       (newLayer >= TileLayer::H1_CROSS_TILE_ROADS)) {
     if (m_coord->h == 1) {
       paveCrossTileRoads();
-    } else if (m_coord->h == 0) {
-      Coord parentCoord = getParentCoord();
-      Node* parentNode = m_nodeMgr->getNode(parentCoord, newLayer);
     }
     
     m_populatedLayer = TileLayer::H1_CROSS_TILE_ROADS;
     //printf("cross tile roads complete\n");
   }
 
+  if ((oldLayer < TileLayer::H0_ROAD) &&
+      (newLayer >= TileLayer::H0_ROAD)) {
+    if (m_coord->h == 0) {
+      collectH0Roads();
+    }
+    
+    m_populatedLayer = TileLayer::H0_ROAD;
+    //printf("cross tile roads complete\n");
+  }
+
+  if ((oldLayer < TileLayer::FRACTAL_LAND_COLOR) &&
+      (newLayer >= TileLayer::FRACTAL_LAND_COLOR)) {
+    printf("doing fractal for %s\n", m_coord->toString().c_str());
+    if (isOrigin()) {
+      if (m_coord->h == 0) {
+	printf("constraining from nothing\n");
+	constrainFromNothing();
+      } else {
+	Coord childCoord = Coord(m_coord->x,
+				 m_coord->y,
+				 m_coord->h - 1);
+      
+	printf("constraining from child %s\n", childCoord.toString().c_str());
+	Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::FRACTAL_LAND_COLOR);
+	constrainFromChild(*childNode);
+      }
+    } else {
+      Coord parentCoord = getParentCoord();
+      printf("constraining from parent %s\n", parentCoord.toString().c_str());
+      Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::FRACTAL_LAND_COLOR);
+      constrainFromParent(*parentNode);
+    }
+    
+    m_populatedLayer = TileLayer::FRACTAL_LAND_COLOR;
+    printf("fractal portion complete for %s\n", m_coord->toString().c_str());
+  }
+  
   if ((oldLayer < TileLayer::H0_FINAL) &&
       (newLayer >= TileLayer::H0_FINAL)) {
     if (m_coord->h == 0) {
@@ -357,11 +355,11 @@ void Node::pickH1CandidateLocations()
     }
     m_childCityCoords.push_back(rCoord);
   }
+}
 
-  for (Coord cc : m_childCityCoords) {
-    Node* childNode = m_nodeMgr->getNode(cc, TileLayer::H1_FRACTAL_LAND_COLOR);
-    childNode->setIsCity(true);
-  }
+std::vector<Coord> Node::getCityCoords()
+{
+  return m_childCityCoords;
 }
 
 void Node::setIsCity(bool isCity)
@@ -382,6 +380,28 @@ bool Node::isCoordInChildCities(Coord& childCoord)
 			    childCoord);
 
   return coord_it != m_childCityCoords.end();
+}
+
+void Node::populateCityLocationNamePopulation()
+{
+  Coord h1Coord = getParentCoord();
+  Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H1_CITY_CANDIDATE_LOCN);
+  Coord h2Coord = h1Node->getParentCoord();
+  Node* h2Node = m_nodeMgr->getNode(h2Coord, TileLayer::H2_CITY_POPULATION_DISTRIBUTION);
+
+  if (h1Node->isCoordInChildCities(*m_coord)) {
+    setIsCity(true);
+    m_city->setPopulation(h2Node->getPopulationForCoord(*m_coord));
+  }
+}
+
+int Node::getPopulationForCoord(Coord coord)
+{
+  auto pop_iter = m_popForCoord.find(coord);
+  if (pop_iter == m_popForCoord.end()) {
+    return -1;
+  }
+  return pop_iter->second;
 }
 
 void Node::generateH1TileRoads()
@@ -501,10 +521,6 @@ bool Node::isInNodeExtents(Coord c) {
 }
 
 void Node::finalizeH0() {
-  Coord parentCoord = getParentCoord();
-  Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_CROSS_TILE_ROADS);
-
-  m_pavedLinksH0 = parentNode->getPavedLinks(*m_coord);
 }
 
 PaveDirSet Node::getPavedLinks(Coord childCoord)
@@ -592,6 +608,14 @@ std::vector<Coord> Node::getPavedCoords()
   return outCoords;
 }
 
+void Node::collectH0Roads()
+{
+  Coord parentCoord = getParentCoord();
+  Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_CROSS_TILE_ROADS);
+
+  m_pavedLinksH0 = parentNode->getPavedLinks(*m_coord);  
+}
+
 void Node::distributeH2CityPopulation()
 {
   std::vector<Coord> cityCoords;
@@ -600,12 +624,15 @@ void Node::distributeH2CityPopulation()
   getBaseExtents(xLeft, yBottom, xRight, yTop);
   printf("distributing population %d %d %d %d\n", xLeft, yBottom, xRight, yTop);
 
-  for (int x = xLeft; x < xRight; ++x) {
-    for (int y = yBottom; y < yTop; ++y) {
+  for (int x = xLeft; x < xRight; x += SCALE_FACTOR) {
+    for (int y = yBottom; y < yTop; y += SCALE_FACTOR) {
       Coord childCoord(x, y, 0);
-      Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::H0_CITY_LOCN);
-      if (childNode->isCity()) {
-	cityCoords.push_back(childCoord);
+      Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::EMPTY);
+      Coord h1Coord = childNode->getParentCoord();
+      Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H1_CITY_CANDIDATE_LOCN);
+
+      for (Coord cityCoord : h1Node->getCityCoords()) {
+	cityCoords.push_back(cityCoord);
       }
     }
   }
@@ -627,12 +654,6 @@ void Node::distributeH2CityPopulation()
   for (int i = 0; i < cityCoords.size(); ++i) {
     int zipf_pop = primaryCityPopulation / (i+1);
 
-    Node* childNode = m_nodeMgr->getNode(cityCoords[i], TileLayer::H0_CITY_LOCN);
-    City* city = childNode->getCity();
-    city->setPopulation(zipf_pop);
-
-    printf("City: %s pop: %d x:%d y:%d\n",
-	   city->getName().c_str(), zipf_pop,
-	   cityCoords[i].x, cityCoords[i].y);
+    m_popForCoord[cityCoords[i]] = zipf_pop;
   }
 }

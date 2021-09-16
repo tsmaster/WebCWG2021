@@ -60,6 +60,8 @@ class Node
 
   bool isCoordInChildCities(Coord& childCoord);
 
+  int getPopulationForCoord(Coord coord);
+
   std::vector<Coord> getPavedCoords();
 
   bool isCity() { return m_isCity; }
@@ -67,18 +69,24 @@ class Node
 
   void setIsCity(bool isCity);
 
+  std::vector<Coord> getCityCoords();
+
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
 
   void pickH1CandidateLocations();
 
   void distributeH2CityPopulation();
+
+  void populateCityLocationNamePopulation();
   
   void generateH1TileRoads();
 
   void paveCrossTileRoads();
   
   void paveCrossTileRoad(Node* neighborNode);
+
+  void collectH0Roads();
   
   void finalizeH0();
 
@@ -98,6 +106,7 @@ class Node
   std::vector<Coord> m_childCityCoords;
   std::vector<Coord> m_connectedCities;
 
+  std::map<Coord, int> m_popForCoord;
   std::map<Coord, PaveDirSet> m_pavedDirs;
   PaveDirSet m_pavedLinksH0;
 

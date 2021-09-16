@@ -158,6 +158,7 @@
 #define OLC_PGEX_POPUPMENU_H
 
 #include <cstdint>
+#include <unordered_map>
 
 namespace olc
 {
