@@ -2,6 +2,7 @@
 
 #include "mode_highway.h"
 
+#include "city.h"
 #include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
@@ -10,15 +11,16 @@
 
 HighwayGameMode::HighwayGameMode()
 {
-  m_tileScale = 10.0f;
-  m_viewRadius = 4.5f;
+  m_tileScale = START_TILE_SCALE;
+  m_viewRadius = START_VIEW_RADIUS;
 }
 
-void HighwayGameMode::init()
+void HighwayGameMode::init(olc::Sprite* menuSprite)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
   m_nodeMgr = new NodeMgr(BASE_CACHE_SIZE, m_gameClock);
+  m_menuSprite = menuSprite;
 }
 
 void HighwayGameMode::destroy()
@@ -56,6 +58,33 @@ bool HighwayGameMode::update(olc::PixelGameEngine* pge, float elapsedSeconds)
   return bContinue;
 }
 
+void HighwayGameMode::move(int dx, int dy)
+{
+  int cx = m_centerCoord.x;
+  int cy = m_centerCoord.y;
+
+  int nx = cx + dx;
+  int ny = cy + dy;
+
+  m_centerCoord = Coord(nx, ny, 0);
+
+  Node* centerNode = m_nodeMgr->getNode(m_centerCoord, TileLayer::H0_FINAL);
+  if (centerNode->isCity()) {
+    City* c = centerNode->getCity();
+    std::string name = c->getName();
+    int population = c->getPopulation();
+    printf("city name: %s pop %d\n", name.c_str(), population);
+
+    // todo better formatting
+    std::string msg = name + std::string("\npop: ") +std::to_string(population);
+    std::vector<ButtonDesc> buttons;
+    m_popupLocationPanel.build(msg, buttons);
+  } else {
+    std::vector<ButtonDesc> buttons;
+    m_popupLocationPanel.build("driving", buttons);
+  }
+}
+
 bool HighwayGameMode::handleUserInput(olc::PixelGameEngine* pge)
 {
   bool bTicked = false;
@@ -70,22 +99,22 @@ bool HighwayGameMode::handleUserInput(olc::PixelGameEngine* pge)
   int cy = m_centerCoord.y;
   
   if (pge->GetKey(olc::Key::LEFT).bPressed) {
-    m_centerCoord = Coord(cx - 1, cy, 0);
+    move(-1, 0);
     bTicked = true;
   }
 
   if (pge->GetKey(olc::Key::RIGHT).bPressed) {
-    m_centerCoord = Coord(cx + 1, cy, 0);
+    move(1, 0);
     bTicked = true;
   }
 
   if (pge->GetKey(olc::Key::DOWN).bPressed) {
-    m_centerCoord = Coord(cx, cy - 1, 0);
+    move(0, -1);
     bTicked = true;
   }
 
   if (pge->GetKey(olc::Key::UP).bPressed) {
-    m_centerCoord = Coord(cx, cy + 1, 0);
+    move(0, 1);
     bTicked = true;
   }
 
@@ -169,7 +198,9 @@ void HighwayGameMode::draw(olc::PixelGameEngine* pge)
 		pcx + 5, pcy, crossHairsColor);
   pge->DrawLine(pcx, pcy - 5,
 		pcx, pcy + 5, crossHairsColor);
-  
+
+
+  m_popupLocationPanel.draw(4, 4, pge, m_menuSprite);  
 }
 
 

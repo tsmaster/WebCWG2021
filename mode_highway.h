@@ -12,6 +12,7 @@
 #include "coord.h"
 #include "gameclock.h"
 #include "nodemgr.h"
+#include "popup_dialog.h"
 
 class GameClock;
 
@@ -20,7 +21,7 @@ class HighwayGameMode
  public:
   HighwayGameMode();
 
-  void init();
+  void init(olc::Sprite *menuSprite);
 
   void destroy();
 
@@ -35,6 +36,8 @@ class HighwayGameMode
 
   float getTileScale() {return m_tileScale;}
 
+protected:
+  void move(int x, int y);
 private:
   Coord m_centerCoord;
   GameClock* m_gameClock;
@@ -42,6 +45,9 @@ private:
 
   float m_tileScale;
   float m_viewRadius;
+
+  PopupDialog m_popupLocationPanel;
+  olc::Sprite* m_menuSprite;
 };
 
 #endif // MODE_HIGHWAY_H

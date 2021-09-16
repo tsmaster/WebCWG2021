@@ -1,6 +1,10 @@
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
+
+#define OLC_PGEX_POPUPMENU
+#include "olcPopupMenu.h"
+
 #ifdef __EMSCRIPTEN__
 #define USE_SOUND 0
 #else
@@ -156,6 +160,44 @@ public:
 					  GameMode::GM_MAIN_MENU,
 					  GameMode::GM_MAIN_MENU);
 
+
+	
+    // Construction (root menu is a 1x5 table)
+    m_menu.SetTable(1, 5);
+
+    // Add first item  to root menu (A 1x5 submenu)
+    m_menu["Menu1"].SetTable(1, 5);
+
+    // Add items to first item
+    m_menu["Menu1"]["Item1"];
+    m_menu["Menu1"]["Item2"];
+
+    // Add a 4x3 submenu
+    m_menu["Menu1"]["Item3"].SetTable(4, 3);
+    m_menu["Menu1"]["Item3"]["Option1"];
+    m_menu["Menu1"]["Item3"]["Option2"];
+
+    // Set properties of specific item
+    m_menu["Menu1"]["Item3"]["Option3"].Enable(false);
+    m_menu["Menu1"]["Item3"]["Option4"];
+    m_menu["Menu1"]["Item3"]["Option5"];
+    m_menu["Menu1"]["Item4"];
+
+    // Add second item to root menu
+    m_menu["Menu2"].SetTable(3, 3);
+    m_menu["Menu2"]["Item1"];
+    m_menu["Menu2"]["Item2"].SetID(1001).Enable(true);
+    m_menu["Menu2"]["Item3"];
+
+    m_menu["Pew Pew"].SetTable(1,2);
+    m_menu["Pew Pew"]["With Guns"].SetID(1002).Enable(true);
+    m_menu["Pew Pew"]["Without Guns"].SetID(1003).Enable(true);
+
+    // Construct the menu structure
+    m_menu.Build();
+
+    m_menuSprite = new olc::Sprite("Assets/Sprites/retroMenu.png");
+
     setGameMode(GameMode::GM_BDG);
 
     return true;
@@ -225,6 +267,8 @@ public:
     if (mode.modeID == GM_HIGHWAY) {
       //printf("drawing highway(?!)\n");
       drawHighwayMode();
+    } else if (mode.modeID == GM_INSTRUCTIONS) {
+      m_menuMgr.Draw(m_menuSprite, {30, 30});
     }
 
     //printf("done drawing current mode\n");
@@ -267,10 +311,15 @@ public:
 
     switch (mode.modeID) {
     case GM_HIGHWAY:
-      bool cont = updateHighwayMode(fElapsedSeconds);
-      if (!cont) {
-	setGameMode(mode.escMode);
-      }	
+      {
+	bool cont = updateHighwayMode(fElapsedSeconds);
+	if (!cont) {
+	  setGameMode(mode.escMode);
+	}
+      }
+      break;
+    case GM_INSTRUCTIONS:
+      updateInstructionsMode(fElapsedSeconds);
       break;
     }
   }
@@ -323,6 +372,9 @@ public:
       break;
     case GameMode::GM_HIGHWAY:
       initHighwayMode();
+      break;
+    case GameMode::GM_INSTRUCTIONS:
+      initInstructionsMode();
       break;
     default:
       // do nothing
@@ -398,7 +450,7 @@ public:
 
   void initHighwayMode()
   {
-    m_highwayGameMode.init();
+    m_highwayGameMode.init(m_menuSprite);
   }
 
   void destroyHighwayMode()
@@ -417,6 +469,21 @@ public:
   bool updateHighwayMode(float elapsedSeconds)
   {
     return m_highwayGameMode.update(this, elapsedSeconds);
+  }
+
+  void initInstructionsMode()
+  {
+    m_menuMgr.Open(&m_menu);
+  }
+
+  void updateInstructionsMode(float elapsedSeconds)
+  {
+    if (GetKey(olc::Key::UP).bPressed)    m_menuMgr.OnUp();
+    if (GetKey(olc::Key::DOWN).bPressed)  m_menuMgr.OnDown();
+    if (GetKey(olc::Key::LEFT).bPressed)  m_menuMgr.OnLeft();
+    if (GetKey(olc::Key::RIGHT).bPressed) m_menuMgr.OnRight();
+    if (GetKey(olc::Key::Z).bPressed)     m_menuMgr.OnBack();
+    if (GetKey(olc::Key::X).bPressed)     m_menuMgr.OnConfirm();
   }
 
   bool updateButtons() {
@@ -471,6 +538,10 @@ private:
   HighwayGameMode m_highwayGameMode;
 
   bool m_bIsPlaying = true;
+
+  olc::Sprite* m_menuSprite;
+  olc::popup::Menu m_menu;
+  olc::popup::Manager m_menuMgr;
 };
 
 

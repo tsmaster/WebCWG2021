@@ -65,12 +65,12 @@ class Node
   bool isCity() { return m_isCity; }
   City* getCity() { return m_city; }
 
+  void setIsCity(bool isCity);
+
  private:
   void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
 
   void pickH1CandidateLocations();
-
-  void getH0CityFromParent();
 
   void distributeH2CityPopulation();
   

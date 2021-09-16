@@ -11,6 +11,9 @@ City::City(int x, int y)
 {
   m_coord = Coord(x, y, 0);
   m_name = makeName();
+  m_population = 1234;
+
+  printf("making city %s at %d %d\n", m_name.c_str(), x, y);
 }
 
 std::string City::makeName()

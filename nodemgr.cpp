@@ -73,7 +73,8 @@ void NodeMgr::pruneCacheForHeight(int h)
     return np1->getLastUsed() < np2->getLastUsed();
   });
 
-  for (int i = 0; i < nc.size() - cacheSize; ++i) {
+  int numToPrune = nc.size() - cacheSize;
+  for (int i = 0; i < numToPrune; ++i) {
     Node* n = nodePtrs[i];
     Coord* c = n->getCoord();
     nc.erase(*c);
@@ -88,6 +89,8 @@ void NodeMgr::populate(Coord c, TileLayer layer)
 
 Node* NodeMgr::getNode(Coord c, TileLayer layer)
 {
+  //printf("NodeMgr::getNode %s %d\n", c.toString().c_str(), (int)layer);
+  
   if (c.h >= m_nodesByHeight.size()) {
     m_nodesByHeight.resize(c.h + 1);
   }
@@ -99,12 +102,13 @@ Node* NodeMgr::getNode(Coord c, TileLayer layer)
   if (node_it != nc.end()) {
     nodePtr = node_it->second;
   } else {
+    printf("making new node for %s layer %d\n", c.toString().c_str(), int(layer));
     nodePtr = new Node(c, this);
     nc[c] = nodePtr;
   }
   nodePtr->populate(layer);
   
   nodePtr->updateLastUsed(m_gameClock->getTime());
-  //printf("returning node for %s\n", c.toString().c_str());
+  //printf("returning node for %s, layer %d\n", c.toString().c_str(), int(layer));
   return nodePtr;
 }
