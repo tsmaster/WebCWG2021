@@ -22,6 +22,8 @@ class City
   
   std::string makeName();
   std::string makeAltName();
+  std::string makeMarkovName();
+  
   std::string m_name;
 
   int m_population;
