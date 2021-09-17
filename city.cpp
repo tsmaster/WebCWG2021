@@ -4,8 +4,11 @@
 
 #include <cctype>
 #include <cstring>
+#include <vector>
 
 #include "bdg_random.h"
+
+extern std::vector<std::string> CityNames;
 
 City::City(int x, int y)
 {
@@ -17,6 +20,22 @@ City::City(int x, int y)
 }
 
 std::string City::makeName()
+{
+  unsigned int nameSeed = makeSeedKey(m_coord.x, m_coord.y, 0, "PICK NAME ALGO");
+  srand(nameSeed);
+
+  int val = randomrange(0, 100);
+
+  if (val < 75) {
+    return makeAltName();
+  } else {
+    int nameCount = CityNames.size();
+    int nameIndex = randomrange(0, nameCount);
+    return CityNames[nameIndex];
+  }
+}
+
+std::string City::makeAltName()
 {
   unsigned int nameSeed = makeSeedKey(m_coord.x, m_coord.y, 0, "CITY NAME");
   srand(nameSeed);

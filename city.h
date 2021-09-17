@@ -21,6 +21,7 @@ class City
   Coord m_coord;
   
   std::string makeName();
+  std::string makeAltName();
   std::string m_name;
 
   int m_population;
