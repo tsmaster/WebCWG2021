@@ -102,7 +102,7 @@ Node* NodeMgr::getNode(Coord c, TileLayer layer)
   if (node_it != nc.end()) {
     nodePtr = node_it->second;
   } else {
-    printf("making new node for %s layer %d\n", c.toString().c_str(), int(layer));
+    //printf("making new node for %s layer %d\n", c.toString().c_str(), int(layer));
     nodePtr = new Node(c, this);
     nc[c] = nodePtr;
   }

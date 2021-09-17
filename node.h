@@ -93,6 +93,8 @@ class Node
   void pave(Coord startCoord, int direction);
 
   PaveDirSet getPavedLinks(Coord childCoord);
+
+  void srandForCoord(std::string tag);
   
   NodeMgr* m_nodeMgr;
 

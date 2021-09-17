@@ -178,19 +178,20 @@ void Node::populate(TileLayer newLayer)
 
   TileLayer oldLayer = m_populatedLayer;
 
+  /*
   printf("populating x %d y %d h %d l %d\n",
 	 m_coord->x,
 	 m_coord->y,
 	 m_coord->h,
-	 int(newLayer));
-  printf("old layer: %d\n", (int)oldLayer);
-
+	 int(newLayer));*/
+  //printf("old layer: %d\n", (int)oldLayer);
+  
   // cities
   if ((oldLayer < TileLayer::H1_CITY_CANDIDATE_LOCN) &&
       (newLayer >= TileLayer::H1_CITY_CANDIDATE_LOCN) &&
       (m_coord->h == 1)) {
     // choose n candidate locations
-    printf("picking h1 city candidate locations for %s\n", m_coord->toString().c_str());
+    //printf("picking h1 city candidate locations for %s\n", m_coord->toString().c_str());
     pickH1CandidateLocations();
     
     m_populatedLayer = TileLayer::H1_CITY_CANDIDATE_LOCN;
@@ -203,7 +204,7 @@ void Node::populate(TileLayer newLayer)
     distributeH2CityPopulation();
       
     m_populatedLayer = TileLayer::H2_CITY_POPULATION_DISTRIBUTION;
-    printf("H2 city pop dist complete\n");
+    //printf("H2 city pop dist complete\n");
   }
 
   if ((oldLayer < TileLayer::H0_CITY_LOCN_NAME_POP) &&
@@ -212,7 +213,7 @@ void Node::populate(TileLayer newLayer)
     populateCityLocationNamePopulation();
       
     m_populatedLayer = TileLayer::H0_CITY_LOCN_NAME_POP;
-    printf("H0 locn name pop complete\n");
+    //printf("H0 locn name pop complete\n");
   }
 
   // roads
@@ -247,29 +248,29 @@ void Node::populate(TileLayer newLayer)
 
   if ((oldLayer < TileLayer::FRACTAL_LAND_COLOR) &&
       (newLayer >= TileLayer::FRACTAL_LAND_COLOR)) {
-    printf("doing fractal for %s\n", m_coord->toString().c_str());
+    //printf("doing fractal for %s\n", m_coord->toString().c_str());
     if (isOrigin()) {
       if (m_coord->h == 0) {
-	printf("constraining from nothing\n");
+	//printf("constraining from nothing\n");
 	constrainFromNothing();
       } else {
 	Coord childCoord = Coord(m_coord->x,
 				 m_coord->y,
 				 m_coord->h - 1);
       
-	printf("constraining from child %s\n", childCoord.toString().c_str());
+	//printf("constraining from child %s\n", childCoord.toString().c_str());
 	Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::FRACTAL_LAND_COLOR);
 	constrainFromChild(*childNode);
       }
     } else {
       Coord parentCoord = getParentCoord();
-      printf("constraining from parent %s\n", parentCoord.toString().c_str());
+      //printf("constraining from parent %s\n", parentCoord.toString().c_str());
       Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::FRACTAL_LAND_COLOR);
       constrainFromParent(*parentNode);
     }
     
     m_populatedLayer = TileLayer::FRACTAL_LAND_COLOR;
-    printf("fractal portion complete for %s\n", m_coord->toString().c_str());
+    //printf("fractal portion complete for %s\n", m_coord->toString().c_str());
   }
   
   if ((oldLayer < TileLayer::H0_FINAL) &&
@@ -296,8 +297,8 @@ void Node::constrainFromNothing()
 
 void Node::constrainFromChild(Node& childNode)
 {
-  unsigned int seed = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "COLOR");
-  srand(seed);
+  srandForCoord("FRACTAL FROM CHILD");
+  
   olc::Pixel cp = childNode.m_color;
   
   int cr = std::clamp(cp.r + randomrange(-5, 6), 0, 255);
@@ -308,8 +309,8 @@ void Node::constrainFromChild(Node& childNode)
 
 void Node::constrainFromParent(Node& parentNode)
 {
-  unsigned int seed = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "COLOR");
-  srand(seed);
+  srandForCoord("FRACTAL FROM PARENT");
+  
   olc::Pixel pp = parentNode.m_color;
 
   int variance = 25;
@@ -329,10 +330,10 @@ Coord Node::getParentCoord()
 
 void Node::pickH1CandidateLocations()
 {
-  printf("making H1 city candidates for x: %d y: %d h: %d\n",
-	 m_coord->x, m_coord->y, m_coord->h);
-  
-  unsigned int seedKey = makeSeedKey(m_coord->x, m_coord->y, m_coord->h, "ISCITY");
+  //printf("making H1 city candidates for x: %d y: %d h: %d\n",
+  //	 m_coord->x, m_coord->y, m_coord->h);
+
+  srandForCoord("ISCITY");
 
   int left, bottom, right, top;
   getBaseExtents(left, bottom, right, top);
@@ -366,7 +367,7 @@ void Node::setIsCity(bool isCity)
 {
   m_isCity = isCity;
   if (isCity) {
-    printf("making new city in setIsCity\n");
+    //printf("making new city in setIsCity\n");
     m_city = new City(m_coord->x, m_coord->y);    
   } else {
     m_city = NULL;
@@ -406,6 +407,8 @@ int Node::getPopulationForCoord(Coord coord)
 
 void Node::generateH1TileRoads()
 {
+  srandForCoord("Kruskal H1");
+  
   // kruskal up some connections
   std::vector<KruskPair> pairs = computeKruskal(m_childCityCoords);
   
@@ -538,6 +541,8 @@ PaveDirSet Node::getPavedLinks(Coord childCoord)
 
 void Node::paveCrossTileRoads()
 {
+  srandForCoord("CROSS TILE ROADS");
+  
   Vec2i deltas[] = {
     Vec2i(-1, 0),
     Vec2i(1, 0),
@@ -620,9 +625,11 @@ void Node::distributeH2CityPopulation()
 {
   std::vector<Coord> cityCoords;
 
+  srandForCoord("DIST CITY");
+  
   int xLeft, yBottom, xRight, yTop;
   getBaseExtents(xLeft, yBottom, xRight, yTop);
-  printf("distributing population %d %d %d %d\n", xLeft, yBottom, xRight, yTop);
+  //printf("distributing population %d %d %d %d\n", xLeft, yBottom, xRight, yTop);
 
   for (int x = xLeft; x < xRight; x += SCALE_FACTOR) {
     for (int y = yBottom; y < yTop; y += SCALE_FACTOR) {
@@ -642,7 +649,7 @@ void Node::distributeH2CityPopulation()
   unsigned int seed = makeSeedKey(m_coord->x,
 				  m_coord->y,
 				  m_coord->h,
-				  "H2 ZIPF DISTR");
+				  "ZIPF SHUFFLE");
   
   std::shuffle(cityCoords.begin(),
 	       cityCoords.end(),
@@ -656,4 +663,14 @@ void Node::distributeH2CityPopulation()
 
     m_popForCoord[cityCoords[i]] = zipf_pop;
   }
+}
+
+void Node::srandForCoord(std::string tag)
+{
+  unsigned int seed = makeSeedKey(m_coord->x,
+				  m_coord->y,
+				  m_coord->h,
+				  tag.c_str());
+
+  srand(seed);
 }
