@@ -3,6 +3,7 @@
 #include "node.h"
 
 #include <algorithm>
+#include <cassert>
 #include <random>
 #include <stdlib.h>
 
@@ -328,6 +329,19 @@ Coord Node::getParentCoord()
   return Coord(px, py, m_coord->h + 1);
 }
 
+void Node::getChildCoords(int& left, int& bottom, int& right, int& top, int& h)
+{
+  assert(m_coord->h > 0);
+  
+  // TODO handle odd height offset
+  h = m_coord->h - 1;
+
+  left = m_coord->x * SCALE_FACTOR - ODD_HEIGHT_OFFSET;
+  bottom = m_coord->y * SCALE_FACTOR - ODD_HEIGHT_OFFSET;
+  right = left + SCALE_FACTOR;
+  top = bottom + SCALE_FACTOR;
+}
+
 void Node::pickH1CandidateLocations()
 {
   //printf("making H1 city candidates for x: %d y: %d h: %d\n",
@@ -627,15 +641,13 @@ void Node::distributeH2CityPopulation()
 
   srandForCoord("DIST CITY");
   
-  int xLeft, yBottom, xRight, yTop;
-  getBaseExtents(xLeft, yBottom, xRight, yTop);
-  //printf("distributing population %d %d %d %d\n", xLeft, yBottom, xRight, yTop);
+  int xLeft, yBottom, xRight, yTop, h;
+  getChildCoords(xLeft, yBottom, xRight, yTop, h);
+  printf("distributing population %d %d %d %d\n", xLeft, yBottom, xRight, yTop);
 
-  for (int x = xLeft; x < xRight; x += SCALE_FACTOR) {
-    for (int y = yBottom; y < yTop; y += SCALE_FACTOR) {
-      Coord childCoord(x, y, 0);
-      Node* childNode = m_nodeMgr->getNode(childCoord, TileLayer::EMPTY);
-      Coord h1Coord = childNode->getParentCoord();
+  for (int x = xLeft; x < xRight; ++x) {
+    for (int y = yBottom; y < yTop; ++y) {
+      Coord h1Coord = Coord(x, y, h);
       Node* h1Node = m_nodeMgr->getNode(h1Coord, TileLayer::H1_CITY_CANDIDATE_LOCN);
 
       for (Coord cityCoord : h1Node->getCityCoords()) {

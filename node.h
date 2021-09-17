@@ -36,6 +36,7 @@ class Node
 
   Coord* getCoord() { return m_coord; }
   Coord getParentCoord();
+  void getChildCoords(int& left, int& bottom, int& right, int& top, int& h);
 
   void constrainFromNothing();
 
