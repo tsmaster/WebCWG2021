@@ -1,5 +1,6 @@
-#include <stdlib.h>
 #include <cstdio>
+#include <math.h>
+#include <stdlib.h>
 
 unsigned int makeSeedKey(int x, int y, int h, const char* str)
 {
@@ -31,4 +32,41 @@ unsigned int makeSeedKey(int x, int y, int h, const char* str)
 int randomrange(int low, int high)
 {
   return (rand() % (high-low)) + low;
+}
+
+
+int rand_range(int min, int max)
+{
+  int r = max - min + 1;
+  int v = rand() % r;
+  return min + v;
+}
+
+float rand_frange(float min, float max)
+{
+  const int r = 10000;
+  float v = (rand() % r) / ((float) r);
+  return min + (max - min) * v;
+}
+
+
+void rand_sphere_point(float& outX, float& outY, float& outZ)
+{
+  while (true) {
+    outX = rand_frange(-1.0f, 1.0f);
+    outY = rand_frange(-1.0f, 1.0f);
+    outZ = rand_frange(-1.0f, 1.0f);
+
+    float magSqr = outX * outX + outY * outY + outZ * outZ;
+    if (magSqr > 1.0f) {
+      continue;
+    }
+
+    float mag = sqrt(magSqr);
+    outX /= mag;
+    outY /= mag;
+    outZ /= mag;
+
+    return;
+  }
 }

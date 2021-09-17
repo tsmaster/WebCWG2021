@@ -2,8 +2,8 @@
 # https://earthly.dev/blog/g++-makefile/
 # https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
 
-CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_highway.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp 
-CWG_HS = bdg_math.h bdg_random.h button.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_highway.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
+CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_city.cpp mode_highway.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp 
+CWG_HS = bdg_math.h bdg_random.h button.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
 
 SOUND_TEST_CPPS = sound_test.cpp
 SOUND_TEST_HS = olc_pgex_sound.h

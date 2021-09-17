@@ -12,6 +12,7 @@
 #include "gameclock.h"
 #include "layers.h"
 
+class CarsWithGuns;
 class City;
 class HighwayGameMode;
 class NodeMgr;
@@ -44,8 +45,8 @@ class Node
 
   void constrainFromChild(Node& childNode);
   
-  void draw(olc::PixelGameEngine* pge, HighwayGameMode* mode);
-  void drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode);
+  void draw(CarsWithGuns* pge, HighwayGameMode* mode);
+  void drawLabel(CarsWithGuns* pge, HighwayGameMode* mode);
 
   void getBaseExtents(int& outLeft, int& outBottom,
 		      int& outRight, int& outTop);
@@ -73,7 +74,7 @@ class Node
   std::vector<Coord> getCityCoords();
 
  private:
-  void drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode);
+  void drawRoads(CarsWithGuns* pge, HighwayGameMode* mode);
 
   void pickH1CandidateLocations();
 

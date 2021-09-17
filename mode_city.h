@@ -1,9 +1,7 @@
-// mode_highway.h
+// mode_city.h
 
-// Reference ../PyCWG2021/fractal.py
-
-#ifndef MODE_HIGHWAY_H
-#define MODE_HIGHWAY_H
+#ifndef MODE_CITY_H
+#define MODE_CITY_H
 
 #include "olcPixelGameEngine.h"
 
@@ -14,35 +12,30 @@
 #include "nodemgr.h"
 #include "popup_dialog.h"
 
-class CarsWithGuns;
 class GameClock;
 
-class HighwayGameMode
+class CityGameMode
 {
  public:
-  HighwayGameMode();
+  CityGameMode();
 
   void init(olc::Sprite *menuSprite);
 
   void destroy();
 
-  bool update(CarsWithGuns* pge, float elapsedSeconds);
+  bool update(olc::PixelGameEngine* pge, float elapsedSeconds);
 
-  void draw(CarsWithGuns* pge);
+  void draw(olc::PixelGameEngine* pge);
 
-  Vec2f screenToTileCoord(CarsWithGuns* pge, Vec2f screenCoord);
-  Vec2f tileToScreenCoord(CarsWithGuns* pge, Vec2f tileCoord);
+  Vec2f screenToTileCoord(olc::PixelGameEngine* pge, Vec2f screenCoord);
+  Vec2f tileToScreenCoord(olc::PixelGameEngine* pge, Vec2f tileCoord);
+
+  bool handleUserInput(olc::PixelGameEngine* pge);
 
   float getTileScale() {return m_tileScale;}
 
 protected:
   void move(int x, int y);
-
-  bool tryEnterCity(CarsWithGuns* pge);
-
-  bool handleUserInput(CarsWithGuns* pge, bool& outSwitched);
-
-  
 private:
   Coord m_centerCoord;
   GameClock* m_gameClock;
@@ -55,4 +48,4 @@ private:
   olc::Sprite* m_menuSprite;
 };
 
-#endif // MODE_HIGHWAY_H
+#endif // MODE_CITY_H

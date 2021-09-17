@@ -1,22 +1,21 @@
-// mode_highway.cpp
+// mode_city.cpp
 
-#include "mode_highway.h"
+#include "mode_city.h"
 
 #include "city.h"
 #include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
 #include "layers.h"
-#include "main.h"
 #include "node.h"
 
-HighwayGameMode::HighwayGameMode()
+CityGameMode::CityGameMode()
 {
   m_tileScale = START_TILE_SCALE;
   m_viewRadius = START_VIEW_RADIUS;
 }
 
-void HighwayGameMode::init(olc::Sprite* menuSprite)
+void CityGameMode::init(olc::Sprite* menuSprite)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
@@ -24,7 +23,7 @@ void HighwayGameMode::init(olc::Sprite* menuSprite)
   m_menuSprite = menuSprite;
 }
 
-void HighwayGameMode::destroy()
+void CityGameMode::destroy()
 {
   delete(m_gameClock);
   m_gameClock = NULL;
@@ -33,14 +32,9 @@ void HighwayGameMode::destroy()
   m_nodeMgr = NULL;
 }
 
-bool HighwayGameMode::update(CarsWithGuns* pge, float elapsedSeconds)
+bool CityGameMode::update(olc::PixelGameEngine* pge, float elapsedSeconds)
 {
-  bool modeSwitched = false;
-  bool bContinue = handleUserInput(pge, modeSwitched);
-
-  if (modeSwitched) {
-    return true;
-  }
+  bool bContinue = handleUserInput(pge);
 
   float vrSqr = m_viewRadius * m_viewRadius;
 
@@ -64,7 +58,7 @@ bool HighwayGameMode::update(CarsWithGuns* pge, float elapsedSeconds)
   return bContinue;
 }
 
-void HighwayGameMode::move(int dx, int dy)
+void CityGameMode::move(int dx, int dy)
 {
   int cx = m_centerCoord.x;
   int cy = m_centerCoord.y;
@@ -91,73 +85,56 @@ void HighwayGameMode::move(int dx, int dy)
   }
 }
 
-bool HighwayGameMode::tryEnterCity(CarsWithGuns* game)
-{
-  Node* centerNode = m_nodeMgr->getNode(m_centerCoord, TileLayer::H0_CITY_LOCN_NAME_POP);
-  if (centerNode->isCity()) {
-    game->setGameMode(GameMode::GM_CITY);
-    return true;
-  }
-  return false;
-}
-
-bool HighwayGameMode::handleUserInput(CarsWithGuns* game, bool& outSwitched)
+bool CityGameMode::handleUserInput(olc::PixelGameEngine* pge)
 {
   bool bTicked = false;
 
   bool bContinue = true;
 
-  if (game->GetKey(olc::Key::ESCAPE).bPressed) {
+  if (pge->GetKey(olc::Key::ESCAPE).bPressed) {
     bContinue = false;
   }
 
   int cx = m_centerCoord.x;
   int cy = m_centerCoord.y;
   
-  if (game->GetKey(olc::Key::LEFT).bPressed) {
+  if (pge->GetKey(olc::Key::LEFT).bPressed) {
     move(-1, 0);
     bTicked = true;
   }
 
-  if (game->GetKey(olc::Key::RIGHT).bPressed) {
+  if (pge->GetKey(olc::Key::RIGHT).bPressed) {
     move(1, 0);
     bTicked = true;
   }
 
-  if (game->GetKey(olc::Key::DOWN).bPressed) {
+  if (pge->GetKey(olc::Key::DOWN).bPressed) {
     move(0, -1);
     bTicked = true;
   }
 
-  if (game->GetKey(olc::Key::UP).bPressed) {
+  if (pge->GetKey(olc::Key::UP).bPressed) {
     move(0, 1);
     bTicked = true;
   }
 
-  if ((game->GetKey(olc::Key::RETURN).bPressed) ||
-      (game->GetKey(olc::Key::ENTER).bPressed)) {
-    if (tryEnterCity(game)) {
-      outSwitched = true;
-    }
-  }
-
-  if (game->GetKey(olc::Key::PGUP).bPressed) {
+  if (pge->GetKey(olc::Key::PGUP).bPressed) {
     m_tileScale = std::min((m_tileScale * 3) / 2, 64.0f);
   }
 
-  if (game->GetKey(olc::Key::PGDN).bPressed) {
+  if (pge->GetKey(olc::Key::PGDN).bPressed) {
     m_tileScale = std::max((m_tileScale * 2) / 3, 2.0f);
   }
   
-  if (game->GetKey(olc::Key::NP_ADD).bPressed) {
+  if (pge->GetKey(olc::Key::NP_ADD).bPressed) {
     m_viewRadius = std::min(m_viewRadius + 0.25f, 32.0f);
   }
 
-  if (game->GetKey(olc::Key::NP_SUB).bPressed) {
+  if (pge->GetKey(olc::Key::NP_SUB).bPressed) {
     m_viewRadius = std::min(m_viewRadius - 0.25f, 1.0f);
   }
   
-  if (game->GetKey(olc::Key::K1).bPressed) {
+  if (pge->GetKey(olc::Key::K1).bPressed) {
     printf("center: %s\n", m_centerCoord.toString().c_str());
   }
 
@@ -168,9 +145,9 @@ bool HighwayGameMode::handleUserInput(CarsWithGuns* game, bool& outSwitched)
   return bContinue;
 }
 
-void HighwayGameMode::draw(CarsWithGuns* pge)
+void CityGameMode::draw(olc::PixelGameEngine* pge)
 {
-  pge->Clear(olc::DARK_GREEN);
+  pge->Clear(olc::DARK_GRAY);
 
   int sw = pge->ScreenWidth();
   int sh = pge->ScreenHeight();
@@ -205,6 +182,7 @@ void HighwayGameMode::draw(CarsWithGuns* pge)
     pge->DrawLine(0, sy, sw, sy, lineColor);
   }
 
+  /*
   std::vector<Node *> nodeVec = m_nodeMgr->getNodes();
 
   for (Node* n : nodeVec) {
@@ -215,6 +193,7 @@ void HighwayGameMode::draw(CarsWithGuns* pge)
   for (Node* n : nodeVec) {
     n->drawLabel(pge, this);
   }
+  */
 
   olc::Pixel crossHairsColor = olc::Pixel(125, 0, 0);
   pge->DrawLine(pcx - 5, pcy,
@@ -227,7 +206,7 @@ void HighwayGameMode::draw(CarsWithGuns* pge)
 }
 
 
-Vec2f HighwayGameMode::screenToTileCoord(CarsWithGuns* pge, Vec2f screenCoord)
+Vec2f CityGameMode::screenToTileCoord(olc::PixelGameEngine* pge, Vec2f screenCoord)
 {
   // When sc is 0, 0, there is a scale x scale unit box centered
   // at the center of the screen.
@@ -258,7 +237,7 @@ Vec2f HighwayGameMode::screenToTileCoord(CarsWithGuns* pge, Vec2f screenCoord)
   return Vec2f(tx, ty);
 }
 
-Vec2f HighwayGameMode::tileToScreenCoord(CarsWithGuns* pge, Vec2f tileCoord)
+Vec2f CityGameMode::tileToScreenCoord(olc::PixelGameEngine* pge, Vec2f tileCoord)
 {
   // When screen center is 0, 0, there is a scale x scale unit box centered
   // at the center of the screen.

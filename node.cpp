@@ -12,6 +12,7 @@
 #include "constants.h"
 #include "coord.h"
 #include "kruskal.h"
+#include "main.h"
 #include "mode_highway.h"
 
 
@@ -30,7 +31,7 @@ void Node::destroy()
   delete m_coord;
 }
 
-void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
+void Node::draw(CarsWithGuns* pge, HighwayGameMode* mode)
 {
   int xLeft, yBottom, xRight, yTop;
   getBaseExtents(xLeft, yBottom, xRight, yTop);
@@ -62,7 +63,7 @@ void Node::draw(olc::PixelGameEngine* pge, HighwayGameMode* mode)
   }
 }
 
-void Node::drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode)
+void Node::drawLabel(CarsWithGuns* pge, HighwayGameMode* mode)
 {
   if (m_isCity) {
     int xLeft, yBottom, xRight, yTop;
@@ -80,7 +81,7 @@ void Node::drawLabel(olc::PixelGameEngine* pge, HighwayGameMode* mode)
   }
 }
 
-void Node::drawRoads(olc::PixelGameEngine* pge, HighwayGameMode* mode)
+void Node::drawRoads(CarsWithGuns* pge, HighwayGameMode* mode)
 {
   if (m_coord->h != 0) {
     return;
