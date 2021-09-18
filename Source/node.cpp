@@ -542,7 +542,7 @@ bool Node::isInNodeExtents(Coord c) {
 void Node::finalizeH0() {
 }
 
-PaveDirSet Node::getPavedLinks(Coord childCoord)
+PaveDirSet Node::getPavedChildren(Coord childCoord)
 {
   auto pd_it = m_pavedDirs.find(childCoord);
   
@@ -634,7 +634,7 @@ void Node::collectH0Roads()
   Coord parentCoord = getParentCoord();
   Node* parentNode = m_nodeMgr->getNode(parentCoord, TileLayer::H1_CROSS_TILE_ROADS);
 
-  m_pavedLinksH0 = parentNode->getPavedLinks(*m_coord);  
+  m_pavedLinksH0 = parentNode->getPavedChildren(*m_coord);  
 }
 
 void Node::distributeH2CityPopulation()

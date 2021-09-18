@@ -77,6 +77,8 @@ private:
   bool m_bIsPlaying = true;
 
   olc::Sprite* m_menuSprite;
+  olc::Sprite* m_citySprite;
+  
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;
 

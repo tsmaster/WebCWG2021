@@ -26,7 +26,8 @@ class City
     m_exitWest = w;
     m_exitSouth = s;
   }
-    
+
+  bool hasExit(int dir);
   
  private:
   Coord m_coord;

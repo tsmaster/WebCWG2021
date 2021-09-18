@@ -19,7 +19,30 @@ float fmap(float t, float in_min, float in_max, float out_min, float out_max)
 }
 
 
+int clamp(int val, int min, int max)
+{
+  return std::min(std::max(min, val), max-1);
+}
+
 Vec2f::Vec2f(float ix, float iy) {
   x = ix;
   y = iy;
 }
+
+
+bool Vec2i::lessThan(const Vec2i& other) const
+{
+  if (y < other.y) {
+    return true;
+  }  
+  if (y > other.y) {
+    return false;
+  }
+  
+  if (x < other.x) {
+    return true;
+  }
+  
+  return false;  
+}
+

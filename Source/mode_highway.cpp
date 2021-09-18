@@ -103,12 +103,13 @@ bool HighwayGameMode::tryEnterCity(CarsWithGuns* game)
     mcr.x = m_centerCoord.x;
     mcr.y = m_centerCoord.y;
     mcr.population = c->getPopulation();
+
+    PaveDirSet pavedDirs = centerNode->getSelfPavedDirs();
     
-    // TODO handle exits
-    mcr.exitEast = true;
-    mcr.exitNorth = false;
-    mcr.exitWest = true;
-    mcr.exitSouth = true;
+    mcr.exitEast = pavedDirs.find(0) != pavedDirs.end();
+    mcr.exitNorth = pavedDirs.find(1) != pavedDirs.end();;
+    mcr.exitWest = pavedDirs.find(2) != pavedDirs.end();;
+    mcr.exitSouth = pavedDirs.find(3) != pavedDirs.end();;
 
     game->requestGameMode(mcr);
     return true;

@@ -144,3 +144,19 @@ std::string City::makeMarkovName()
   free(nameBuffer);
   return outName;
 }
+
+bool City::hasExit(int dir)
+{
+  switch (dir) {
+  case 0:
+    return m_exitEast;
+  case 1:
+    return m_exitNorth;
+  case 2:
+    return m_exitWest;
+  case 3:
+    return m_exitSouth;
+  default:
+    return false;
+  }
+}

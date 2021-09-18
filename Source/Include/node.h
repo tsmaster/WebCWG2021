@@ -73,6 +73,8 @@ class Node
 
   std::vector<Coord> getCityCoords();
 
+  PaveDirSet getSelfPavedDirs() { return m_pavedLinksH0; }
+  
  private:
   void drawRoads(CarsWithGuns* pge, HighwayGameMode* mode);
 
@@ -94,7 +96,7 @@ class Node
 
   void pave(Coord startCoord, int direction);
 
-  PaveDirSet getPavedLinks(Coord childCoord);
+  PaveDirSet getPavedChildren(Coord childCoord);
 
   void srandForCoord(std::string tag);
   

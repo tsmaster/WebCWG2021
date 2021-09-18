@@ -9,6 +9,8 @@ const float TAU = PI * 2.0f;
 
 float fmap(float val, float inMin, float inMax, float outMin, float outMax);
 
+// returns value in [min, max)
+int clamp(int val, int min, int max);
 
 class Vec2f
 {
@@ -23,9 +25,19 @@ class Vec2i
 {
  public:
   Vec2i(int ix, int iy) { x=ix; y=iy; }
+  Vec2i() {x=0; y=0;}
 
   int x;
   int y;
+
+  bool lessThan(const Vec2i& other) const;
+  
+  bool operator < (const Vec2i &other) const { return lessThan(other); }
+
+  bool operator == (const Vec2i &other) const { return ((x == other.x) &&
+							(y == other.y)); }
+
+  
 };
 
 #endif //BDG_MATH_H

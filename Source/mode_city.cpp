@@ -4,6 +4,7 @@
 
 #include "carswithguns.h"
 #include "city.h"
+#include "citymap.h"
 #include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
@@ -17,17 +18,21 @@ CityGameMode::CityGameMode()
   m_viewRadius = START_VIEW_RADIUS;
 }
 
-void CityGameMode::init(olc::Sprite* menuSprite)
+void CityGameMode::init(olc::Sprite* menuSprite, olc::Sprite* citySprite)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
   m_menuSprite = menuSprite;
+  m_citySprite = citySprite;
 }
 
 void CityGameMode::destroy()
 {
   delete(m_gameClock);
   m_gameClock = NULL;
+  m_menuSprite = NULL;
+  m_citySprite = NULL;
+  m_cityMap.destroy();
 }
 
 bool CityGameMode::update(CarsWithGuns* game, float elapsedSeconds)
@@ -39,30 +44,6 @@ bool CityGameMode::update(CarsWithGuns* game, float elapsedSeconds)
 
 void CityGameMode::move(int dx, int dy)
 {
-  int cx = m_centerCoord.x;
-  int cy = m_centerCoord.y;
-
-  int nx = cx + dx;
-  int ny = cy + dy;
-
-  m_centerCoord = Coord(nx, ny, 0);
-
-  /*
-  Node* centerNode = m_nodeMgr->getNode(m_centerCoord, TileLayer::H0_FINAL);
-  if (centerNode->isCity()) {
-    City* c = centerNode->getCity();
-    std::string name = c->getName();
-    int population = c->getPopulation();
-    printf("city name: %s pop %d\n", name.c_str(), population);
-
-    // todo better formatting
-    std::string msg = name + std::string("\npop: ") +std::to_string(population);
-    std::vector<ButtonDesc> buttons;
-    m_popupLocationPanel.build(msg, buttons);
-  } else {
-    std::vector<ButtonDesc> buttons;
-    m_popupLocationPanel.build("driving", buttons);
-    }*/
 }
 
 bool CityGameMode::handleUserInput(CarsWithGuns* game)
@@ -74,8 +55,7 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
   int cx = m_centerCoord.x;
   int cy = m_centerCoord.y;
     
-  if ((game->GetKey(olc::Key::ESCAPE).bPressed)||
-      (game->GetKey(olc::Key::Q).bPressed)) {
+  if (game->GetKey(olc::Key::ESCAPE).bPressed) {
     ModeChangeRequest mcr = ModeChangeRequest::modeChangeRequestFactory(GameMode::GM_HIGHWAY);
     mcr.x = m_city.getCoord().x;
     mcr.y = m_city.getCoord().y;
@@ -175,6 +155,7 @@ void CityGameMode::draw(CarsWithGuns* game)
   game->DrawLine(pcx, pcy - 5,
 		pcx, pcy + 5, crossHairsColor);
 
+  m_cityMap.draw(game);
 
   m_popupLocationPanel.draw(4, 4, game, m_menuSprite);  
 }
@@ -246,6 +227,11 @@ void CityGameMode::setCity(City c)
 {
   m_city = c;
   rebuildDisplay();
+
+  m_cityMap.populate(c.getCoord().x, c.getCoord().y,
+		     c.getPopulation(),
+		     c.hasExit(0), c.hasExit(1), c.hasExit(2), c.hasExit(3),
+		     m_citySprite);
 }
 
 void CityGameMode::rebuildDisplay()
@@ -256,6 +242,21 @@ void CityGameMode::rebuildDisplay()
 
   // todo better formatting
   std::string msg = name + std::string("\npop: ") +std::to_string(population);
+  msg = msg + std::string("\nexits: ");
+
+  if (m_city.hasExit(0)) {
+    msg = msg + std::string("E ");
+  }
+  if (m_city.hasExit(1)) {
+    msg = msg + std::string("N ");
+  }
+  if (m_city.hasExit(2)) {
+    msg = msg + std::string("W ");
+  }
+  if (m_city.hasExit(3)) {
+    msg = msg + std::string("S ");
+  }
+  
   std::vector<ButtonDesc> buttons;
   m_popupLocationPanel.build(msg, buttons);
 }

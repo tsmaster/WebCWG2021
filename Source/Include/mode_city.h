@@ -8,6 +8,7 @@
 #include "bdg_math.h"
 
 #include "city.h"
+#include "citymap.h"
 #include "coord.h"
 #include "gameclock.h"
 #include "nodemgr.h"
@@ -21,7 +22,7 @@ class CityGameMode
  public:
   CityGameMode();
 
-  void init(olc::Sprite *menuSprite);
+  void init(olc::Sprite *menuSprite, olc::Sprite *citySprite);
 
   void destroy();
 
@@ -50,8 +51,11 @@ private:
   float m_tileScale;
   float m_viewRadius;
 
+  CityMap m_cityMap;
+
   PopupDialog m_popupLocationPanel;
   olc::Sprite* m_menuSprite;
+  olc::Sprite* m_citySprite;
 };
 
 #endif // MODE_CITY_H
