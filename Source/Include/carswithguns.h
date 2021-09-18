@@ -8,6 +8,7 @@
 #include "modes.h"
 #include "mode_city.h"
 #include "mode_highway.h"
+#include "modemgr.h"
 
 class CarsWithGuns : public olc::PixelGameEngine
 {
@@ -20,7 +21,7 @@ class CarsWithGuns : public olc::PixelGameEngine
 
   bool OnUserUpdate(float seconds) override;
 
-  void setGameMode(GameMode newMode);
+  void requestGameMode(ModeChangeRequest mcr);
   
  protected:
   void updateGame(float seconds);
@@ -52,6 +53,8 @@ class CarsWithGuns : public olc::PixelGameEngine
 
   bool updateButtons();
 
+  void setGameMode(GameMode newMode);
+  void applyModeArguments(ModeChangeRequest mcr);
 
 private:
   std::vector<Button> m_buttons;
@@ -67,17 +70,17 @@ private:
   //int m_sndPickupID = -1;
   //int m_sndDropID = -1;
 
-  entt::entity m_currentMode = entt::null;
-
+  ModeMgr m_modeMgr;
   HighwayGameMode m_highwayGameMode;
-
   CityGameMode m_cityGameMode;
 
   bool m_bIsPlaying = true;
 
   olc::Sprite* m_menuSprite;
   olc::popup::Menu m_menu;
-  olc::popup::Manager m_menuMgr;  
+  olc::popup::Manager m_menuMgr;
+
+  std::vector<ModeChangeRequest> m_modeChangeRequests;
 };
 
 

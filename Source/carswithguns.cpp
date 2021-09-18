@@ -22,11 +22,13 @@
 
 #include "bdg_math.h"
 #include "button.h"
+#include "city.h"
 #include "hsv.h"
 #include "screen_bg.h"
 #include "modes.h"
 #include "mode_city.h"
 #include "mode_highway.h"
+#include "modemgr.h"
 
 CarsWithGuns::CarsWithGuns()
 {
@@ -242,7 +244,7 @@ void CarsWithGuns::drawGame()
 
 void CarsWithGuns::drawCurrentMode() {
   auto [mode, bg] = m_registry.get<GameModeComponent,
-				   ScreenBackgroundComponent>(m_currentMode);
+				   ScreenBackgroundComponent>(m_modeMgr.getCurrentMode());
 
   bg.DrawBG(this);
 
@@ -254,22 +256,17 @@ void CarsWithGuns::drawCurrentMode() {
   }
 
   if (mode.modeID == GM_HIGHWAY) {
-    //printf("drawing highway(?!)\n");
     drawHighwayMode();
   } else if (mode.modeID == GM_CITY) {
     drawCityMode();
   } else if (mode.modeID == GM_INSTRUCTIONS) {
     m_menuMgr.Draw(m_menuSprite, {30, 30});
   }
-  
-  //printf("done drawing current mode\n");
 }
 
 void CarsWithGuns::updateCurrentMode(float fElapsedSeconds)
 {
-  //printf("updating current mode with %d\n", (int)m_currentMode);
-  
-  auto &mode = m_registry.get<GameModeComponent>(m_currentMode);
+  auto &mode = m_registry.get<GameModeComponent>(m_modeMgr.getCurrentMode());
 
   mode.timeInMode += fElapsedSeconds;
 
@@ -342,8 +339,8 @@ entt::entity CarsWithGuns::findEntityForMode(GameMode queryMode)
 
 void CarsWithGuns::setGameMode(GameMode newMode)
 {
-  if (m_currentMode != entt::null) {
-    auto oldMode = m_registry.get<GameModeComponent>(m_currentMode);
+  if (m_modeMgr.getCurrentMode() != entt::null) {
+    auto oldMode = m_registry.get<GameModeComponent>(m_modeMgr.getCurrentMode());
     
     // clean up current game mode
     switch(oldMode.modeID) {
@@ -359,12 +356,13 @@ void CarsWithGuns::setGameMode(GameMode newMode)
     }
   }
 
-  m_currentMode = findEntityForMode(newMode);
-  assert(m_currentMode != entt::null);
+  auto newModeEntity = findEntityForMode(newMode);
+  assert(newModeEntity != entt::null);  
+  m_modeMgr.setCurrentMode(newModeEntity);
 
   // set up new game mode
 
-  auto &mode = m_registry.get<GameModeComponent>(m_currentMode);
+  auto &mode = m_registry.get<GameModeComponent>(newModeEntity);
 
   mode.timeInMode = 0.0f;
     
@@ -526,8 +524,38 @@ bool CarsWithGuns::updateButtons() {
   return false;
 }
 
+void CarsWithGuns::applyModeArguments(ModeChangeRequest mcr)
+{
+  switch (mcr.newGameMode) {
+  case GameMode::GM_HIGHWAY:
+    {
+      printf("setting pos %d %d\n", mcr.x, mcr.y);
+      m_highwayGameMode.setPos(mcr.x, mcr.y);
+    }
+    break;
+  case GameMode::GM_CITY:
+    {
+      City c(mcr.x, mcr.y);
+      c.setName(mcr.cityName);
+      c.setPopulation(mcr.population);
+      c.setExits(mcr.exitEast,
+		 mcr.exitNorth,
+		 mcr.exitWest,
+		 mcr.exitSouth);
+      
+      m_cityGameMode.setCity(c);
+    }
+  }
+}
+
 bool CarsWithGuns::OnUserUpdate(float fElapsedSeconds)
 {
+  for (auto rq : m_modeChangeRequests) {
+    setGameMode(rq.newGameMode);
+    applyModeArguments(rq);
+  }
+  m_modeChangeRequests.clear();
+  
   //printf("---OnUserUpdate---\n");
   updateCurrentMode(fElapsedSeconds);
   //updateGame(fElapsedSeconds);
@@ -535,4 +563,9 @@ bool CarsWithGuns::OnUserUpdate(float fElapsedSeconds)
   // called once per frame
   drawCurrentMode();
   return m_bIsPlaying;
+}
+
+void CarsWithGuns::requestGameMode(ModeChangeRequest mcr)
+{
+  m_modeChangeRequests.push_back(mcr);
 }

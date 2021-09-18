@@ -35,6 +35,8 @@ class HighwayGameMode
 
   float getTileScale() {return m_tileScale;}
 
+  void setPos(int x, int y) { m_centerCoord = Coord(x, y, 0); }
+
 protected:
   void move(int x, int y);
 

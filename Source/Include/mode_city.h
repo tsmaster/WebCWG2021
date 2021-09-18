@@ -7,11 +7,13 @@
 
 #include "bdg_math.h"
 
+#include "city.h"
 #include "coord.h"
 #include "gameclock.h"
 #include "nodemgr.h"
 #include "popup_dialog.h"
 
+class CarsWithGuns;
 class GameClock;
 
 class CityGameMode
@@ -23,23 +25,27 @@ class CityGameMode
 
   void destroy();
 
-  bool update(olc::PixelGameEngine* pge, float elapsedSeconds);
+  bool update(CarsWithGuns* game, float elapsedSeconds);
 
-  void draw(olc::PixelGameEngine* pge);
+  void draw(CarsWithGuns* game);
 
-  Vec2f screenToTileCoord(olc::PixelGameEngine* pge, Vec2f screenCoord);
-  Vec2f tileToScreenCoord(olc::PixelGameEngine* pge, Vec2f tileCoord);
+  Vec2f screenToTileCoord(CarsWithGuns* game, Vec2f screenCoord);
+  Vec2f tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord);
 
-  bool handleUserInput(olc::PixelGameEngine* pge);
+  bool handleUserInput(CarsWithGuns* game);
 
   float getTileScale() {return m_tileScale;}
 
+  void setCity(City c);
+
 protected:
   void move(int x, int y);
+
+  void rebuildDisplay();
 private:
+  City m_city = City(0, 0);
   Coord m_centerCoord;
   GameClock* m_gameClock;
-  NodeMgr* m_nodeMgr;
 
   float m_tileScale;
   float m_viewRadius;

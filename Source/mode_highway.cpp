@@ -96,7 +96,21 @@ bool HighwayGameMode::tryEnterCity(CarsWithGuns* game)
 {
   Node* centerNode = m_nodeMgr->getNode(m_centerCoord, TileLayer::H0_CITY_LOCN_NAME_POP);
   if (centerNode->isCity()) {
-    game->setGameMode(GameMode::GM_CITY);
+    City* c = centerNode->getCity();
+
+    ModeChangeRequest mcr = ModeChangeRequest::modeChangeRequestFactory(GameMode::GM_CITY);
+    mcr.cityName = c->getName();
+    mcr.x = m_centerCoord.x;
+    mcr.y = m_centerCoord.y;
+    mcr.population = c->getPopulation();
+    
+    // TODO handle exits
+    mcr.exitEast = true;
+    mcr.exitNorth = false;
+    mcr.exitWest = true;
+    mcr.exitSouth = true;
+
+    game->requestGameMode(mcr);
     return true;
   }
   return false;

@@ -1,6 +1,8 @@
 #ifndef MODES_H
 #define MODES_H
 
+#include "olcPixelGameEngine.h"
+
 enum GameMode {
   GM_NONE,
   

@@ -1,14 +1,15 @@
 # Makefile examples
 # https://earthly.dev/blog/g++-makefile/
 # https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
+# https://stackoverflow.com/questions/3220277/what-do-the-makefile-symbols-and-mean
 
 # make -j 4 <targets>
 
-_CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_city.cpp mode_highway.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp
+_CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_city.cpp mode_highway.cpp modemgr.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp
 
-_CWG_HS = bdg_math.h bdg_random.h button.h carswithguns.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
+_CWG_HS = bdg_math.h bdg_random.h button.h carswithguns.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modemgr.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
 
-_CWG_OBJS = main.o bdg_math.o bdg_random.o button.o carswithguns.o city.o citynames.o coord.o gameclock.o hsv.o kruskal.o mode_city.o mode_highway.o node.o nodemgr.o popup_dialog.o screen_bg.o
+_CWG_OBJS=$(_CWG_CPPS:.cpp=.o)
 
 
 SOUND_TEST_CPPS = sound_test.cpp
@@ -33,16 +34,10 @@ CDBGFLAGS = -std=c++17 -Og -ggdb -I$(IDIR)
 
 .PHONY: all clean
 
-all: sparkle cwg cwg.html
+all: cwg cwg.html
 
 clean:
-	rm -f sparkle cwg cwg-opt cwg-dbg cwg.js cwg.html cwg.wasm cwg.data *.o *~ Build/*.o
-
-sparkle: sparkle.cpp
-	$(CXX) -o sparkle sparkle.cpp -lX11 -lGL -lpthread -lpng -lstdc++fs -std=c++17
-
-cwg-old: $(CWG_CPPS) $(CWG_HS)
-	$(CXX) -o $@ $(CWG_CPPS) -lX11 -lGL -lpthread -lpng -lstdc++fs -lopenal -std=c++17
+	rm -f cwg cwg-opt cwg-dbg cwg.js cwg.html cwg.wasm cwg.data *~ Build/*.o
 
 cwg-opt: $(CWG_CPPS) $(CWG_HS)
 	$(CXX) -o $@ $(CWG_CPPS) $(CLIBS) $(COPTFLAGS)
@@ -50,7 +45,7 @@ cwg-opt: $(CWG_CPPS) $(CWG_HS)
 cwg-dbg: $(CWG_CPPS) $(CWG_HS)
 	$(CXX) -o $@ $(CWG_CPPS) $(CLIBS) $(CDBGFLAGS)
 
-$(ODIR)/%.o: $(SDIR)/%.cpp $(DEPS)
+$(ODIR)/%.o: $(SDIR)/%.cpp $(CWG_HS)
 	$(CXX) -c -o $@ $< $(CFLAGS)
 
 cwg: $(CWG_OBJS)
