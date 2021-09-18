@@ -368,7 +368,6 @@ void CarsWithGuns::setGameMode(GameMode newMode)
     }
   }
 
-  printf("finding entity for %d\n", newMode);
   m_currentMode = findEntityForMode(newMode);
   assert(m_currentMode != entt::null);
 
