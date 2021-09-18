@@ -2,6 +2,7 @@
 
 #include "mode_highway.h"
 
+#include "carswithguns.h"
 #include "city.h"
 #include "constants.h"
 #include "coord.h"

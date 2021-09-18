@@ -4,11 +4,11 @@
 
 # make -j 4 <targets>
 
-_CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_city.cpp mode_highway.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp
+_CWG_CPPS = main.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp mode_city.cpp mode_highway.cpp node.cpp nodemgr.cpp popup_dialog.cpp screen_bg.cpp
 
-_CWG_HS = bdg_math.h bdg_random.h button.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
+_CWG_HS = bdg_math.h bdg_random.h button.h carswithguns.h city.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modes.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h popup_dialog.h screen_bg.h 
 
-_CWG_OBJS = main.o bdg_math.o bdg_random.o button.o city.o citynames.o coord.o gameclock.o hsv.o kruskal.o mode_city.o mode_highway.o node.o nodemgr.o popup_dialog.o screen_bg.o
+_CWG_OBJS = main.o bdg_math.o bdg_random.o button.o carswithguns.o city.o citynames.o coord.o gameclock.o hsv.o kruskal.o mode_city.o mode_highway.o node.o nodemgr.o popup_dialog.o screen_bg.o
 
 
 SOUND_TEST_CPPS = sound_test.cpp

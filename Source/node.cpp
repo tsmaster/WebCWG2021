@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "bdg_random.h"
+#include "carswithguns.h"
 #include "city.h"
 #include "constants.h"
 #include "coord.h"
