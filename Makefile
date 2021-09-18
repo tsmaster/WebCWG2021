@@ -54,7 +54,7 @@ cwg: $(CWG_OBJS)
 
 
 cwg.html: $(CWG_CPPS) $(CWG_HS)
-	$(EMXX) -std=c++17 -O2 -lopenal -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s USE_LIBPNG=1 -s ASSERTIONS=1 $(CWG_CPPS) -o $@ --preload-file ./Assets
+	$(EMXX) $(COPTFLAGS) -lopenal -s ALLOW_MEMORY_GROWTH=1 -s MAX_WEBGL_VERSION=2 -s MIN_WEBGL_VERSION=2 -s USE_LIBPNG=1 -s ASSERTIONS=1 $(CWG_CPPS) -o $@ --preload-file ./Assets
 
 run-cwg: cwg.html
 	emrun cwg.html

@@ -146,7 +146,7 @@ bool CarsWithGuns::OnUserCreate()
 					-1.0f,
 					-1.0f,
 					GameMode::GM_NONE,
-					GameMode::GM_HIGHWAY);
+					GameMode::GM_NONE);
 
   entt::entity eSettingsMode = m_registry.create();
   m_registry.emplace<ScreenBackgroundComponent>(eSettingsMode,

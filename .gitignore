@@ -8,6 +8,12 @@
 *.obj
 Build/*.o
 
+# Compiled WebAssembly files
+cwg.html
+cwg.data
+cwg.wasm
+cwg.js
+
 # Precompiled Headers
 *.gch
 *.pch
@@ -34,7 +40,6 @@ Build/*.o
 cwg
 cwg-opt
 cwg-dbg
-cwg.js
 
 # Emacs
 *~
