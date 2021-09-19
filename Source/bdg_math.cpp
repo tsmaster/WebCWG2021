@@ -46,3 +46,11 @@ bool Vec2i::lessThan(const Vec2i& other) const
   return false;  
 }
 
+float Vec2i::distEuclid(const Vec2i& other) const
+{
+  int dx = x - other.x;
+  int dy = y - other.y;
+
+  int distSqr = dx * dx + dy * dy;
+  return sqrt(distSqr);
+}
