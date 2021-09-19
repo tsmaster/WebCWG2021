@@ -37,6 +37,9 @@ class Vec2i
   bool operator == (const Vec2i &other) const { return ((x == other.x) &&
 							(y == other.y)); }
 
+  Vec2i operator+ (const Vec2i& other) const { return Vec2i(x + other.x,
+							     y + other.y); }
+
   float distEuclid(const Vec2i& other) const;
 
   int distManhattan(const Vec2i& other) const;

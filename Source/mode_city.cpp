@@ -18,12 +18,16 @@ CityGameMode::CityGameMode()
   m_viewRadius = START_VIEW_RADIUS;
 }
 
-void CityGameMode::init(olc::Sprite* menuSprite, olc::Sprite* citySprite)
+void CityGameMode::init(olc::Sprite* menuSprite,
+			olc::Sprite* citySprite,
+			olc::Sprite* carSprite)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
   m_menuSprite = menuSprite;
   m_citySprite = citySprite;
+  m_carSprite = carSprite;
+  m_carPos = Vec2i(0, 0);
 }
 
 void CityGameMode::destroy()
@@ -44,6 +48,28 @@ bool CityGameMode::update(CarsWithGuns* game, float elapsedSeconds)
 
 void CityGameMode::move(int dx, int dy)
 {
+  int newHeading = m_carHeading;
+  
+  if (dx == 1) {
+    // east
+    newHeading = 0;
+  } else if (dy == 1) {
+    // north
+    newHeading = 2;
+  } else if (dx == -1) {
+    // west
+    newHeading = 4;
+  } else {
+    // south
+    newHeading = 6;
+  }
+
+  Vec2i newPos = m_carPos + Vec2i(dx, dy);
+
+  if (m_cityMap.isLocationPaved(newPos)) {
+    m_carPos = newPos;
+    m_carHeading = newHeading;
+  }
 }
 
 bool CityGameMode::handleUserInput(CarsWithGuns* game)
@@ -157,7 +183,32 @@ void CityGameMode::draw(CarsWithGuns* game)
 
   m_cityMap.draw(game);
 
+  drawCar(game);
+
   m_popupLocationPanel.draw(4, 4, game, m_menuSprite);  
+}
+
+void CityGameMode::drawCar(CarsWithGuns* game)
+{
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  int scx = 320;
+  int scy = 240;
+  
+  Vec2i wc = m_carPos;
+
+  Vec2i tc = Vec2i(16 * (m_carHeading & 0x3),
+		   16 * (m_carHeading / 4));
+
+  olc::vi2d vScreenLocation = { scx + 16 * wc.x, scy - 16 * wc.y };
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_carSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
 }
 
 
@@ -232,6 +283,9 @@ void CityGameMode::setCity(City c)
 		     c.getPopulation(),
 		     c.hasExit(0), c.hasExit(1), c.hasExit(2), c.hasExit(3),
 		     m_citySprite);
+
+  m_carPos = m_cityMap.getCityCenterLocn();
+  m_carHeading = 0;
 }
 
 void CityGameMode::rebuildDisplay()

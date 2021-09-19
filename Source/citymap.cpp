@@ -86,6 +86,11 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
   setTileAt(cx+1, cy+1, 9, 9); // trash can?
 
   std::set<Vec2i> pavedTiles;
+
+  Vec2i eastExitLocation;
+  Vec2i northExitLocation;
+  Vec2i westExitLocation;
+  Vec2i southExitLocation;
   
   if (eE) {
     int exitY = randomrange(-radius/2, radius/2+1);
@@ -95,7 +100,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
       pavedTiles.insert(b);
     }
 
-    setTileAt(radius, exitY, 1, 16);
+    eastExitLocation = Vec2i(radius, exitY);
   }
 
   if (eN) {
@@ -105,8 +110,8 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
       setTileAt(b.x, b.y, 9, 16);
       pavedTiles.insert(b);
     }
-    
-    setTileAt(exitX, radius, 3, 17);
+
+    northExitLocation = Vec2i(exitX, radius);
   }
 
   if (eW) {
@@ -117,7 +122,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
       pavedTiles.insert(b);
     }
 
-    setTileAt(-radius, exitY, 1, 16);
+    westExitLocation = Vec2i(-radius, exitY);
   }
   
   if (eS) {
@@ -127,8 +132,8 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
       setTileAt(b.x, b.y, 9, 16);
       pavedTiles.insert(b);
     }
-    
-    setTileAt(exitX, -radius, 3, 17);
+
+    southExitLocation = Vec2i(exitX, -radius);
   }
 
   setTileAt(cx, cy, 2, 15); // plus
@@ -155,8 +160,8 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
     Vec2i nearestPos;
     
     for (int i = 0; i < 16; ++i) {
-      int rx = randomrange(-radius, radius + 1);
-      int ry = randomrange(-radius, radius + 1);
+      int rx = randomrange(-radius + 1, radius);
+      int ry = randomrange(-radius + 1, radius);
 
       Vec2i rPos = Vec2i(rx, ry);
       Vec2i nearPos = findNearestPos(rPos, pavedTiles);
@@ -173,15 +178,22 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
       setTileAt(hackTile.x, hackTile.y, 9, 16);
     }
   }
-
-  /*
-  printf("desired Num buildings: %d\n", desiredNumBuildings);
-  printf("populated people: %d\n", (int)peoplePosns.size());
-  printf("passes used: %d\n", passesUsed);
-  for (Vec2i ppos : peoplePosns) {
-    printf("pos: %d %d\n", ppos.x, ppos.y);
+  
+  if (eE) {
+    setTileAt(eastExitLocation.x, eastExitLocation.y, 1, 16);
   }
-  */
+
+  if (eN) {
+    setTileAt(northExitLocation.x, northExitLocation.y, 3, 17);
+  }
+
+  if (eW) {
+    setTileAt(westExitLocation.x, westExitLocation.y, 1, 16);
+  }
+  
+  if (eS) {
+    setTileAt(southExitLocation.x, southExitLocation.y, 3, 17);
+  }
 
   std::vector<Vec2i> personTiles = {
     Vec2i(24, 0),
@@ -198,6 +210,159 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
     
     setTileAt(personPosn.x, personPosn.y,
 	      pt.x, pt.y);
+  }
+
+  std::set<Vec2i> bldgReservedLocs = pavedTiles;
+
+  for (Vec2i personPosn : peoplePosns) {
+    std::vector<Vec2i> sizeCandidates;
+
+    for (int w = 2; w < 5; ++w) {
+      for (int h = 2; h < 4; ++h) {
+	sizeCandidates.push_back(Vec2i(w,h));
+      }
+    }
+
+    unsigned int seed = makeSeedKey(personPosn.x,
+				    personPosn.y,
+				    int(peoplePosns.size()),
+				    "BUILDING SIZE SHUFFLE");
+    
+    std::shuffle(sizeCandidates.begin(),
+		 sizeCandidates.end(),
+		 std::default_random_engine(seed));
+
+    bool placed = false;
+    for (Vec2i sz : sizeCandidates) {
+      int w = sz.x;
+      int h = sz.y;
+      for (int dx = -w+1; dx < w; ++dx) {
+	for (int dy = -h+1; dy < h; ++dy) {
+	  if (canPlaceBuilding(personPosn.x + dx,
+			       personPosn.y + dy,
+			       w, h,
+			       bldgReservedLocs,
+			       radius)) {
+	    placeBuilding(personPosn.x + dx,
+			  personPosn.y + dy,
+			  w, h);
+
+	    for (int resX = personPosn.x + dx - 1; resX <= personPosn.x + dx + w; ++resX) {
+	      for (int resY = personPosn.y + dy - 1; resY <= personPosn.y + dy + h; ++resY) {
+		bldgReservedLocs.insert(Vec2i(resX, resY));
+	      }
+	    }
+	    placed = true;
+	    break;
+	  }
+	}
+	if (placed) {
+	  break;
+	}
+      }
+      if (placed) {
+	break;
+      }
+    }
+  }
+
+  m_pavedLocations = pavedTiles;
+  m_cityCenter = Vec2i(cx, cy);
+}
+
+bool CityMap::canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> pavedSet, int cityRadius)
+{
+  for (int tx = 0; tx < w; ++tx) {
+    int nx = x + tx;
+    if ((nx < -cityRadius) || (nx > cityRadius)) {
+      return false;
+    }
+    for (int ty = 0; ty < h; ++ty) {
+      int ny = y + ty;
+      if ((ny < -cityRadius) || (ny > cityRadius)) {
+	return false;
+      }
+      Vec2i nv = Vec2i(nx, ny);
+      if (pavedSet.find(nv) != pavedSet.end()) {
+	return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+void CityMap::placeBuilding(int x, int y, int w, int h)
+{
+  int tileOffX = randomrange(0, 2) * 3;
+  int tileOffY = randomrange(0, 2) * 4;
+  
+  for (int nx = 0; nx < w; ++nx) {
+    for (int ny = 0; ny < h; ++ny) {
+      int bx = nx + x;
+      int by = ny + y;
+	
+      if (nx == 0) {
+	if (ny == 0) {
+	  setTileAt(bx, by, 17+tileOffX, 3+tileOffY);
+	}
+	else if (ny + 1 == h) {
+	  setTileAt(bx, by, 17+tileOffX, 0+tileOffY);
+	}
+	else {
+	  setTileAt(bx, by, 17+tileOffX, 2+tileOffY);
+	}
+      }
+      else if (nx + 1 == w) {
+	if (ny == 0) {
+	  setTileAt(bx, by, 19+tileOffX, 3+tileOffY);
+	}
+	else if (ny + 1 == h) {
+	  setTileAt(bx, by, 19+tileOffX, 0+tileOffY);
+	}
+	else {
+	  setTileAt(bx, by, 19+tileOffX, 2+tileOffY);
+	}
+      }
+      else {
+	if (ny == 0) {
+	  setTileAt(bx, by, 18+tileOffX, 3+tileOffY);
+	}
+	else if (ny + 1 == h) {
+	  setTileAt(bx, by, 18+tileOffX, 0+tileOffY);
+	}
+	else {
+	  setTileAt(bx, by, 18+tileOffX, 2+tileOffY);
+	}
+      }
+    }
+  }
+
+  std::vector<Vec2i> doorVec = {
+    Vec2i(11, 10),
+    Vec2i(12, 10),
+    Vec2i(13, 10),
+    Vec2i(14, 10),
+    Vec2i(15, 10),
+    Vec2i(11, 11),
+    Vec2i(12, 11),
+    Vec2i(13, 11),
+    Vec2i(14, 11),
+    Vec2i(15, 11),
+    Vec2i(15, 12),
+  };
+
+  int di = randomrange(0, doorVec.size());
+  Vec2i dt = doorVec[di];
+    
+  if (w > 2) {
+    setTileAt(x + randomrange(1, w-1),
+	      y,
+	      dt.x, dt.y);
+  } else {
+    setTileAt(x + randomrange(0, 2),
+	      y,
+	      dt.x, dt.y);
   }
 }
 
@@ -370,4 +535,9 @@ std::vector<Vec2i> CityMap::makePeoplePosns(std::set<Vec2i> pavedTiles,
     }
   }
   return outPosns;
+}
+
+bool CityMap::isLocationPaved(Vec2i loc)
+{
+  return (m_pavedLocations.find(loc) != m_pavedLocations.end());
 }

@@ -78,6 +78,7 @@ private:
 
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_citySprite;
+  olc::Sprite* m_carSprite;
   
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;

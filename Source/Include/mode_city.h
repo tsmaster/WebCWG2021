@@ -22,7 +22,7 @@ class CityGameMode
  public:
   CityGameMode();
 
-  void init(olc::Sprite *menuSprite, olc::Sprite *citySprite);
+  void init(olc::Sprite* menuSprite, olc::Sprite* citySprite, olc::Sprite* carSprite);
 
   void destroy();
 
@@ -43,6 +43,8 @@ protected:
   void move(int x, int y);
 
   void rebuildDisplay();
+
+  void drawCar(CarsWithGuns* game);
 private:
   City m_city = City(0, 0);
   Coord m_centerCoord;
@@ -54,8 +56,13 @@ private:
   CityMap m_cityMap;
 
   PopupDialog m_popupLocationPanel;
+  
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_citySprite;
+  olc::Sprite* m_carSprite;
+
+  int m_carHeading; // 0 = east, 2 = north, 4 = west, 6 = south
+  Vec2i m_carPos;
 };
 
 #endif // MODE_CITY_H

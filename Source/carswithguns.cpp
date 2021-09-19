@@ -202,6 +202,8 @@ bool CarsWithGuns::OnUserCreate()
 
   m_citySprite = new olc::Sprite("Assets/Sprites/kenney_rpgurbanpack/Tilemap/tilemap_32.png");
 
+  m_carSprite = new olc::Sprite("Assets/Sprites/WhiteCar/white-car-sprite.png");
+
   setGameMode(GameMode::GM_BDG);
 
   return true;
@@ -469,7 +471,7 @@ bool CarsWithGuns::updateHighwayMode(float elapsedSeconds)
 
 void CarsWithGuns::initCityMode()
 {
-  m_cityGameMode.init(m_menuSprite, m_citySprite);
+  m_cityGameMode.init(m_menuSprite, m_citySprite, m_carSprite);
 }
 
 void CarsWithGuns::destroyCityMode()

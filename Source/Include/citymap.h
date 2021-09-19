@@ -20,6 +20,11 @@ class CityMap
   void destroy();
 
   void draw(CarsWithGuns* game);
+
+  bool isLocationPaved(Vec2i loc);
+
+  Vec2i getCityCenterLocn() { return m_cityCenter; }
+  
   
  protected:
   int radiusForPopulation(int population);
@@ -34,11 +39,22 @@ class CityMap
 
   Vec2i findNearestPos(Vec2i p, std::set<Vec2i> posSet);
 
+  bool canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> pavedSet, int cityRadius);
+
+  void placeBuilding(int x, int y, int w, int h);
+  
+
+ private:
+  
   std::map<Vec2i, Vec2i> m_tileMap;
   olc::Sprite* m_citySprite;
- private:
+
   int m_x;
   int m_y;
+
+  Vec2i m_cityCenter;
+
+  std::set<Vec2i> m_pavedLocations;
 };
 
 #endif // citymap_h
