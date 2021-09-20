@@ -24,7 +24,9 @@ class CityMap
   bool isLocationPaved(Vec2i loc);
 
   Vec2i getCityCenterLocn() { return m_cityCenter; }
-  
+
+  Vec2f screenToTileCoord(CarsWithGuns* game, Vec2f screenCoord);
+  Vec2f tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord);
   
  protected:
   int radiusForPopulation(int population);

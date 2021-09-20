@@ -453,6 +453,25 @@ void CityMap::draw(CarsWithGuns* game)
   game->SetPixelMode(currentPixelMode);
 }
 
+Vec2f CityMap::screenToTileCoord(CarsWithGuns* game, Vec2f screenCoord)
+{
+  int scx = 320;
+  int scy = 240;
+
+  return Vec2f((screenCoord.x - scx) / 16.0f,
+	       -(screenCoord.y - scy) / 16.0f);
+
+}
+
+Vec2f CityMap::tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord)
+{
+  int scx = 320;
+  int scy = 240;
+  
+  return Vec2f(scx + 16 * tileCoord.x,
+	       scy - 16 * tileCoord.y);
+}
+
 std::vector<Vec2i> generateCoordsInEuclideanRadius(Vec2i center, float radius)
 {
   int cx = center.x;

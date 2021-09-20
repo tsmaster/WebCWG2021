@@ -28,6 +28,9 @@ void CityGameMode::init(olc::Sprite* menuSprite,
   m_citySprite = citySprite;
   m_carSprite = carSprite;
   m_carPos = Vec2i(0, 0);
+
+  m_isFindingPath = false;
+  m_isFollowingPath = false;
 }
 
 void CityGameMode::destroy()
@@ -41,6 +44,47 @@ void CityGameMode::destroy()
 
 bool CityGameMode::update(CarsWithGuns* game, float elapsedSeconds)
 {
+  if (m_isFindingPath) {
+    printf("tick\n");
+
+    for (int i = 0; i < 10; ++i) {
+      bool isComplete = m_astar.tick();
+      if (isComplete) {
+	m_isFindingPath = false;
+	m_isFollowingPath = true;
+	m_path = m_astar.getSolution();
+	m_timeRemainingBeforeMove = m_timeToMove;
+	break;
+      }
+    }
+  }
+
+  if (m_isFollowingPath) {
+    if (m_path.size() == 0) {
+      m_isFollowingPath = false;
+    } else {
+      if (elapsedSeconds >= m_timeRemainingBeforeMove) {
+      
+	Vec2i nextPosn = m_path[0];
+	m_path.erase(m_path.begin());
+      
+	//printf("moving to %d %d\n", nextPosn.x, nextPosn.y);
+
+	int dx = nextPosn.x - m_carPos.x;
+	int dy = nextPosn.y - m_carPos.y;
+	if ((dx == 0) && (dy == 0)) {
+	  //printf("actually not moving\n");
+	} else {
+	  move(dx, dy);
+	}
+
+	m_timeRemainingBeforeMove = m_timeToMove;
+      } else {
+	m_timeRemainingBeforeMove -= elapsedSeconds;
+      }
+    }
+  }
+  
   bool bContinue = handleUserInput(game);
   
   return bContinue;
@@ -131,6 +175,40 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
     printf("center: %s\n", m_centerCoord.toString().c_str());
   }
 
+  if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
+    int mx = game->GetMouseX();
+    int my = game->GetMouseY();
+
+    Vec2f tileDestFloat = screenToTileCoord(game, Vec2f(mx, my));
+    printf("nav to <%f %f>\n", tileDestFloat.x, tileDestFloat.y);
+    m_destTile = Vec2i(int(floor(tileDestFloat.x)),
+		       int(floor(tileDestFloat.y + 0.9f))); // TODO fix this hack
+
+    if (m_cityMap.isLocationPaved(m_destTile)) {
+      printf("nav to int <%d %d>\n", m_destTile.x, m_destTile.y);
+
+      std::set<Vec2i> destSet;
+      destSet.insert(m_destTile);
+
+      auto expandFunc = [=](Vec2i v){return expandPosn(v);};
+      m_astar = bdg_astar::AStar();
+      m_astar.requestPath(m_carPos,
+			  destSet,
+			  expandFunc);
+      m_isFindingPath = true;
+      m_isFollowingPath = false;
+    } else {
+      printf("not valid dest <%f %f> <%d %d>\n",
+	     tileDestFloat.x,
+	     tileDestFloat.y,
+	     m_destTile.x,
+	     m_destTile.y);
+      
+      m_isFindingPath = false;
+      m_isFollowingPath = false;
+    }
+  }  
+
   if (bTicked) {
     m_gameClock->increment();
   }
@@ -183,6 +261,18 @@ void CityGameMode::draw(CarsWithGuns* game)
 
   m_cityMap.draw(game);
 
+  if (m_isFollowingPath) {
+    for (Vec2i pathpos : m_path) {
+      drawPathPos(game, pathpos);
+    }
+  }
+
+  if (m_isFindingPath) {
+    drawCursor(game, 0);
+  } else if (m_isFollowingPath) {
+    drawCursor(game, 1);
+  }
+  
   drawCar(game);
 
   m_popupLocationPanel.draw(4, 4, game, m_menuSprite);  
@@ -211,67 +301,65 @@ void CityGameMode::drawCar(CarsWithGuns* game)
   game->SetPixelMode(currentPixelMode);
 }
 
+void CityGameMode::drawCursor(CarsWithGuns* game, int cursorStyle)
+{
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  int scx = 320;
+  int scy = 240;
+  
+  Vec2i wc = m_destTile;
+
+  Vec2i tc;
+  if (cursorStyle == 0) {
+    tc = Vec2i(10, 16);
+  } else {
+    tc = Vec2i(2, 15);
+  }
+
+  olc::vi2d vScreenLocation = { scx + 16 * wc.x, scy - 16 * wc.y };
+  olc::vi2d vTileLocation = {tc.x * 16, tc.y * 16};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_citySprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+}
+
+void CityGameMode::drawPathPos(CarsWithGuns* game, Vec2i pathPos)
+{
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  int scx = 320;
+  int scy = 240;
+  
+  Vec2i wc = pathPos;
+
+  Vec2i tc = Vec2i(10, 17);
+
+  olc::vi2d vScreenLocation = { scx + 16 * wc.x, scy - 16 * wc.y };
+  olc::vi2d vTileLocation = {tc.x * 16, tc.y * 16};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_citySprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+}
+
+
 
 Vec2f CityGameMode::screenToTileCoord(CarsWithGuns* game, Vec2f screenCoord)
 {
-  // When sc is 0, 0, there is a scale x scale unit box centered
-  // at the center of the screen.
-
-  float screenX = screenCoord.x;
-  float screenY = screenCoord.y;
-
-  int sw = game->ScreenWidth();
-  int sh = game->ScreenHeight();
-
-  float screenCenterX = sw / 2.0f;
-  float screenCenterY = sh / 2.0f;
-
-  int cameraX = m_centerCoord.x;
-  int cameraY = m_centerCoord.y;
-
-  float worldOriginScreenX = screenCenterX -
-    cameraX * m_tileScale -
-    m_tileScale / 2.0f;
-
-  float worldOriginScreenY = screenCenterY +
-    cameraY * m_tileScale +
-    m_tileScale / 2.0f;
-
-  float tx = (screenX - worldOriginScreenX) / m_tileScale;
-  float ty = (worldOriginScreenY - screenY) / m_tileScale;
-
-  return Vec2f(tx, ty);
+  return m_cityMap.screenToTileCoord(game, screenCoord);
 }
 
 Vec2f CityGameMode::tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord)
 {
-  // When screen center is 0, 0, there is a scale x scale unit box centered
-  // at the center of the screen.
-  
-  float tileX = tileCoord.x;
-  float tileY = tileCoord.y;
-  
-  int sw = game->ScreenWidth();
-  int sh = game->ScreenHeight();
-
-  float screenCenterX = sw / 2.0f;
-  float screenCenterY = sh / 2.0f;
-
-  int cameraX = m_centerCoord.x;
-  int cameraY = m_centerCoord.y;
-
-  float worldOriginScreenX = screenCenterX -
-    cameraX * m_tileScale -
-    m_tileScale / 2.0f;
-
-  float worldOriginScreenY = screenCenterY +
-    cameraY * m_tileScale +
-    m_tileScale / 2.0f;
-
-  float sx = worldOriginScreenX + tileX * m_tileScale;
-  float sy = worldOriginScreenY - tileY * m_tileScale;
-
-  return Vec2f(sx, sy);
+  return m_cityMap.tileToScreenCoord(game, tileCoord);
 }
 
 void CityGameMode::setCity(City c)
@@ -313,4 +401,24 @@ void CityGameMode::rebuildDisplay()
   
   std::vector<ButtonDesc> buttons;
   m_popupLocationPanel.build(msg, buttons);
+}
+
+std::vector<bdg_astar::Link> CityGameMode::expandPosn(Vec2i posn)
+{
+  std::vector<bdg_astar::Link> outLinks;
+
+  std::vector<Vec2i> deltas = {
+    Vec2i(-1, 0),
+    Vec2i(1, 0),
+    Vec2i(0, -1),
+    Vec2i(0, 1)};
+
+  for (Vec2i delta: deltas) {
+    Vec2i nPos = posn + delta;
+    if (m_cityMap.isLocationPaved(nPos)) {
+      outLinks.push_back(bdg_astar::Link(nPos, 1.0f));
+    }
+  }    
+  
+  return outLinks;
 }

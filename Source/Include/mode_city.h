@@ -7,6 +7,7 @@
 
 #include "bdg_math.h"
 
+#include "astar.h"
 #include "city.h"
 #include "citymap.h"
 #include "coord.h"
@@ -45,6 +46,12 @@ protected:
   void rebuildDisplay();
 
   void drawCar(CarsWithGuns* game);
+
+  void drawCursor(CarsWithGuns* game, int cursorStyle);
+
+  void drawPathPos(CarsWithGuns* game, Vec2i pathPos);
+
+  std::vector<bdg_astar::Link> expandPosn(Vec2i posn);
 private:
   City m_city = City(0, 0);
   Coord m_centerCoord;
@@ -63,6 +70,16 @@ private:
 
   int m_carHeading; // 0 = east, 2 = north, 4 = west, 6 = south
   Vec2i m_carPos;
+
+  bdg_astar::AStar m_astar;
+  bool m_isFindingPath;
+  bool m_isFollowingPath;
+  std::vector<Vec2i> m_path;
+
+  Vec2i m_destTile;
+
+  float m_timeToMove = 0.2f;
+  float m_timeRemainingBeforeMove;
 };
 
 #endif // MODE_CITY_H
