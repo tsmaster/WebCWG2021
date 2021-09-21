@@ -180,12 +180,12 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
     int my = game->GetMouseY();
 
     Vec2f tileDestFloat = screenToTileCoord(game, Vec2f(mx, my));
-    printf("nav to <%f %f>\n", tileDestFloat.x, tileDestFloat.y);
+    //printf("nav to <%f %f>\n", tileDestFloat.x, tileDestFloat.y);
     m_destTile = Vec2i(int(floor(tileDestFloat.x)),
 		       int(floor(tileDestFloat.y + 0.9f))); // TODO fix this hack
 
     if (m_cityMap.isLocationPaved(m_destTile)) {
-      printf("nav to int <%d %d>\n", m_destTile.x, m_destTile.y);
+      //printf("nav to int <%d %d>\n", m_destTile.x, m_destTile.y);
 
       std::set<Vec2i> destSet;
       destSet.insert(m_destTile);
@@ -194,16 +194,18 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
       m_astar = bdg_astar::AStar();
       m_astar.requestPath(m_carPos,
 			  destSet,
-			  expandFunc);
+			  expandFunc,
+			  32);
       m_isFindingPath = true;
       m_isFollowingPath = false;
     } else {
+      /*
       printf("not valid dest <%f %f> <%d %d>\n",
 	     tileDestFloat.x,
 	     tileDestFloat.y,
 	     m_destTile.x,
 	     m_destTile.y);
-      
+      */
       m_isFindingPath = false;
       m_isFollowingPath = false;
     }
@@ -252,12 +254,6 @@ void CityGameMode::draw(CarsWithGuns* game)
     int sy = int(projVec.y);
     game->DrawLine(0, sy, sw, sy, lineColor);
   }
-
-  olc::Pixel crossHairsColor = olc::Pixel(125, 0, 0);
-  game->DrawLine(pcx - 5, pcy,
-		pcx + 5, pcy, crossHairsColor);
-  game->DrawLine(pcx, pcy - 5,
-		pcx, pcy + 5, crossHairsColor);
 
   m_cityMap.draw(game);
 

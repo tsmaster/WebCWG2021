@@ -17,6 +17,10 @@ class Vec2f
  public:
   Vec2f(float x, float y);
 
+  Vec2f operator+ (const Vec2f& other) const { return Vec2f(x + other.x,
+							    y + other.y); }
+
+  
   float x;
   float y;
 };
@@ -38,7 +42,7 @@ class Vec2i
 							(y == other.y)); }
 
   Vec2i operator+ (const Vec2i& other) const { return Vec2i(x + other.x,
-							     y + other.y); }
+							    y + other.y); }
 
   float distEuclid(const Vec2i& other) const;
 

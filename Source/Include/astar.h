@@ -23,7 +23,7 @@ class SearchNode {
 
   float getTotalCost() { return elapsedCost + heuristicCost; }
 
-  static bool cmp(SearchNode left, SearchNode right) { return left.getTotalCost() < right.getTotalCost(); };
+  static bool cmp(SearchNode left, SearchNode right) { return left.getTotalCost() > right.getTotalCost(); };
 
   bool operator < (const SearchNode& other) const {return SearchNode::cmp(*this, other);}
 };
@@ -39,7 +39,8 @@ class AStar {
   
   void requestPath(Vec2i startPosn,
 		   std::set<Vec2i> destinations,
-		   std::function<std::vector<Link>(Vec2i)> expand);
+		   std::function<std::vector<Link>(Vec2i)> expand,
+		   int maxLen);
 
   bool tick();
 
@@ -50,13 +51,16 @@ class AStar {
   float calcShortestHeuristic(Vec2i startPos);
   int findResult(Vec2i pos);
 
+  int countLengthForNode(SearchNode& n);
+
  private:
   std::set<Vec2i> m_destinations;
 
   std::vector<SearchNode> m_bestResults;
-  std::function<std::vector<Link>(Vec2i)>  m_expandFunc;
+  std::function<std::vector<Link>(Vec2i)> m_expandFunc;
 
   SearchPQueue m_searchQueue;
+  int m_maxLen;
 
   float m_solutionLength;
   int m_endingIndex;

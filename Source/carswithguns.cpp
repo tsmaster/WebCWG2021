@@ -448,7 +448,7 @@ void CarsWithGuns::destroyMainMenuMode()
 
 void CarsWithGuns::initHighwayMode()
 {
-  m_highwayGameMode.init(m_menuSprite);
+  m_highwayGameMode.init(m_menuSprite, m_carSprite);
 }
 
 void CarsWithGuns::destroyHighwayMode()

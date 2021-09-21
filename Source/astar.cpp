@@ -1,6 +1,5 @@
 #include "astar.h"
 
-
 using namespace bdg_astar;
 
 AStar::AStar()
@@ -11,11 +10,13 @@ AStar::AStar()
 
 void AStar::requestPath(Vec2i startPosn,
 			std::set<Vec2i> destinations,
-			std::function<std::vector<Link>(Vec2i)> expand)
+			std::function<std::vector<Link>(Vec2i)> expand,
+			int maxLen)
 {
   m_bestResults.clear();
   m_destinations = destinations;
   m_expandFunc = expand;
+  m_maxLen = maxLen;
 
   float h = calcShortestHeuristic(startPosn);
   SearchNode startNode;
@@ -36,6 +37,15 @@ int AStar::findResult(Vec2i pos) {
   return -1;
 }
 
+int AStar::countLengthForNode(SearchNode& n)
+{
+  if (n.prevResultIndex == -1) {
+    return 1;
+  }
+
+  return countLengthForNode(m_bestResults[n.prevResultIndex]) + 1;
+}
+
 bool AStar::tick()
 {
   if (m_searchQueue.size() == 0) {
@@ -44,6 +54,11 @@ bool AStar::tick()
   
   SearchNode n = m_searchQueue.top();
   m_searchQueue.pop();
+
+  int pathLen = countLengthForNode(n);
+  if (pathLen > m_maxLen) {
+    return false;
+  }
 
   Vec2i currentPos = n.currentPos;
   int currentResultIndex = findResult(currentPos);

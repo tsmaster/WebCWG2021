@@ -17,12 +17,15 @@ HighwayGameMode::HighwayGameMode()
   m_viewRadius = START_VIEW_RADIUS;
 }
 
-void HighwayGameMode::init(olc::Sprite* menuSprite)
+void HighwayGameMode::init(olc::Sprite* menuSprite, olc::Sprite* carSprite)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
   m_nodeMgr = new NodeMgr(BASE_CACHE_SIZE, m_gameClock);
   m_menuSprite = menuSprite;
+  m_carSprite = carSprite;
+  m_carPos = Vec2f(0.0f, 0.0f);
+  m_carHeading = 0;
 }
 
 void HighwayGameMode::destroy()
@@ -41,6 +44,45 @@ bool HighwayGameMode::update(CarsWithGuns* pge, float elapsedSeconds)
 
   if (modeSwitched) {
     return true;
+  }
+
+  if (m_isFindingPath) {
+    for (int i = 0; i < 10; ++i) {
+      bool isComplete = m_astar.tick();
+      if (isComplete) {
+	m_isFindingPath = false;
+	m_isFollowingPath = true;
+	m_path = m_astar.getSolution();
+	m_timeRemainingBeforeMove = m_timeToMove;
+	break;
+      }
+    }
+  }
+
+  if (m_isFollowingPath) {
+    if (m_path.size() == 0) {
+      m_isFollowingPath = false;
+    } else {
+      if (elapsedSeconds >= m_timeRemainingBeforeMove) {
+      
+	Vec2i nextPosn = m_path[0];
+	m_path.erase(m_path.begin());
+
+	int dx = nextPosn.x - m_carPos.x;
+	int dy = nextPosn.y - m_carPos.y;
+	if ((dx == 0) && (dy == 0)) {
+	  //printf("actually not moving\n");
+	} else {
+	  //printf ("moving on path dx %d dy %d\n", dx, dy);
+	  move(dx, dy);
+	  m_gameClock->increment();
+	}
+
+	m_timeRemainingBeforeMove = m_timeToMove;
+      } else {
+	m_timeRemainingBeforeMove -= elapsedSeconds;
+      }
+    }
   }
 
   float vrSqr = m_viewRadius * m_viewRadius;
@@ -73,7 +115,21 @@ void HighwayGameMode::move(int dx, int dy)
   int nx = cx + dx;
   int ny = cy + dy;
 
+  if (dx == 1) {
+    m_carHeading = 0;
+  }
+  else if (dx == -1) {
+    m_carHeading = 4;
+  }
+  else if (dy == 1) {
+    m_carHeading = 2;
+  }
+  else if (dy == -1) {
+    m_carHeading = 6;
+  }
+
   m_centerCoord = Coord(nx, ny, 0);
+  m_carPos = Vec2f(nx, ny);
 
   Node* centerNode = m_nodeMgr->getNode(m_centerCoord, TileLayer::H0_FINAL);
   if (centerNode->isCity()) {
@@ -104,7 +160,7 @@ bool HighwayGameMode::tryEnterCity(CarsWithGuns* game)
     mcr.y = m_centerCoord.y;
     mcr.population = c->getPopulation();
 
-    PaveDirSet pavedDirs = centerNode->getSelfPavedDirs();
+    PaveDirSet pavedDirs = centerNode->getSelfPavedDirsH0();
     
     mcr.exitEast = pavedDirs.find(0) != pavedDirs.end();
     mcr.exitNorth = pavedDirs.find(1) != pavedDirs.end();;
@@ -177,11 +233,67 @@ bool HighwayGameMode::handleUserInput(CarsWithGuns* game, bool& outSwitched)
     printf("center: %s\n", m_centerCoord.toString().c_str());
   }
 
+  if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
+    int mx = game->GetMouseX();
+    int my = game->GetMouseY();
+
+    Vec2f tileDestFloat = screenToTileCoord(game, Vec2f(mx, my));
+
+    m_destTile = Vec2i(int(floor(tileDestFloat.x)),
+		       int(floor(tileDestFloat.y)));
+
+    printf("dest tile: %d %d\n", m_destTile.x, m_destTile.y);
+    
+    std::set<Vec2i> destSet;
+    destSet.insert(m_destTile);
+
+    auto expandFunc = [=](Vec2i v){return expandPosn(v);};
+    m_astar = bdg_astar::AStar();
+    Vec2i intCarPos = Vec2i(int(m_carPos.x),
+			    int(m_carPos.y));
+    m_astar.requestPath(intCarPos,
+			destSet,
+			expandFunc,
+			80);
+    m_isFindingPath = true;
+    m_isFollowingPath = false;
+  }    
+
   if (bTicked) {
     m_gameClock->increment();
   }
 
   return bContinue;
+}
+
+std::vector<bdg_astar::Link> HighwayGameMode::expandPosn(Vec2i posn)
+{
+  const float ROAD_COST = 1;
+  const float OFFROAD_COST = 1000;
+  
+  std::vector<bdg_astar::Link> outLinks;
+
+  Node* centerNode = m_nodeMgr->getNode(Coord(posn.x, posn.y, 0), TileLayer::H0_ROAD);
+
+  PaveDirSet nodePDS = centerNode->getSelfPavedDirsH0();
+
+  bdg_astar::Link eastLink = bdg_astar::Link(Vec2i(posn.x + 1, posn.y), 
+					     (nodePDS.find(0) != nodePDS.end()) ? ROAD_COST : OFFROAD_COST);
+  outLinks.push_back(eastLink);
+  
+  bdg_astar::Link northLink = bdg_astar::Link(Vec2i(posn.x, posn.y + 1), 
+					      (nodePDS.find(1) != nodePDS.end()) ? ROAD_COST : OFFROAD_COST);
+  outLinks.push_back(northLink);
+  
+  bdg_astar::Link westLink = bdg_astar::Link(Vec2i(posn.x - 1, posn.y), 
+					     (nodePDS.find(2) != nodePDS.end()) ? ROAD_COST : OFFROAD_COST);
+  outLinks.push_back(westLink);
+  
+  bdg_astar::Link southLink = bdg_astar::Link(Vec2i(posn.x, posn.y - 1), 
+					      (nodePDS.find(3) != nodePDS.end()) ? ROAD_COST : OFFROAD_COST);
+  outLinks.push_back(southLink);
+  
+  return outLinks;
 }
 
 void HighwayGameMode::draw(CarsWithGuns* pge)
@@ -224,24 +336,43 @@ void HighwayGameMode::draw(CarsWithGuns* pge)
   std::vector<Node *> nodeVec = m_nodeMgr->getNodes();
 
   for (Node* n : nodeVec) {
-    //printf("Drawing node at coord %s\n", n->getCoord()->toString().c_str());
     n->draw(pge, this);
   }
+
+  drawCar(pge);
 
   for (Node* n : nodeVec) {
     n->drawLabel(pge, this);
   }
 
-  olc::Pixel crossHairsColor = olc::Pixel(125, 0, 0);
-  pge->DrawLine(pcx - 5, pcy,
-		pcx + 5, pcy, crossHairsColor);
-  pge->DrawLine(pcx, pcy - 5,
-		pcx, pcy + 5, crossHairsColor);
-
-
   m_popupLocationPanel.draw(4, 4, pge, m_menuSprite);  
 }
 
+void HighwayGameMode::drawCar(CarsWithGuns* game)
+{
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, m_carPos);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, m_carPos + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(16 * (m_carHeading & 0x3),
+		   16 * (m_carHeading / 4));
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_carSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+}
 
 Vec2f HighwayGameMode::screenToTileCoord(CarsWithGuns* pge, Vec2f screenCoord)
 {
