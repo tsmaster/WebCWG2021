@@ -31,6 +31,7 @@ void CityGameMode::init(olc::Sprite* menuSprite,
 
   m_isFindingPath = false;
   m_isFollowingPath = false;
+  m_cityMap = CityMap();
 }
 
 void CityGameMode::destroy()
@@ -45,8 +46,6 @@ void CityGameMode::destroy()
 bool CityGameMode::update(CarsWithGuns* game, float elapsedSeconds)
 {
   if (m_isFindingPath) {
-    printf("tick\n");
-
     for (int i = 0; i < 10; ++i) {
       bool isComplete = m_astar.tick();
       if (isComplete) {
@@ -181,6 +180,7 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
 
     Vec2f tileDestFloat = screenToTileCoord(game, Vec2f(mx, my));
     //printf("nav to <%f %f>\n", tileDestFloat.x, tileDestFloat.y);
+
     m_destTile = Vec2i(int(floor(tileDestFloat.x)),
 		       int(floor(tileDestFloat.y + 0.9f))); // TODO fix this hack
 
@@ -195,19 +195,35 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
       m_astar.requestPath(m_carPos,
 			  destSet,
 			  expandFunc,
-			  32);
+			  64);
       m_isFindingPath = true;
       m_isFollowingPath = false;
     } else {
-      /*
-      printf("not valid dest <%f %f> <%d %d>\n",
-	     tileDestFloat.x,
-	     tileDestFloat.y,
-	     m_destTile.x,
-	     m_destTile.y);
-      */
-      m_isFindingPath = false;
-      m_isFollowingPath = false;
+      int buildingIndex = findBuilding(m_destTile.x, m_destTile.y);
+      if (buildingIndex >= 0) {
+	printf("nav to building %d\n", buildingIndex);
+
+	std::set<Vec2i> destSet = getDestinationsForBuilding(buildingIndex);
+
+	auto expandFunc = [=](Vec2i v){return expandPosn(v);};
+	       m_astar = bdg_astar::AStar();
+	       m_astar.requestPath(m_carPos,
+				   destSet,
+				   expandFunc,
+				   64);
+	       m_isFindingPath = true;
+	       m_isFollowingPath = false;
+      }  else {
+	/*
+	  printf("not valid dest <%f %f> <%d %d>\n",
+	  tileDestFloat.x,
+	  tileDestFloat.y,
+	  m_destTile.x,
+	  m_destTile.y);
+	*/
+	m_isFindingPath = false;
+	m_isFollowingPath = false;
+      }
     }
   }  
 
@@ -417,4 +433,51 @@ std::vector<bdg_astar::Link> CityGameMode::expandPosn(Vec2i posn)
   }    
   
   return outLinks;
+}
+
+int CityGameMode::findBuilding(int wx, int wy)
+{
+  std::vector<Building> buildings = m_cityMap.getBuildings();
+  
+  for (int i = 0; i < buildings.size(); ++i) {
+    Building bldg = buildings[i];
+
+    if ((wx >= bldg.x) &&
+	(wy >= bldg.y) &&
+	(wx < bldg.x + bldg.width) &&
+	(wy < bldg.y + bldg.height)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+std::set<Vec2i> CityGameMode::getDestinationsForBuilding(int buildingIndex)
+{
+  std::set<Vec2i> outSet;
+  Building b = m_cityMap.getBuildings()[buildingIndex];
+
+  for (int x = b.x; x < b.x + b.width; ++x){
+    Vec2i nPos(x, b.y - 1);
+    if (m_cityMap.isLocationPaved(nPos)) {
+      outSet.insert(nPos);
+    }
+    nPos = Vec2i(x, b.y + b.height);
+    if (m_cityMap.isLocationPaved(nPos)) {
+      outSet.insert(nPos);
+    }
+  }
+
+  for (int y = b.y; y < b.y + b.height; ++y){
+    Vec2i nPos(b.x - 1, y);
+    if (m_cityMap.isLocationPaved(nPos)) {
+      outSet.insert(nPos);
+    }
+    nPos = Vec2i(b.x + b.width, y);
+    if (m_cityMap.isLocationPaved(nPos)) {
+      outSet.insert(nPos);
+    }
+  }
+
+  return outSet;
 }

@@ -12,6 +12,12 @@
 
 class CarsWithGuns;
 
+class Building
+{
+public:
+  int x, y, width, height;
+};
+
 class CityMap
 {
  public:
@@ -27,6 +33,8 @@ class CityMap
 
   Vec2f screenToTileCoord(CarsWithGuns* game, Vec2f screenCoord);
   Vec2f tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord);
+
+  std::vector<Building> getBuildings() { return m_buildings; }
   
  protected:
   int radiusForPopulation(int population);
@@ -44,7 +52,6 @@ class CityMap
   bool canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> pavedSet, int cityRadius);
 
   void placeBuilding(int x, int y, int w, int h);
-  
 
  private:
   
@@ -57,6 +64,8 @@ class CityMap
   Vec2i m_cityCenter;
 
   std::set<Vec2i> m_pavedLocations;
+
+  std::vector<Building> m_buildings;
 };
 
 #endif // citymap_h

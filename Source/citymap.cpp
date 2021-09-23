@@ -289,6 +289,14 @@ bool CityMap::canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> paved
     }
   }
 
+  Building newBuilding;
+  newBuilding.x = x;
+  newBuilding.y = y;
+  newBuilding.width = w;
+  newBuilding.height = h;
+
+  m_buildings.push_back(newBuilding);
+
   return true;
 }
 

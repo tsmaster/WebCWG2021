@@ -10,6 +10,7 @@
 #include "astar.h"
 #include "city.h"
 #include "citymap.h"
+#include "constants.h"
 #include "coord.h"
 #include "gameclock.h"
 #include "nodemgr.h"
@@ -52,6 +53,10 @@ protected:
   void drawPathPos(CarsWithGuns* game, Vec2i pathPos);
 
   std::vector<bdg_astar::Link> expandPosn(Vec2i posn);
+
+  int findBuilding(int x, int y);
+
+  std::set<Vec2i> getDestinationsForBuilding(int buildingIndex);
 private:
   City m_city = City(0, 0);
   Coord m_centerCoord;
@@ -78,7 +83,7 @@ private:
 
   Vec2i m_destTile;
 
-  float m_timeToMove = 0.2f;
+  float m_timeToMove = MOVEMENT_SPEED;
   float m_timeRemainingBeforeMove;
 };
 
