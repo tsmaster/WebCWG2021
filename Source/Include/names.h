@@ -9,11 +9,10 @@ class NameFactory
  public:
   NameFactory();
 
-  std::string getFirstName(unsigned int seed);
-  std::string getMaleFirstName(unsigned int seed);
-  std::string getFemaleFirstName(unsigned int seed);
-  std::string getOtherFirstName(unsigned int seed);
-  std::string getLastName(unsigned int seed);
+  std::string getMaleFirstName(int wx, int wy, int residentIndex, std::string tag);
+  std::string getFemaleFirstName(int wx, int wy, int residentIndex, std::string tag);
+  std::string getOtherFirstName(int wx, int wy, int residentIndex, std::string tag);
+  std::string getLastName(int wx, int wy, int residentIndex, std::string tag);
 
  private:
   std::vector<std::string> m_firstNames;

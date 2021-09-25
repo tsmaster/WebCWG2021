@@ -3645,41 +3645,33 @@ NameFactory::NameFactory()
   printf("last name count: %d\n", int(m_lastNames.size()));
 }
 
-std::string NameFactory::getFirstName(unsigned int seed)
+std::string NameFactory::getMaleFirstName(int wx, int wy, int residentIndex, std::string tag)
 {
-  srand(seed);
-
-  int i = randomrange(0, m_firstNames.size());
-  return m_firstNames[i];
-}
-
-std::string NameFactory::getMaleFirstName(unsigned int seed)
-{
-  srand(seed);
+  srand(makeSeedKey(wx, wy, residentIndex, (std::string("MALE FIRST NAME SEED") + tag).c_str()));
 
   int i = randomrange(0, m_maleNames.size());
   return m_maleNames[i];
 }
 
-std::string NameFactory::getFemaleFirstName(unsigned int seed)
+std::string NameFactory::getFemaleFirstName(int wx, int wy, int residentIndex, std::string tag)
 {
-  srand(seed);
+  srand(makeSeedKey(wx, wy, residentIndex, (std::string("FEMALE FIRST NAME SEED") + tag).c_str()));
 
   int i = randomrange(0, m_femaleNames.size());
   return m_femaleNames[i];
 }
 
-std::string NameFactory::getOtherFirstName(unsigned int seed)
+std::string NameFactory::getOtherFirstName(int wx, int wy, int residentIndex, std::string tag)
 {
-  srand(seed);
+  srand(makeSeedKey(wx, wy, residentIndex, (std::string("OTHER FIRST NAME SEED") + tag).c_str()));
 
   int i = randomrange(0, m_otherNames.size());
   return m_otherNames[i];
 }
 
-std::string NameFactory::getLastName(unsigned int seed)
+std::string NameFactory::getLastName(int wx, int wy, int residentIndex, std::string tag)
 {
-  srand(seed);
+  srand(makeSeedKey(wx, wy, residentIndex, (std::string("LAST NAME SEED") + tag).c_str()));
 
   int i = randomrange(0, m_lastNames.size());
   return m_lastNames[i];

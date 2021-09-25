@@ -20,12 +20,12 @@ class Person {
 
   Gender m_gender;
 
-  void generateName(unsigned int seed);
+  void generateName(int wx, int wy, int personIndex);
 
  protected:  
-  void generateMaleName();
-  void generateFemaleName();
-  void generateOtherName();
+  void generateMaleName(int wx, int wy, int personIndex);
+  void generateFemaleName(int wx, int wy, int personIndex);
+  void generateOtherName(int wx, int wy, int personIndex);
 };
 
 

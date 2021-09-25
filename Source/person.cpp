@@ -4,9 +4,9 @@
 #include "bdg_random.h"
 #include "names.h"
 
-void Person::generateName(unsigned int seed)
+void Person::generateName(int wx, int wy, int personIndex)
 {
-  srand(seed);
+  srand(makeSeedKey(wx, wy, personIndex, "GENDER ROLL"));
 
   int genderRoll = randomrange(0,20);
 
@@ -20,18 +20,18 @@ void Person::generateName(unsigned int seed)
 
   switch (m_gender) {
   case Gender::Male:
-    generateMaleName();
+    generateMaleName(wx, wy, personIndex);
     break;
   case Gender::Female:
-    generateFemaleName();
+    generateFemaleName(wx, wy, personIndex);
     break;
   case Gender::Other:
-    generateOtherName();
+    generateOtherName(wx, wy, personIndex);
     break;
   }
 }
 
-void Person::generateMaleName()
+void Person::generateMaleName(int wx, int wy, int personIndex)
 {
   NameFactory nf;
   /* Patterns:
@@ -45,43 +45,43 @@ void Person::generateMaleName()
   int roll = randomrange(0, 100);
   if (roll < 65) {
     // first, last
-    std::string firstname = nf.getMaleFirstName(makeSeedKey(1, roll, 1024, "MALE FIRST NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 1025, "MALE LAST NAME"));
+    std::string firstname = nf.getMaleFirstName(wx, wy, personIndex, std::string("MFN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("MLN"));
     m_names.push_back(firstname);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + lastname;
   } else if (roll < 77) {
     // first, mi, last
-    std::string firstname = nf.getMaleFirstName(makeSeedKey(1, roll, 1024, "MALE FIRST NAME"));
-    std::string middlename = nf.getMaleFirstName(makeSeedKey(1, roll, 1025, "MALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 1026, "MALE LAST NAME"));
+    std::string firstname = nf.getMaleFirstName(wx, wy, personIndex, std::string("MFN"));
+    std::string middlename = nf.getMaleFirstName(wx, wy, personIndex, std::string("MMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("MLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + middlename.substr(0,1) + std::string(". ") + lastname;
   } else if (roll < 87) {
     // first, middle, last
-    std::string firstname = nf.getMaleFirstName(makeSeedKey(1, roll, 1024, "MALE FIRST NAME"));
-    std::string middlename = nf.getMaleFirstName(makeSeedKey(1, roll, 1025, "MALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 1026, "MALE LAST NAME"));
+    std::string firstname = nf.getMaleFirstName(wx, wy, personIndex, std::string("MFN"));
+    std::string middlename = nf.getMaleFirstName(wx, wy, personIndex, std::string("MMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("MLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + middlename + std::string(" ") + lastname;
   } else if (roll < 95) {
     // fi, mi, last
-    std::string firstname = nf.getMaleFirstName(makeSeedKey(1, roll, 1024, "MALE FIRST NAME"));
-    std::string middlename = nf.getMaleFirstName(makeSeedKey(1, roll, 1025, "MALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 1026, "MALE LAST NAME"));
+    std::string firstname = nf.getMaleFirstName(wx, wy, personIndex, std::string("MFN"));
+    std::string middlename = nf.getMaleFirstName(wx, wy, personIndex, std::string("MMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("MLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname.substr(0,1) + std::string(". ") + middlename.substr(0,1) + std::string(". ") + lastname;
   } else {
     // fi, middle, last
-    std::string firstname = nf.getMaleFirstName(makeSeedKey(1, roll, 1024, "MALE FIRST NAME"));
-    std::string middlename = nf.getMaleFirstName(makeSeedKey(1, roll, 1025, "MALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 1026, "MALE LAST NAME"));
+    std::string firstname = nf.getMaleFirstName(wx, wy, personIndex, std::string("MFN"));
+    std::string middlename = nf.getMaleFirstName(wx, wy, personIndex, std::string("MMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("MLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
@@ -89,7 +89,7 @@ void Person::generateMaleName()
   }    
 }
 
-void Person::generateFemaleName()
+void Person::generateFemaleName(int wx, int wy, int personIndex)
 {
   NameFactory nf;
   /* Patterns:
@@ -103,43 +103,43 @@ void Person::generateFemaleName()
   int roll = randomrange(0, 100);
   if (roll < 75) {
     // first, last
-    std::string firstname = nf.getFemaleFirstName(makeSeedKey(2, roll, 8000, "FEMALE FIRST NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(1, roll, 8001, "FEMALE LAST NAME"));
+    std::string firstname = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FFN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("FLN"));
     m_names.push_back(firstname);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + lastname;
   } else if (roll < 85) {
     // first, last-last2
-    std::string firstname = nf.getFemaleFirstName(makeSeedKey(2, roll, 8000, "FEMALE FIRST NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(2, roll, 8001, "FEMALE LAST NAME"));
-    std::string lastname2 = nf.getLastName(makeSeedKey(2, roll, 8002, "FEMALE LAST NAME 2"));
+    std::string firstname = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FLN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("FLN"));
+    std::string lastname2 = nf.getLastName(wx, wx, personIndex, std::string("FLN2"));
     m_names.push_back(firstname);
     m_names.push_back(lastname);
     m_names.push_back(lastname2);
     m_preferredName = firstname + std::string(" ") + lastname + std::string("-") + lastname2;
   } else if (roll < 90) {
     // first, mi, last
-    std::string firstname = nf.getFemaleFirstName(makeSeedKey(2, roll, 8000, "FEMALE FIRST NAME"));
-    std::string middlename = nf.getFemaleFirstName(makeSeedKey(2, roll, 8001, "FEMALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(2, roll, 8002, "FEMALE LAST NAME"));
+    std::string firstname = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FFN"));
+    std::string middlename = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("FLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + middlename.substr(0,1) + std::string(". ") + lastname;
   } else if (roll < 95) {
     // fi, middle, last
-    std::string firstname = nf.getFemaleFirstName(makeSeedKey(2, roll, 8000, "FEMALE FIRST NAME"));
-    std::string middlename = nf.getFemaleFirstName(makeSeedKey(2, roll, 8001, "FEMALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(2, roll, 8002, "FEMALE LAST NAME"));
+    std::string firstname = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FFN"));
+    std::string middlename = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("FLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname.substr(0,1) + std::string(". ") + middlename + std::string(" ") + lastname;
   } else {
     // fi, mi, last
-    std::string firstname = nf.getFemaleFirstName(makeSeedKey(2, roll, 8000, "FEMALE FIRST NAME"));
-    std::string middlename = nf.getFemaleFirstName(makeSeedKey(2, roll, 8001, "FEMALE MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(2, roll, 8002, "FEMALE LAST NAME"));
+    std::string firstname = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FFN"));
+    std::string middlename = nf.getFemaleFirstName(wx, wy, personIndex, std::string("FMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("FLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
@@ -147,7 +147,7 @@ void Person::generateFemaleName()
   }  
 }
 
-void Person::generateOtherName()
+void Person::generateOtherName(int wx, int wy, int personIndex)
 {
   NameFactory nf;
   /* Patterns:
@@ -159,23 +159,23 @@ void Person::generateOtherName()
   int roll = randomrange(0, 100);
   if (roll < 90) {
     // first, last
-    std::string firstname = nf.getOtherFirstName(makeSeedKey(3, roll, 9000, "OTHER FIRST NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(3, roll, 9001, "OTHER LAST NAME"));
+    std::string firstname = nf.getOtherFirstName(wx, wy, personIndex, std::string("OFN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("OLN"));
     m_names.push_back(firstname);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + lastname;
   } else if (roll < 98) {
     // first, middle, last
-    std::string firstname = nf.getOtherFirstName(makeSeedKey(3, roll, 9000, "OTHER FIRST NAME"));
-    std::string middlename = nf.getOtherFirstName(makeSeedKey(3, roll, 9001, "OTHER MIDDLE NAME"));
-    std::string lastname = nf.getLastName(makeSeedKey(3, roll, 9002, "OTHER LAST NAME"));
+    std::string firstname = nf.getOtherFirstName(wx, wy, personIndex, std::string("OFN"));
+    std::string middlename = nf.getOtherFirstName(wx, wy, personIndex, std::string("OMN"));
+    std::string lastname = nf.getLastName(wx, wy, personIndex, std::string("OLN"));
     m_names.push_back(firstname);
     m_names.push_back(middlename);
     m_names.push_back(lastname);
     m_preferredName = firstname + std::string(" ") + middlename + std::string(" ") + lastname;
   } else {
     // first
-    std::string firstname = nf.getOtherFirstName(makeSeedKey(3, roll, 9000, "OTHER MONONYM"));
+    std::string firstname = nf.getOtherFirstName(wx, wy, personIndex, std::string("OMono"));
     m_names.push_back(firstname);
     m_preferredName = firstname;
   }  

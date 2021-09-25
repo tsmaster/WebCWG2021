@@ -247,10 +247,13 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
 			       bldgReservedLocs,
 			       radius)) {
 	    Person owner;
-	    owner.generateName(makeSeedKey(m_x,
-					   m_y,
-					   getNthPrime(m_people.size()),
-					   "BUILDING OWNER NAME"));
+	    int seed_h = getNthPrime(m_people.size());
+	    printf("generating name for %d %d %d\n", m_x, m_y, seed_h);
+	    owner.generateName(m_x,
+			       m_y,
+			       seed_h);
+
+	    printf("person name: %s\n", owner.m_preferredName.c_str());
 	    m_people.push_back(owner);
 	    placeBuilding(personPosn.x + dx,
 			  personPosn.y + dy,
