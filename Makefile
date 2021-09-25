@@ -5,9 +5,9 @@
 
 # make -j 4 <targets>
 
-_CWG_CPPS = astar.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mode_city.cpp mode_highway.cpp names.cpp modemgr.cpp node.cpp nodemgr.cpp person.cpp popup_dialog.cpp screen_bg.cpp
+_CWG_CPPS = astar.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mode_city.cpp mode_highway.cpp names.cpp modemgr.cpp node.cpp nodemgr.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp
 
-_CWG_HS = astar.h bdg_math.h bdg_random.h button.h carswithguns.h city.h citymap.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modemgr.h modes.h names.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h person.h popup_dialog.h screen_bg.h 
+_CWG_HS = astar.h bdg_math.h bdg_random.h button.h carswithguns.h city.h citymap.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mode_city.h mode_highway.h modemgr.h modes.h names.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h person.h popup_dialog.h primes.h screen_bg.h 
 
 _CWG_OBJS=$(_CWG_CPPS:.cpp=.o)
 

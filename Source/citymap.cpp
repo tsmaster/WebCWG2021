@@ -10,6 +10,7 @@
 #include "bdg_random.h"
 #include "carswithguns.h"
 #include "names.h"
+#include "primes.h"
 
 
 void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, bool eS, olc::Sprite* citySprite)
@@ -248,7 +249,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
 	    Person owner;
 	    owner.generateName(makeSeedKey(m_x,
 					   m_y,
-					   m_people.size(),
+					   getNthPrime(m_people.size()),
 					   "BUILDING OWNER NAME"));
 	    m_people.push_back(owner);
 	    placeBuilding(personPosn.x + dx,

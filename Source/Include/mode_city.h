@@ -86,7 +86,7 @@ private:
   float m_timeToMove = MOVEMENT_SPEED;
   float m_timeRemainingBeforeMove;
 
-  bool m_bShowingResidents = False;
+  bool m_bShowingResidents = false;
   PopupDialog m_residentsPanel;
 };
 
