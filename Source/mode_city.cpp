@@ -174,6 +174,14 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
     printf("center: %s\n", m_centerCoord.toString().c_str());
   }
 
+  if (game->GetKey(olc::Key::R).bPressed) {
+    printf("residents:\n");
+    for (Person p : m_cityMap.getResidents()) {
+      printf("%s\n", p.m_preferredName.c_str());
+    }
+    m_bShowingResidents = (!m_bShowingResidents);
+  }
+
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
     int mx = game->GetMouseX();
     int my = game->GetMouseY();
@@ -201,7 +209,10 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
     } else {
       int buildingIndex = findBuilding(m_destTile.x, m_destTile.y);
       if (buildingIndex >= 0) {
-	printf("nav to building %d\n", buildingIndex);
+	Building bldg = m_cityMap.getBuildings()[buildingIndex];
+	
+	printf("nav to building %d %s\n", buildingIndex,
+	       bldg.owner_name.c_str());
 
 	std::set<Vec2i> destSet = getDestinationsForBuilding(buildingIndex);
 
@@ -287,7 +298,11 @@ void CityGameMode::draw(CarsWithGuns* game)
   
   drawCar(game);
 
-  m_popupLocationPanel.draw(4, 4, game, m_menuSprite);  
+  m_popupLocationPanel.draw(4, 4, game, m_menuSprite);
+
+  if (m_bShowingResidents) {
+    m_residentsPanel.draw(32, 32, game, m_menuSprite);
+  }
 }
 
 void CityGameMode::drawCar(CarsWithGuns* game)
@@ -386,6 +401,15 @@ void CityGameMode::setCity(City c)
 
   m_carPos = m_cityMap.getCityCenterLocn();
   m_carHeading = 0;
+
+  std::vector<ButtonDesc> buttons;
+  std::string resmsg = std::string("Residents:\n\n");
+  for (Person p : m_cityMap.getResidents()) {
+    resmsg += p.m_preferredName;
+    resmsg += std::string("\n");
+  }
+  resmsg = resmsg.substr(0, resmsg.size() - 1);
+  m_residentsPanel.build(resmsg, buttons);  
 }
 
 void CityGameMode::rebuildDisplay()

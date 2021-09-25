@@ -85,6 +85,9 @@ private:
 
   float m_timeToMove = MOVEMENT_SPEED;
   float m_timeRemainingBeforeMove;
+
+  bool m_bShowingResidents = False;
+  PopupDialog m_residentsPanel;
 };
 
 #endif // MODE_CITY_H

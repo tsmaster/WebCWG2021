@@ -8,7 +8,7 @@
 #include "olcPixelGameEngine.h"
 
 #include "bdg_math.h"
-
+#include "person.h"
 
 class CarsWithGuns;
 
@@ -16,6 +16,8 @@ class Building
 {
 public:
   int x, y, width, height;
+
+  std::string owner_name;
 };
 
 class CityMap
@@ -35,6 +37,8 @@ class CityMap
   Vec2f tileToScreenCoord(CarsWithGuns* game, Vec2f tileCoord);
 
   std::vector<Building> getBuildings() { return m_buildings; }
+
+  std::vector<Person> getResidents() { return m_people; }
   
  protected:
   int radiusForPopulation(int population);
@@ -51,7 +55,7 @@ class CityMap
 
   bool canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> pavedSet, int cityRadius);
 
-  void placeBuilding(int x, int y, int w, int h);
+  void placeBuilding(int x, int y, int w, int h, std::string ownerName);
 
  private:
   
@@ -66,6 +70,8 @@ class CityMap
   std::set<Vec2i> m_pavedLocations;
 
   std::vector<Building> m_buildings;
+
+  std::vector<Person> m_people;
 };
 
 #endif // citymap_h

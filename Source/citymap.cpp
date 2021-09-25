@@ -9,6 +9,7 @@
 
 #include "bdg_random.h"
 #include "carswithguns.h"
+#include "names.h"
 
 
 void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, bool eS, olc::Sprite* citySprite)
@@ -195,6 +196,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
     setTileAt(southExitLocation.x, southExitLocation.y, 3, 17);
   }
 
+  // the tile positions of people
   std::vector<Vec2i> personTiles = {
     Vec2i(24, 0),
     Vec2i(24, 3),
@@ -243,9 +245,16 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
 			       w, h,
 			       bldgReservedLocs,
 			       radius)) {
+	    Person owner;
+	    owner.generateName(makeSeedKey(m_x,
+					   m_y,
+					   m_people.size(),
+					   "BUILDING OWNER NAME"));
+	    m_people.push_back(owner);
 	    placeBuilding(personPosn.x + dx,
 			  personPosn.y + dy,
-			  w, h);
+			  w, h,
+			  owner.m_preferredName);
 
 	    for (int resX = personPosn.x + dx - 1; resX <= personPosn.x + dx + w; ++resX) {
 	      for (int resY = personPosn.y + dy - 1; resY <= personPosn.y + dy + h; ++resY) {
@@ -289,21 +298,26 @@ bool CityMap::canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> paved
     }
   }
 
+  return true;
+}
+
+void CityMap::placeBuilding(int x, int y, int w, int h, std::string ownerName)
+{
+  // pick random tile set
+  int tileOffX = randomrange(0, 2) * 3;
+  int tileOffY = randomrange(0, 2) * 4;
+
   Building newBuilding;
   newBuilding.x = x;
   newBuilding.y = y;
   newBuilding.width = w;
   newBuilding.height = h;
 
+  unsigned int fnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "FIRST NAME");
+  unsigned int lnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "LAST NAME");
+
+  newBuilding.owner_name = ownerName;
   m_buildings.push_back(newBuilding);
-
-  return true;
-}
-
-void CityMap::placeBuilding(int x, int y, int w, int h)
-{
-  int tileOffX = randomrange(0, 2) * 3;
-  int tileOffY = randomrange(0, 2) * 4;
   
   for (int nx = 0; nx < w; ++nx) {
     for (int ny = 0; ny < h; ++ny) {
