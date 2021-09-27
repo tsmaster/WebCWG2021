@@ -15,7 +15,7 @@ using NodeCache = std::map<Coord, Node*>;
 class NodeMgr
 {
  public:
-  NodeMgr(unsigned int cacheSize, GameClock* gameClock);
+  void init(unsigned int cacheSize, GameClock* gameClock);
 
   std::vector<Node*> getNodes();
 
@@ -24,6 +24,8 @@ class NodeMgr
   void populate(Coord c, TileLayer layer);
 
   Node* getNode(Coord c, TileLayer layer);
+
+  std::vector<Node*> getCityNodesInRadius(Coord center, float radius);
 
  protected:
   int getCacheSizeForHeight(int height);

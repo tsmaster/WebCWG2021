@@ -5,12 +5,6 @@
 #include "coord.h"
 #include "node.h"
 
-NodeMgr::NodeMgr(unsigned int cacheSize, GameClock* gameClock)
-{
-  m_baseCacheSize = cacheSize;
-  m_gameClock = gameClock;
-}
-
 std::vector<Node*> NodeMgr::getNodes()
 {
   // TODO can probably cache this for better performance
@@ -112,3 +106,36 @@ Node* NodeMgr::getNode(Coord c, TileLayer layer)
   //printf("returning node for %s, layer %d\n", c.toString().c_str(), int(layer));
   return nodePtr;
 }
+
+std::vector<Node*> NodeMgr::getCityNodesInRadius(Coord center, float radius)
+{
+  std::vector<Node*> outVec;
+
+  float radSqr = radius * radius;
+
+  for (int x = int(floor(center.x - radius)); x <= int(ceil(center.x + radius)); ++x) {
+    int dx = x - center.x;
+    for (int y = int(floor(center.y - radius)); y <= int(ceil(center.y + radius)); ++y) {
+      int dy = y - center.y;
+      if (dx*dx + dy*dy > radSqr) {
+	continue;
+      }
+
+      Node* n = getNode(Coord(x, y, 0), TileLayer::H0_CITY_LOCN_NAME_POP);
+      if (n->isCity()) {
+	outVec.push_back(n);
+      }
+    }
+  }
+
+  return outVec;
+}
+
+void NodeMgr::init(unsigned int cacheSize, GameClock* gameClock)
+{
+  m_baseCacheSize = cacheSize;
+  m_gameClock = gameClock;
+}
+
+
+		   

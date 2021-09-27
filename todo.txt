@@ -1,0 +1,2 @@
+move nodemgr up to CarsWithGuns class
+

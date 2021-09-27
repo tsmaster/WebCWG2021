@@ -175,11 +175,26 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
   }
 
   if (game->GetKey(olc::Key::R).bPressed) {
-    printf("residents:\n");
-    for (Person p : m_cityMap.getResidents()) {
-      printf("%s\n", p.m_preferredName.c_str());
+    for (Person p : m_city.getPeople()) {
+      printf("%s ", p.m_preferredName.c_str());
+      for (PersonAddress fa : p.getFriendAddresses()) {
+	if ((fa.wx == m_city.getCoord().x) &&
+	    (fa.wy == m_city.getCoord().y)) {
+	  printf("L[%d] ", fa.personIndex);
+	} else {
+	  printf("R[%d] ", fa.personIndex);
+	}
+      }      
+      printf("\n");
     }
     m_bShowingResidents = (!m_bShowingResidents);
+  }
+
+  if (game->GetKey(olc::Key::M).bPressed) {
+    printf("making mission from within city\n");
+    game->generateMissionSequence(m_centerCoord,
+				  3,
+				  15, 20);
   }
 
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
@@ -397,14 +412,15 @@ void CityGameMode::setCity(City c)
   m_cityMap.populate(c.getCoord().x, c.getCoord().y,
 		     c.getPopulation(),
 		     c.hasExit(0), c.hasExit(1), c.hasExit(2), c.hasExit(3),
-		     m_citySprite);
+		     m_citySprite,
+		     &m_city);
 
   m_carPos = m_cityMap.getCityCenterLocn();
   m_carHeading = 0;
 
   std::vector<ButtonDesc> buttons;
   std::string resmsg = std::string("Residents:\n\n");
-  for (Person p : m_cityMap.getResidents()) {
+  for (Person p : m_city.getPeople()) {
     resmsg += p.m_preferredName;
     resmsg += std::string("\n");
   }

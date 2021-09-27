@@ -5,6 +5,7 @@
 #include "entt.hpp"
 
 #include "button.h"
+#include "mission.h"
 #include "modes.h"
 #include "mode_city.h"
 #include "mode_highway.h"
@@ -22,6 +23,11 @@ class CarsWithGuns : public olc::PixelGameEngine
   bool OnUserUpdate(float seconds) override;
 
   void requestGameMode(ModeChangeRequest mcr);
+
+  void generateMissionSequence(Coord startingCoord, int length,
+			       float beginningRadius, float endingRadius);
+
+  NodeMgr* getNodeMgr() { return &m_nodeMgr; }
   
  protected:
   void updateGame(float seconds);
@@ -84,6 +90,11 @@ private:
   olc::popup::Manager m_menuMgr;
 
   std::vector<ModeChangeRequest> m_modeChangeRequests;
+
+  MissionMgr m_missionMgr;
+
+  NodeMgr m_nodeMgr;
+  GameClock m_gameClock;
 };
 
 

@@ -17,24 +17,16 @@ HighwayGameMode::HighwayGameMode()
   m_viewRadius = START_VIEW_RADIUS;
 }
 
-void HighwayGameMode::init(olc::Sprite* menuSprite, olc::Sprite* carSprite)
+void HighwayGameMode::init(olc::Sprite* menuSprite, olc::Sprite* carSprite,
+			   GameClock* gameClock, NodeMgr* nodeMgr)
 {
   m_centerCoord = Coord(0, 0, 0);
-  m_gameClock = new GameClock();
-  m_nodeMgr = new NodeMgr(BASE_CACHE_SIZE, m_gameClock);
   m_menuSprite = menuSprite;
   m_carSprite = carSprite;
   m_carPos = Vec2f(0.0f, 0.0f);
   m_carHeading = 0;
-}
-
-void HighwayGameMode::destroy()
-{
-  delete(m_gameClock);
-  m_gameClock = NULL;
-
-  delete(m_nodeMgr);
-  m_nodeMgr = NULL;
+  m_gameClock = gameClock;
+  m_nodeMgr = nodeMgr;
 }
 
 bool HighwayGameMode::update(CarsWithGuns* pge, float elapsedSeconds)
@@ -232,6 +224,16 @@ bool HighwayGameMode::handleUserInput(CarsWithGuns* game, bool& outSwitched)
   if (game->GetKey(olc::Key::K1).bPressed) {
     printf("center: %s\n", m_centerCoord.toString().c_str());
   }
+
+  if (game->GetKey(olc::Key::M).bPressed) {
+    printf("making mission from highway\n");
+    Coord carCoord(m_carPos.x,
+		   m_carPos.y,
+		   0);
+    game->generateMissionSequence(carCoord,
+				  3,
+				  5.0, 10.0);
+  }  
 
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
     int mx = game->GetMouseX();

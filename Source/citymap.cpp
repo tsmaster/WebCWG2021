@@ -9,13 +9,17 @@
 
 #include "bdg_random.h"
 #include "carswithguns.h"
+#include "constants.h"
 #include "names.h"
 #include "primes.h"
 
 
-void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, bool eS, olc::Sprite* citySprite)
+void CityMap::populate(int x, int y, int population,
+		       bool eE, bool eN, bool eW, bool eS,
+		       olc::Sprite* citySprite,
+		       City* city)
 {
-  printf("populating %d %d %d\n", x, y, population);
+  //printf("populating %d %d %d\n", x, y, population);
   m_citySprite = citySprite;
   m_x = x;
   m_y = y;
@@ -25,7 +29,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
   
   int radius = radiusForPopulation(population);
 
-  printf("radius: %d\n", radius);
+  //printf("radius: %d\n", radius);
 
   int hr = radius / 2;
 
@@ -40,7 +44,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
   cx = clamp(cx, -radius + 1, radius);
   cy = clamp(cy, -radius + 1, radius);
 
-  printf("city center: %d %d\n", cx, cy);
+  //printf("city center: %d %d\n", cx, cy);
 
   std::vector<Vec2i> groundTiles = {
     Vec2i(1, 1),
@@ -216,7 +220,7 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
   }
 
   std::set<Vec2i> bldgReservedLocs = pavedTiles;
-
+  
   for (Vec2i personPosn : peoplePosns) {
     std::vector<Vec2i> sizeCandidates;
 
@@ -235,6 +239,8 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
 		 sizeCandidates.end(),
 		 std::default_random_engine(seed));
 
+    std::vector<Person> cityResidentsList = city->getPeople();
+    
     bool placed = false;
     for (Vec2i sz : sizeCandidates) {
       int w = sz.x;
@@ -246,19 +252,15 @@ void CityMap::populate(int x, int y, int population, bool eE, bool eN, bool eW, 
 			       w, h,
 			       bldgReservedLocs,
 			       radius)) {
-	    Person owner;
-	    int seed_h = getNthPrime(m_people.size());
-	    printf("generating name for %d %d %d\n", m_x, m_y, seed_h);
-	    owner.generateName(m_x,
-			       m_y,
-			       seed_h);
 
-	    printf("person name: %s\n", owner.m_preferredName.c_str());
-	    m_people.push_back(owner);
+	    int buildingIndex = m_buildings.size();
+	    
 	    placeBuilding(personPosn.x + dx,
 			  personPosn.y + dy,
 			  w, h,
-			  owner.m_preferredName);
+			  cityResidentsList[buildingIndex].m_preferredName);
+	    
+	    cityResidentsList[buildingIndex].setBuildingIndex(buildingIndex);
 
 	    for (int resX = personPosn.x + dx - 1; resX <= personPosn.x + dx + w; ++resX) {
 	      for (int resY = personPosn.y + dy - 1; resY <= personPosn.y + dy + h; ++resY) {

@@ -6,6 +6,9 @@
 #include <string>
 
 #include "coord.h"
+#include "person.h"
+
+class CityMap;
 
 class City
 {
@@ -15,7 +18,11 @@ class City
   void setName(std::string name) { m_name = name; }
   std::string getName() { return m_name; }
 
-  void setPopulation(int pop) { m_population = pop; }
+  void setPopulation(int pop) {
+    m_population = pop;
+    populatePeople();
+  }
+  
   int getPopulation() { return m_population; }
 
   Coord getCoord() { return m_coord; }
@@ -28,6 +35,10 @@ class City
   }
 
   bool hasExit(int dir);
+
+  CityMap* getCityMap() { return m_cityMap; }
+
+  std::vector<Person> getPeople() { return m_people; }
   
  private:
   Coord m_coord;
@@ -35,6 +46,7 @@ class City
   std::string makeName();
   std::string makeAltName();
   std::string makeMarkovName();
+  void populatePeople();
   
   std::string m_name;
 
@@ -44,6 +56,10 @@ class City
   bool m_exitNorth;
   bool m_exitWest;
   bool m_exitSouth;
+
+  CityMap* m_cityMap;
+
+  std::vector<Person> m_people;
 };
 
 #endif //city_h

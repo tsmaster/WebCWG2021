@@ -1,5 +1,6 @@
 #include "person.h"
 
+#include <algorithm>
 
 #include "bdg_random.h"
 #include "names.h"
@@ -179,4 +180,12 @@ void Person::generateOtherName(int wx, int wy, int personIndex)
     m_names.push_back(firstname);
     m_preferredName = firstname;
   }  
+}
+
+
+bool Person::isFriend(PersonAddress& friendAddress)
+{
+  return std::find(m_friends.begin(),
+		   m_friends.end(),
+		   friendAddress) != m_friends.end();
 }

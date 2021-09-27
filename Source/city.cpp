@@ -4,10 +4,14 @@
 
 #include <cctype>
 #include <cstring>
+#include <cmath>
+#include <math.h>
 #include <map>
 #include <vector>
 
 #include "bdg_random.h"
+#include "constants.h"
+#include "primes.h"
 
 extern std::vector<std::string> CityNames;
 
@@ -159,4 +163,54 @@ bool City::hasExit(int dir)
   default:
     return false;
   }
+}
+
+void City::populatePeople()
+{
+  // TODO: This is duplicated between cityMap (for buildings) and here. Should dedup.
+  
+  int desiredNumPeople = int(floor((m_population / 1000.0f) + 0.5f));
+
+  // Make names for people
+  for (int i = 0; i < desiredNumPeople; ++i) {
+    Person person;
+    int seed_h = getNthPrime(i);
+    person.generateName(m_coord.x,
+			m_coord.y,
+			seed_h);
+
+    m_people.push_back(person);
+  }
+
+  // make local friends for people
+  for (int i = 0; i < m_people.size(); ++i) {
+    for (int friendNum = 0; friendNum < 2 * NUM_LOCAL_FRIENDS; ++friendNum) {
+      if (m_people[i].countFriends() >= NUM_LOCAL_FRIENDS) {
+	break;
+      }
+      
+      int j = randomrange(0, m_people.size());
+      if (j == i) {
+	continue;
+      }
+      
+      PersonAddress friendAddress = PersonAddress(m_coord.x,
+						  m_coord.y,
+						  j);
+      if (!m_people[i].isFriend(friendAddress)) {
+	m_people[i].addFriend(friendAddress);
+	/*
+	printf("Friends: %s %s\n",
+	       m_people[i].m_preferredName.c_str(),
+	       m_people[j].m_preferredName.c_str());*/
+
+	PersonAddress backAddress = PersonAddress(m_coord.x,
+						  m_coord.y,
+						  i);
+	if (!m_people[j].isFriend(backAddress)) {
+	  m_people[j].addFriend(backAddress);
+	}
+      }
+    }
+  }  
 }

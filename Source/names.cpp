@@ -1535,6 +1535,7 @@ NameFactory::NameFactory()
     "Isabel",
     "Isabella",
     "Isadora",
+    "Isolde",
     "Ivette",
     "Ivy",
     "Jacki",
@@ -2262,6 +2263,7 @@ NameFactory::NameFactory()
     "Crow",
     "Dahlia",
     "Denver",
+    "Dire",
     "Dirk",
     "Dylan",
     "Ebony",
@@ -2303,6 +2305,7 @@ NameFactory::NameFactory()
     "Xan",
     "Xanadu",
     "Xerxes",
+    "Zaxxon",
   };
 
   m_lastNames = std::vector<std::string> {
@@ -2403,7 +2406,6 @@ NameFactory::NameFactory()
     "Berry",
     "Bertrand",
     "Best",
-    "Biden",
     "Bird",
     "Bishop",
     "Black",
@@ -3639,10 +3641,12 @@ NameFactory::NameFactory()
     "Zimmerman",
   };
 
+  /*
   printf("male name count: %d\n", int(m_maleNames.size()));
   printf("female name count: %d\n", int(m_femaleNames.size()));
   printf("other name count: %d\n", int(m_otherNames.size()));
   printf("last name count: %d\n", int(m_lastNames.size()));
+  */
 }
 
 std::string NameFactory::getMaleFirstName(int wx, int wy, int residentIndex, std::string tag)

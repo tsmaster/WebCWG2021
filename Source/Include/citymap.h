@@ -11,6 +11,7 @@
 #include "person.h"
 
 class CarsWithGuns;
+class City;
 
 class Building
 {
@@ -23,7 +24,10 @@ public:
 class CityMap
 {
  public:
-  void populate(int x, int y, int population, bool eE, bool eN, bool eW, bool eS, olc::Sprite* citySprite);
+  void populate(int x, int y, int population,
+		bool eE, bool eN, bool eW, bool eS,
+		olc::Sprite* citySprite,
+		City* city);
 
   void destroy();
 
@@ -38,8 +42,6 @@ class CityMap
 
   std::vector<Building> getBuildings() { return m_buildings; }
 
-  std::vector<Person> getResidents() { return m_people; }
-  
  protected:
   int radiusForPopulation(int population);
 
@@ -55,7 +57,8 @@ class CityMap
 
   bool canPlaceBuilding(int x, int y, int w, int h, std::set<Vec2i> pavedSet, int cityRadius);
 
-  void placeBuilding(int x, int y, int w, int h, std::string ownerName);
+  void placeBuilding(int x, int y, int w, int h,
+		     std::string ownerName);
 
  private:
   
@@ -70,8 +73,6 @@ class CityMap
   std::set<Vec2i> m_pavedLocations;
 
   std::vector<Building> m_buildings;
-
-  std::vector<Person> m_people;
 };
 
 #endif // citymap_h

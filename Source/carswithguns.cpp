@@ -21,6 +21,7 @@
 #include <random>
 
 #include "bdg_math.h"
+#include "bdg_random.h"
 #include "button.h"
 #include "city.h"
 #include "hsv.h"
@@ -29,6 +30,7 @@
 #include "mode_city.h"
 #include "mode_highway.h"
 #include "modemgr.h"
+#include "node.h"
 
 CarsWithGuns::CarsWithGuns()
 {
@@ -41,6 +43,7 @@ bool CarsWithGuns::OnUserCreate()
 {
   srand(time(NULL));
 
+  m_nodeMgr.init(BASE_CACHE_SIZE, &m_gameClock);
 
 #if USE_SOUND
   olc::SOUND::InitialiseAudio();
@@ -448,15 +451,14 @@ void CarsWithGuns::destroyMainMenuMode()
 
 void CarsWithGuns::initHighwayMode()
 {
-  m_highwayGameMode.init(m_menuSprite, m_carSprite);
+  m_highwayGameMode.init(m_menuSprite, m_carSprite,
+			 &m_gameClock, &m_nodeMgr);
 }
 
 void CarsWithGuns::destroyHighwayMode()
 {
   printf("clearing highway buttons\n");
   m_buttons.clear();
-  
-  m_highwayGameMode.destroy();
 }
 
 void CarsWithGuns::drawHighwayMode()
@@ -572,4 +574,97 @@ bool CarsWithGuns::OnUserUpdate(float fElapsedSeconds)
 void CarsWithGuns::requestGameMode(ModeChangeRequest mcr)
 {
   m_modeChangeRequests.push_back(mcr);
+}
+
+void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, float beginningRadius, float endingRadius)
+{
+  printf("gms top\n");
+  m_missionMgr.reset();
+  printf("gms reset done\n");
+
+  Mission m;
+
+  std::vector<Node*> citiesInRadius = m_nodeMgr.getCityNodesInRadius(startingCoord,
+								     beginningRadius);
+  
+  Node* beginningNode = citiesInRadius[randomrange(0, citiesInRadius.size())];
+
+  for (int stageNum = 0; stageNum < length; ++stageNum) {
+    printf("gms stage top\n");
+    MissionStage ms;
+    ms.m_state = MissionStageState::NotStarted;
+    ms.m_startMsg = std::string("Hey, take this thing over there. Thanks!");
+    ms.m_helpMsg = std::string("You should be taking that thing over there.");
+    ms.m_completeMsg = std::string("Thanks for bringing me this thing.");
+    printf("gms assigned some fields\n");
+
+    City* startingCity = beginningNode->getCity();
+
+    CityMap* startingCityMap = startingCity->getCityMap();
+
+    printf("gms stage got city map\n");
+
+    std::vector<Person> startingCityPopulation = startingCity->getPeople();
+    
+    int startingPersonIndex = randomrange(0, startingCityPopulation.size());
+    printf("chose person index %d\n", startingPersonIndex);
+    printf("  named: %s\n", startingCityPopulation[startingPersonIndex].m_preferredName.c_str());
+    
+    PersonAddress startPerson(startingCoord.x,
+			      startingCoord.y,
+			      startingPersonIndex);
+
+    ms.m_startPerson = startPerson;
+
+    // todo fill in end person
+
+    float destRadius = fmap(stageNum, 0, length - 1,
+			    beginningRadius, endingRadius);
+
+    printf("dest radius: %f\n", destRadius);
+
+    std::vector<Node*> citiesInDestRadius =
+      m_nodeMgr.getCityNodesInRadius(startingCity->getCoord(),
+				     destRadius);
+
+    Node* destNodePtr = citiesInDestRadius[randomrange(0, citiesInDestRadius.size())];
+
+    assert(destNodePtr != NULL);
+
+    City* destCity = destNodePtr->getCity();
+
+    printf("gms stage got dest city\n");
+
+    std::vector<Person> destCityPopulation = destCity->getPeople();
+    Coord destCoord = destCity->getCoord();
+
+    int destPersonIndex = -1;
+    while (true) {
+      destPersonIndex = randomrange(0, destCityPopulation.size());
+      if ((startingCoord.x != destCoord.x) ||
+	  (startingCoord.y != destCoord.y) ||
+	  (destPersonIndex != startingPersonIndex)) {
+	break;
+      }
+      printf("whoops, generated dest == start\n");
+    }      
+	
+    printf("chose dest person index %d\n", destPersonIndex);
+    printf("  named: %s\n", destCityPopulation[destPersonIndex].m_preferredName.c_str());
+    PersonAddress destPerson(destCoord.x,
+			     destCoord.y,
+			     destPersonIndex);
+    
+    ms.m_destPerson = destPerson;
+    ms.m_stagePayoff = randomrange(stageNum + 1,
+				   2 * stageNum + 2);
+
+    printf("payoff: %d\n", ms.m_stagePayoff);
+
+    m.m_missionStages.push_back(ms);
+    
+    beginningNode = destNodePtr;
+  }
+
+  m_missionMgr.addMission(m);
 }

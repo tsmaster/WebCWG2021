@@ -22,9 +22,8 @@ class HighwayGameMode
  public:
   HighwayGameMode();
 
-  void init(olc::Sprite* menuSprite, olc::Sprite* carSprite);
-
-  void destroy();
+  void init(olc::Sprite* menuSprite, olc::Sprite* carSprite,
+	    GameClock* gameClock, NodeMgr* nodeMgr);
 
   bool update(CarsWithGuns* pge, float elapsedSeconds);
 
@@ -52,9 +51,7 @@ protected:
   
 private:
   Coord m_centerCoord;
-  GameClock* m_gameClock;
-  NodeMgr* m_nodeMgr;
-
+  
   float m_tileScale;
   float m_viewRadius;
 
@@ -73,6 +70,9 @@ private:
   std::vector<Vec2i> m_path;
   float m_timeRemainingBeforeMove;
   float m_timeToMove = 0.2f;
+
+  GameClock* m_gameClock;
+  NodeMgr* m_nodeMgr;
 };
 
 #endif // MODE_HIGHWAY_H
