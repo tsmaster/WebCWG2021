@@ -19,6 +19,8 @@ public:
   int x, y, width, height;
 
   std::string owner_name;
+
+  int door_x;
 };
 
 class CityMap

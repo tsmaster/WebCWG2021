@@ -579,7 +579,7 @@ void CityGameMode::drawMissionQuestion(CarsWithGuns* game, int personIndex)
 	 
   Building bldg = cityBuildings[bldgIndex];
 
-  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f bldgVec = Vec2f(bldg.door_x, bldg.y);			  
   Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
   Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
 
@@ -616,7 +616,7 @@ void CityGameMode::drawMissionDots(CarsWithGuns* game, int personIndex)
 	 
   Building bldg = cityBuildings[bldgIndex];
 
-  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f bldgVec = Vec2f(bldg.door_x, bldg.y);			  
   Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
   Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
 
@@ -652,7 +652,7 @@ void CityGameMode::drawMissionExclamation(CarsWithGuns* game, int personIndex)
 	 
   Building bldg = cityBuildings[bldgIndex];
 
-  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f bldgVec = Vec2f(bldg.door_x, bldg.y);			  
   Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
   Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
 

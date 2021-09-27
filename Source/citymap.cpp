@@ -319,11 +319,10 @@ void CityMap::placeBuilding(int x, int y, int w, int h, std::string ownerName)
   newBuilding.width = w;
   newBuilding.height = h;
 
-  unsigned int fnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "FIRST NAME");
-  unsigned int lnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "LAST NAME");
+  //unsigned int fnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "FIRST NAME");
+  //unsigned int lnseed = makeSeedKey(m_x, m_y, m_buildings.size(), "LAST NAME");
 
   newBuilding.owner_name = ownerName;
-  m_buildings.push_back(newBuilding);
   
   for (int nx = 0; nx < w; ++nx) {
     for (int ny = 0; ny < h; ++ny) {
@@ -382,16 +381,22 @@ void CityMap::placeBuilding(int x, int y, int w, int h, std::string ownerName)
 
   int di = randomrange(0, doorVec.size());
   Vec2i dt = doorVec[di];
-    
+
+  int doorX = -1;
+  
   if (w > 2) {
-    setTileAt(x + randomrange(1, w-1),
-	      y,
-	      dt.x, dt.y);
+    doorX = x + randomrange(1, w-1);
   } else {
-    setTileAt(x + randomrange(0, 2),
-	      y,
-	      dt.x, dt.y);
+    doorX = x + randomrange(0, 2);
   }
+
+  setTileAt(doorX,
+	    y,
+	    dt.x, dt.y);
+
+  newBuilding.door_x = doorX;
+  
+  m_buildings.push_back(newBuilding);
 }
 
 Vec2i CityMap::findNearestPos(Vec2i p, std::set<Vec2i> vecSet)
