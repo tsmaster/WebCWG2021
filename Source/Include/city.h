@@ -38,7 +38,7 @@ class City
 
   CityMap* getCityMap() { return m_cityMap; }
 
-  std::vector<Person> getPeople() { return m_people; }
+  std::vector<Person*> getPeople();
   
  private:
   Coord m_coord;

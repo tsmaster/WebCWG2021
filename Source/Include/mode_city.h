@@ -18,13 +18,16 @@
 
 class CarsWithGuns;
 class GameClock;
+class MissionMgr;
 
 class CityGameMode
 {
  public:
   CityGameMode();
 
-  void init(olc::Sprite* menuSprite, olc::Sprite* citySprite, olc::Sprite* carSprite);
+  void init(olc::Sprite* menuSprite, olc::Sprite* citySprite,
+	    olc::Sprite* carSprite, olc::Sprite* missionSprite,
+	    MissionMgr* missionMgr);
 
   void destroy();
 
@@ -57,6 +60,11 @@ protected:
   int findBuilding(int x, int y);
 
   std::set<Vec2i> getDestinationsForBuilding(int buildingIndex);
+
+  void drawMissionQuestion(CarsWithGuns* game, int personIndex);
+  void drawMissionDots(CarsWithGuns* game, int personIndex);
+  void drawMissionExclamation(CarsWithGuns* game, int personIndex);
+  
 private:
   City m_city = City(0, 0);
   Coord m_centerCoord;
@@ -72,6 +80,7 @@ private:
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_citySprite;
   olc::Sprite* m_carSprite;
+  olc::Sprite* m_missionSprite;
 
   int m_carHeading; // 0 = east, 2 = north, 4 = west, 6 = south
   Vec2i m_carPos;
@@ -88,6 +97,8 @@ private:
 
   bool m_bShowingResidents = false;
   PopupDialog m_residentsPanel;
+
+  MissionMgr* m_missionMgr;
 };
 
 #endif // MODE_CITY_H

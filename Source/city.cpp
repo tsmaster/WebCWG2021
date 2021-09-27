@@ -214,3 +214,12 @@ void City::populatePeople()
     }
   }  
 }
+
+std::vector<Person*> City::getPeople()
+{
+  std::vector<Person*> outVec;
+  for (int i= 0; i < m_people.size(); ++i) {
+    outVec.push_back(&(m_people[i]));
+  }
+  return outVec;
+}

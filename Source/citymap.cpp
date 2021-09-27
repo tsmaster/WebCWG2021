@@ -239,7 +239,7 @@ void CityMap::populate(int x, int y, int population,
 		 sizeCandidates.end(),
 		 std::default_random_engine(seed));
 
-    std::vector<Person> cityResidentsList = city->getPeople();
+    std::vector<Person*> cityResidentsList = city->getPeople();
     
     bool placed = false;
     for (Vec2i sz : sizeCandidates) {
@@ -258,9 +258,9 @@ void CityMap::populate(int x, int y, int population,
 	    placeBuilding(personPosn.x + dx,
 			  personPosn.y + dy,
 			  w, h,
-			  cityResidentsList[buildingIndex].m_preferredName);
+			  cityResidentsList[buildingIndex]->m_preferredName);
 	    
-	    cityResidentsList[buildingIndex].setBuildingIndex(buildingIndex);
+	    cityResidentsList[buildingIndex]->setBuildingIndex(buildingIndex);
 
 	    for (int resX = personPosn.x + dx - 1; resX <= personPosn.x + dx + w; ++resX) {
 	      for (int resY = personPosn.y + dy - 1; resY <= personPosn.y + dy + h; ++resY) {

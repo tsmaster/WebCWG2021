@@ -20,13 +20,18 @@ CityGameMode::CityGameMode()
 
 void CityGameMode::init(olc::Sprite* menuSprite,
 			olc::Sprite* citySprite,
-			olc::Sprite* carSprite)
+			olc::Sprite* carSprite,
+			olc::Sprite* missionSprite,
+			MissionMgr* missionMgr)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_gameClock = new GameClock();
   m_menuSprite = menuSprite;
   m_citySprite = citySprite;
   m_carSprite = carSprite;
+  m_missionSprite = missionSprite;
+  m_missionMgr = missionMgr;
+    
   m_carPos = Vec2i(0, 0);
 
   m_isFindingPath = false;
@@ -175,9 +180,9 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
   }
 
   if (game->GetKey(olc::Key::R).bPressed) {
-    for (Person p : m_city.getPeople()) {
-      printf("%s ", p.m_preferredName.c_str());
-      for (PersonAddress fa : p.getFriendAddresses()) {
+    for (Person* p : m_city.getPeople()) {
+      printf("%s ", p->m_preferredName.c_str());
+      for (PersonAddress fa : p->getFriendAddresses()) {
 	if ((fa.wx == m_city.getCoord().x) &&
 	    (fa.wy == m_city.getCoord().y)) {
 	  printf("L[%d] ", fa.personIndex);
@@ -196,6 +201,11 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
 				  3,
 				  15, 20);
   }
+
+  if (game->GetKey(olc::Key::COMMA).bPressed) {
+    printf("advancing mission\n");
+    game->progressMissionSequence();
+  }    
 
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
     int mx = game->GetMouseX();
@@ -313,6 +323,41 @@ void CityGameMode::draw(CarsWithGuns* game)
   
   drawCar(game);
 
+  for (Mission* m : m_missionMgr->getMissions()) {
+    assert(m != NULL);
+    for (MissionStage* ms : m->getStages()) {
+      assert(ms != NULL);
+      switch (ms->m_state) {
+      case MissionStageState::Hidden:
+      case MissionStageState::Completed:
+	// do nothing
+	break;
+      case MissionStageState::Available:
+	{
+	  // draw ? at start location
+	  if ((ms->m_startPerson.wx == m_city.getCoord().x) &&
+	      (ms->m_startPerson.wy == m_city.getCoord().y)) {
+	    drawMissionQuestion(game, ms->m_startPerson.personIndex);
+	  }
+	}
+	break;
+      case MissionStageState::InProgress:
+	// draw ... at start location
+	if ((ms->m_startPerson.wx == m_city.getCoord().x) &&
+	    (ms->m_startPerson.wy == m_city.getCoord().y)) {
+	  drawMissionDots(game, ms->m_startPerson.personIndex);
+	}
+
+	// draw ! at dest location
+	if ((ms->m_destPerson.wx == m_city.getCoord().x) &&
+	    (ms->m_destPerson.wy == m_city.getCoord().y)) {
+	  drawMissionExclamation(game, ms->m_destPerson.personIndex);
+	}
+	break;
+      }
+    }
+  }  
+
   m_popupLocationPanel.draw(4, 4, game, m_menuSprite);
 
   if (m_bShowingResidents) {
@@ -420,8 +465,8 @@ void CityGameMode::setCity(City c)
 
   std::vector<ButtonDesc> buttons;
   std::string resmsg = std::string("Residents:\n\n");
-  for (Person p : m_city.getPeople()) {
-    resmsg += p.m_preferredName;
+  for (Person* p : m_city.getPeople()) {
+    resmsg += p->m_preferredName;
     resmsg += std::string("\n");
   }
   resmsg = resmsg.substr(0, resmsg.size() - 1);
@@ -520,4 +565,113 @@ std::set<Vec2i> CityGameMode::getDestinationsForBuilding(int buildingIndex)
   }
 
   return outSet;
+}
+
+void CityGameMode::drawMissionQuestion(CarsWithGuns* game, int personIndex)
+{
+  Person* person = m_city.getPeople()[personIndex];
+  int bldgIndex = person->getBuildingIndex();
+  assert (bldgIndex >= 0);
+
+  std::vector<Building> cityBuildings = m_cityMap.getBuildings();
+
+  assert(bldgIndex < cityBuildings.size());
+	 
+  Building bldg = cityBuildings[bldgIndex];
+
+  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(0, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+  
+}
+
+void CityGameMode::drawMissionDots(CarsWithGuns* game, int personIndex)
+{
+  Person* person = m_city.getPeople()[personIndex];
+  int bldgIndex = person->getBuildingIndex();
+  assert (bldgIndex >= 0);
+
+  std::vector<Building> cityBuildings = m_cityMap.getBuildings();
+
+  assert(bldgIndex < cityBuildings.size());
+	 
+  Building bldg = cityBuildings[bldgIndex];
+
+  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(32, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);  
+}
+
+void CityGameMode::drawMissionExclamation(CarsWithGuns* game, int personIndex)
+{
+  Person* person = m_city.getPeople()[personIndex];
+  int bldgIndex = person->getBuildingIndex();
+  assert (bldgIndex >= 0);
+
+  std::vector<Building> cityBuildings = m_cityMap.getBuildings();
+
+  assert(bldgIndex < cityBuildings.size());
+	 
+  Building bldg = cityBuildings[bldgIndex];
+
+  Vec2f bldgVec = Vec2f(bldg.x, bldg.y);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, bldgVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, bldgVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(16, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);  
 }

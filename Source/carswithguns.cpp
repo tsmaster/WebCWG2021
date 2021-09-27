@@ -477,7 +477,9 @@ bool CarsWithGuns::updateHighwayMode(float elapsedSeconds)
 
 void CarsWithGuns::initCityMode()
 {
-  m_cityGameMode.init(m_menuSprite, m_citySprite, m_carSprite);
+  m_cityGameMode.init(m_menuSprite, m_citySprite,
+		      m_carSprite, m_missionSprite,
+		      &m_missionMgr);
 }
 
 void CarsWithGuns::destroyCityMode()
@@ -607,11 +609,11 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
     City* startingCity = beginningNode->getCity();
     printf("starting at city %s\n", startingCity->getName().c_str());
 
-    std::vector<Person> startingCityPopulation = startingCity->getPeople();
+    std::vector<Person*> startingCityPopulation = startingCity->getPeople();
     
     int startingPersonIndex = randomrange(0, startingCityPopulation.size());
     printf("chose person index %d\n", startingPersonIndex);
-    printf("  named: %s\n", startingCityPopulation[startingPersonIndex].m_preferredName.c_str());
+    printf("  named: %s\n", startingCityPopulation[startingPersonIndex]->m_preferredName.c_str());
 
     Coord beginningCoord = startingCity->getCoord();
     
@@ -638,7 +640,7 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
 
     printf("dest city: %s\n", destCity->getName().c_str());
 
-    std::vector<Person> destCityPopulation = destCity->getPeople();
+    std::vector<Person*> destCityPopulation = destCity->getPeople();
     Coord destCoord = destCity->getCoord();
 
     int destPersonIndex = -1;
@@ -663,7 +665,7 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
     }      
 	
     printf("chose dest person index %d\n", destPersonIndex);
-    printf("  named: %s\n", destCityPopulation[destPersonIndex].m_preferredName.c_str());
+    printf("  named: %s\n", destCityPopulation[destPersonIndex]->m_preferredName.c_str());
     PersonAddress destPerson(destCoord.x,
 			     destCoord.y,
 			     destPersonIndex);
