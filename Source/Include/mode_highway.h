@@ -16,6 +16,7 @@
 
 class CarsWithGuns;
 class GameClock;
+class MissionMgr;
 
 class HighwayGameMode
 {
@@ -23,7 +24,9 @@ class HighwayGameMode
   HighwayGameMode();
 
   void init(olc::Sprite* menuSprite, olc::Sprite* carSprite,
-	    GameClock* gameClock, NodeMgr* nodeMgr);
+	    olc::Sprite* missionSprite,
+	    GameClock* gameClock, NodeMgr* nodeMgr,
+	    MissionMgr* missionMgr);
 
   bool update(CarsWithGuns* pge, float elapsedSeconds);
 
@@ -46,6 +49,9 @@ protected:
   bool handleUserInput(CarsWithGuns* pge, bool& outSwitched);
 
   void drawCar(CarsWithGuns* game);
+  void drawMissionQuestion(CarsWithGuns* game, Vec2i posn);
+  void drawMissionDots(CarsWithGuns* game, Vec2i posn);
+  void drawMissionExclamation(CarsWithGuns* game, Vec2i posn);
 
   std::vector<bdg_astar::Link> expandPosn(Vec2i);
   
@@ -58,6 +64,7 @@ private:
   PopupDialog m_popupLocationPanel;
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_carSprite;
+  olc::Sprite* m_missionSprite;
 
   Vec2f m_carPos = Vec2f(0.0f, 0.0f);
   int m_carHeading; //0-7, 0:E
@@ -73,6 +80,7 @@ private:
 
   GameClock* m_gameClock;
   NodeMgr* m_nodeMgr;
+  MissionMgr* m_missionMgr;
 };
 
 #endif // MODE_HIGHWAY_H

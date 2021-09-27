@@ -7,9 +7,10 @@
 
 enum class MissionStageState
 {
-  NotStarted,
-  Active,
-  Completed  
+  Hidden,       // not displayed to player
+  Available,    // shown as (?) to prompt player to start the mission
+  InProgress,   // shown with (...) on start and (!) on dest if mission simply needs to "Report in"
+  Completed     // not displayed, complete.
 };
 
 
@@ -44,6 +45,9 @@ class MissionStage
 class Mission
 {
  public:
+  void addStage(MissionStage stage) { m_missionStages.push_back(stage); }
+  std::vector<MissionStage *> getStages();
+ private:
   std::vector<MissionStage> m_missionStages;
 };
 
@@ -51,10 +55,11 @@ class Mission
 class MissionMgr
 {
  public:
-  std::vector<Mission> m_missions;
-
-  void addMission(Mission& mission) { m_missions.push_back(mission); }
+  void addMission(Mission mission) { m_missions.push_back(mission); }
+  std::vector<Mission *> getMissions();
   void reset();
+ private:
+  std::vector<Mission> m_missions;  
 };
 
 #endif //mission_h

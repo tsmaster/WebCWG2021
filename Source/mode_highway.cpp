@@ -18,15 +18,19 @@ HighwayGameMode::HighwayGameMode()
 }
 
 void HighwayGameMode::init(olc::Sprite* menuSprite, olc::Sprite* carSprite,
-			   GameClock* gameClock, NodeMgr* nodeMgr)
+			   olc::Sprite* missionSprite,
+			   GameClock* gameClock, NodeMgr* nodeMgr,
+			   MissionMgr* missionMgr)
 {
   m_centerCoord = Coord(0, 0, 0);
   m_menuSprite = menuSprite;
   m_carSprite = carSprite;
+  m_missionSprite = missionSprite;
   m_carPos = Vec2f(0.0f, 0.0f);
   m_carHeading = 0;
   m_gameClock = gameClock;
   m_nodeMgr = nodeMgr;
+  m_missionMgr = missionMgr;
 }
 
 bool HighwayGameMode::update(CarsWithGuns* pge, float elapsedSeconds)
@@ -233,6 +237,11 @@ bool HighwayGameMode::handleUserInput(CarsWithGuns* game, bool& outSwitched)
     game->generateMissionSequence(carCoord,
 				  3,
 				  5.0, 10.0);
+  }
+
+  if (game->GetKey(olc::Key::COMMA).bPressed) {
+    printf("advancing mission\n");
+    game->progressMissionSequence();
   }  
 
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
@@ -347,7 +356,117 @@ void HighwayGameMode::draw(CarsWithGuns* pge)
     n->drawLabel(pge, this);
   }
 
+  for (Mission* m : m_missionMgr->getMissions()) {
+    assert(m != NULL);
+    for (MissionStage* ms : m->getStages()) {
+      assert(ms != NULL);
+      switch (ms->m_state) {
+      case MissionStageState::Hidden:
+      case MissionStageState::Completed:
+	// do nothing
+	break;
+      case MissionStageState::Available:
+	{
+	// draw ? at start location
+	Vec2i pv = Vec2i(ms->m_startPerson.wx,
+			 ms->m_startPerson.wy);
+	drawMissionQuestion(pge, pv);
+	}
+	break;
+      case MissionStageState::InProgress:
+	// draw ... at start location
+	Vec2i spv = Vec2i(ms->m_startPerson.wx,
+			  ms->m_startPerson.wy);
+	drawMissionDots(pge, spv);
+
+	// draw ! at dest location
+	Vec2i dpv = Vec2i(ms->m_destPerson.wx,
+			  ms->m_destPerson.wy);
+	drawMissionExclamation(pge, dpv);
+	break;
+      }
+    }
+  }
+
   m_popupLocationPanel.draw(4, 4, pge, m_menuSprite);  
+}
+
+void HighwayGameMode::drawMissionQuestion(CarsWithGuns* game, Vec2i posn)
+{
+  Vec2f personVec = Vec2f(posn.x, posn.y + 1);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, personVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, personVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(0, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+}
+
+void HighwayGameMode::drawMissionDots(CarsWithGuns* game, Vec2i posn)
+{
+  Vec2f personVec = Vec2f(posn.x, posn.y + 1);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, personVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, personVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(32, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
+}
+
+void HighwayGameMode::drawMissionExclamation(CarsWithGuns* game, Vec2i posn)
+{
+  Vec2f personVec = Vec2f(posn.x, posn.y + 1);			  
+  Vec2f lowerLeftScreenCoord = tileToScreenCoord(game, personVec);
+  Vec2f upperRightScreenCoord = tileToScreenCoord(game, personVec + Vec2f(1.0f, 1.0f));
+
+  Vec2i midScreenCoord = Vec2i(int((lowerLeftScreenCoord.x + upperRightScreenCoord.x)/2.0f),
+			       int((lowerLeftScreenCoord.y + upperRightScreenCoord.y)/2));
+  
+  olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
+  game->SetPixelMode(olc::Pixel::MASK);
+
+  Vec2i tc = Vec2i(16, 0);
+
+  olc::vi2d vScreenLocation = {
+    midScreenCoord.x - 8,
+    midScreenCoord.y - 8};
+  olc::vi2d vTileLocation = {tc.x, tc.y};
+  olc::vi2d vTileSize = {16, 16};
+    
+  game->DrawPartialSprite(vScreenLocation, m_missionSprite,
+			  vTileLocation, vTileSize);
+  
+  game->SetPixelMode(currentPixelMode);
 }
 
 void HighwayGameMode::drawCar(CarsWithGuns* game)

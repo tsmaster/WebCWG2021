@@ -27,6 +27,8 @@ class CarsWithGuns : public olc::PixelGameEngine
   void generateMissionSequence(Coord startingCoord, int length,
 			       float beginningRadius, float endingRadius);
 
+  void progressMissionSequence();
+
   NodeMgr* getNodeMgr() { return &m_nodeMgr; }
   
  protected:
@@ -85,6 +87,7 @@ private:
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_citySprite;
   olc::Sprite* m_carSprite;
+  olc::Sprite* m_missionSprite;
   
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;

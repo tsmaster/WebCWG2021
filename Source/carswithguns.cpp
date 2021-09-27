@@ -206,6 +206,8 @@ bool CarsWithGuns::OnUserCreate()
   m_citySprite = new olc::Sprite("Assets/Sprites/kenney_rpgurbanpack/Tilemap/tilemap_32.png");
 
   m_carSprite = new olc::Sprite("Assets/Sprites/WhiteCar/white-car-sprite.png");
+  
+  m_missionSprite = new olc::Sprite("Assets/Sprites/mission-signs.png");
 
   setGameMode(GameMode::GM_BDG);
 
@@ -452,7 +454,9 @@ void CarsWithGuns::destroyMainMenuMode()
 void CarsWithGuns::initHighwayMode()
 {
   m_highwayGameMode.init(m_menuSprite, m_carSprite,
-			 &m_gameClock, &m_nodeMgr);
+			 m_missionSprite,
+			 &m_gameClock, &m_nodeMgr,
+			 &m_missionMgr);
 }
 
 void CarsWithGuns::destroyHighwayMode()
@@ -592,31 +596,30 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
   for (int stageNum = 0; stageNum < length; ++stageNum) {
     printf("gms stage top\n");
     MissionStage ms;
-    ms.m_state = MissionStageState::NotStarted;
+    ms.m_state = (stageNum == 0 ?
+		  MissionStageState::Available :
+		  MissionStageState::Hidden);
     ms.m_startMsg = std::string("Hey, take this thing over there. Thanks!");
     ms.m_helpMsg = std::string("You should be taking that thing over there.");
     ms.m_completeMsg = std::string("Thanks for bringing me this thing.");
     printf("gms assigned some fields\n");
 
     City* startingCity = beginningNode->getCity();
-
-    CityMap* startingCityMap = startingCity->getCityMap();
-
-    printf("gms stage got city map\n");
+    printf("starting at city %s\n", startingCity->getName().c_str());
 
     std::vector<Person> startingCityPopulation = startingCity->getPeople();
     
     int startingPersonIndex = randomrange(0, startingCityPopulation.size());
     printf("chose person index %d\n", startingPersonIndex);
     printf("  named: %s\n", startingCityPopulation[startingPersonIndex].m_preferredName.c_str());
+
+    Coord beginningCoord = startingCity->getCoord();
     
-    PersonAddress startPerson(startingCoord.x,
-			      startingCoord.y,
+    PersonAddress startPerson(beginningCoord.x,
+			      beginningCoord.y,
 			      startingPersonIndex);
 
     ms.m_startPerson = startPerson;
-
-    // todo fill in end person
 
     float destRadius = fmap(stageNum, 0, length - 1,
 			    beginningRadius, endingRadius);
@@ -633,7 +636,7 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
 
     City* destCity = destNodePtr->getCity();
 
-    printf("gms stage got dest city\n");
+    printf("dest city: %s\n", destCity->getName().c_str());
 
     std::vector<Person> destCityPopulation = destCity->getPeople();
     Coord destCoord = destCity->getCoord();
@@ -641,9 +644,19 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
     int destPersonIndex = -1;
     while (true) {
       destPersonIndex = randomrange(0, destCityPopulation.size());
-      if ((startingCoord.x != destCoord.x) ||
-	  (startingCoord.y != destCoord.y) ||
-	  (destPersonIndex != startingPersonIndex)) {
+
+      printf("start: %d %d %d\n",
+	     beginningCoord.x,
+	     beginningCoord.y,
+	     startingPersonIndex);
+      printf("dest: %d %d %d\n",
+	     destCoord.x,
+	     destCoord.y,
+	     destPersonIndex);
+      
+      if ((beginningCoord.x != destCoord.x) ||
+	  (beginningCoord.y != destCoord.y) ||
+	  (startingPersonIndex != destPersonIndex)) {
 	break;
       }
       printf("whoops, generated dest == start\n");
@@ -661,10 +674,40 @@ void CarsWithGuns::generateMissionSequence(Coord startingCoord, int length, floa
 
     printf("payoff: %d\n", ms.m_stagePayoff);
 
-    m.m_missionStages.push_back(ms);
+    m.addStage(ms);
     
     beginningNode = destNodePtr;
   }
 
   m_missionMgr.addMission(m);
+}
+
+
+void CarsWithGuns::progressMissionSequence()
+{
+  for (Mission* m : m_missionMgr.getMissions()) {
+    std::vector<MissionStage*> stages = m->getStages();
+    
+    for (int stageIndex = 0; stageIndex < stages.size(); ++stageIndex) {
+      if (stages[stageIndex]->m_state == MissionStageState::Available) {
+	stages[stageIndex]->m_state = MissionStageState::InProgress;
+	printf("mission %d is now in progress.\n", stageIndex);
+	return;
+      }
+
+      if (stages[stageIndex]->m_state == MissionStageState::InProgress) {
+	stages[stageIndex]->m_state = MissionStageState::Completed;
+	printf("mission %d is now complete.\n", stageIndex);
+	if (stageIndex < stages.size() - 1) {
+	  stages[stageIndex + 1]->m_state = MissionStageState::Available;
+	  printf("mission %d is now available.\n", stageIndex + 1);
+	  return;
+	} else {
+	  m_missionMgr.reset();
+	  printf("resetting mission manager\n");
+	  return;
+	}
+      }
+    }
+  }
 }
