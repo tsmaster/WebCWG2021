@@ -7,6 +7,7 @@
 #include "button.h"
 #include "mission.h"
 #include "modes.h"
+#include "mode_building.h"
 #include "mode_city.h"
 #include "mode_highway.h"
 #include "modemgr.h"
@@ -56,6 +57,11 @@ class CarsWithGuns : public olc::PixelGameEngine
   void drawCityMode();
   bool updateCityMode(float seconds);
 
+  void initBuildingMode();
+  void destroyBuildingMode();
+  void drawBuildingMode();
+  bool updateBuildingMode(float seconds);
+  
   void initInstructionsMode();
   void updateInstructionsMode(float seconds);
 
@@ -81,6 +87,7 @@ private:
   ModeMgr m_modeMgr;
   HighwayGameMode m_highwayGameMode;
   CityGameMode m_cityGameMode;
+  BuildingGameMode m_buildingGameMode;
 
   bool m_bIsPlaying = true;
 
@@ -88,6 +95,12 @@ private:
   olc::Sprite* m_citySprite;
   olc::Sprite* m_carSprite;
   olc::Sprite* m_missionSprite;
+  olc::Sprite* m_faceSprite;
+  olc::Sprite* m_hairSprite;
+  olc::Sprite* m_pantsSprite;
+  olc::Sprite* m_shirtsSprite;
+  olc::Sprite* m_shoesSprite;
+  olc::Sprite* m_skinSprite;
   
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;

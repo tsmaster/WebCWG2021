@@ -27,6 +27,7 @@
 #include "hsv.h"
 #include "screen_bg.h"
 #include "modes.h"
+#include "mode_building.h"
 #include "mode_city.h"
 #include "mode_highway.h"
 #include "modemgr.h"
@@ -165,6 +166,19 @@ bool CarsWithGuns::OnUserCreate()
 					GameMode::GM_MAIN_MENU,
 					GameMode::GM_MAIN_MENU);
 
+  entt::entity eBuildingMode = m_registry.create();
+  m_registry.emplace<ScreenBackgroundComponent>(eBuildingMode,
+						olc::Pixel(16, 16, 16));
+
+  m_registry.emplace<GameModeComponent>(eBuildingMode,
+					GameMode::GM_BUILDING,
+					std::string(""),
+					olc::nDefaultPixel,
+					0.0f,
+					-1.0f,
+					-1.0f,
+					GameMode::GM_NONE,
+					GameMode::GM_NONE);
 
 	
   // Construction (root menu is a 1x5 table)
@@ -208,6 +222,13 @@ bool CarsWithGuns::OnUserCreate()
   m_carSprite = new olc::Sprite("Assets/Sprites/WhiteCar/white-car-sprite.png");
   
   m_missionSprite = new olc::Sprite("Assets/Sprites/mission-signs.png");
+
+  m_faceSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_face.png");
+  m_hairSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_hair.png");
+  m_pantsSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_pants.png");
+  m_shirtsSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_shirts.png");
+  m_shoesSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_shoes.png");
+  m_skinSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_skin.png");
 
   setGameMode(GameMode::GM_BDG);
 
@@ -268,6 +289,8 @@ void CarsWithGuns::drawCurrentMode() {
     drawHighwayMode();
   } else if (mode.modeID == GM_CITY) {
     drawCityMode();
+  } else if (mode.modeID == GM_BUILDING) {
+    drawBuildingMode();
   } else if (mode.modeID == GM_INSTRUCTIONS) {
     m_menuMgr.Draw(m_menuSprite, {30, 30});
   }
@@ -327,6 +350,9 @@ void CarsWithGuns::updateCurrentMode(float fElapsedSeconds)
       }
     }
     break;
+  case GM_BUILDING:
+    updateBuildingMode(fElapsedSeconds);
+    break;
   case GM_INSTRUCTIONS:
     updateInstructionsMode(fElapsedSeconds);
     break;
@@ -362,6 +388,9 @@ void CarsWithGuns::setGameMode(GameMode newMode)
     case GameMode::GM_CITY:
       destroyCityMode();
       break;
+    case GameMode::GM_BUILDING:
+      destroyBuildingMode();
+      break;
     }
   }
 
@@ -387,8 +416,10 @@ void CarsWithGuns::setGameMode(GameMode newMode)
     initHighwayMode();
     break;
   case GameMode::GM_CITY:
-    printf("initing city\n");
     initCityMode();
+    break;
+  case GameMode::GM_BUILDING:
+    initBuildingMode();
     break;
   case GameMode::GM_INSTRUCTIONS:
     initInstructionsMode();
@@ -500,6 +531,31 @@ bool CarsWithGuns::updateCityMode(float elapsedSeconds)
   return m_cityGameMode.update(this, elapsedSeconds);
 }
 
+void CarsWithGuns::initBuildingMode()
+{
+  m_buildingGameMode.init(m_menuSprite,
+			  m_faceSprite,
+			  m_hairSprite,
+			  m_pantsSprite,
+			  m_shirtsSprite,
+			  m_shoesSprite,
+			  m_skinSprite);
+}
+
+void CarsWithGuns::destroyBuildingMode()
+{
+}
+
+void CarsWithGuns::drawBuildingMode()
+{
+  m_buildingGameMode.draw(this);
+}
+
+bool CarsWithGuns::updateBuildingMode(float elapsedSeconds)
+{
+  return m_buildingGameMode.update(this, elapsedSeconds);
+}
+
 void CarsWithGuns::initInstructionsMode()
 {
   m_menuMgr.Open(&m_menu);
@@ -557,6 +613,11 @@ void CarsWithGuns::applyModeArguments(ModeChangeRequest mcr)
       
       m_cityGameMode.setCity(c);
     }
+    break;
+  case GameMode::GM_BUILDING:
+    m_buildingGameMode.setCity(mcr.city);
+    m_buildingGameMode.setBuildingIndex(mcr.buildingIndex);
+    break;
   }
 }
 

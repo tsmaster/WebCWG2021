@@ -15,6 +15,7 @@ enum GameMode {
   GM_CITY,
   GM_ESC_MENU,
   GM_SETTINGS,
+  GM_BUILDING,
 
   GM_LAST,
 };

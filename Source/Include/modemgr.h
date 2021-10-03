@@ -7,6 +7,8 @@
 
 #include "modes.h"
 
+class City;
+
 class ModeChangeRequest
 {
  public:
@@ -20,6 +22,9 @@ class ModeChangeRequest
   int population;
 
   bool exitEast, exitNorth, exitWest, exitSouth;
+
+  City* city;
+  int buildingIndex;
 
   static ModeChangeRequest modeChangeRequestFactory(GameMode newGameMode);  
 };

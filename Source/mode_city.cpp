@@ -205,7 +205,15 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
   if (game->GetKey(olc::Key::COMMA).bPressed) {
     printf("advancing mission\n");
     game->progressMissionSequence();
-  }    
+  }
+
+  if (game->GetKey(olc::Key::B).bPressed) {
+    printf("entering building\n");
+    ModeChangeRequest mcr = ModeChangeRequest::modeChangeRequestFactory(GameMode::GM_BUILDING);
+    mcr.city = &m_city;
+    mcr.buildingIndex = 0; // TODO fancier
+    game->requestGameMode(mcr);
+  }
 
   if (game->GetMouse(olc::Mouse::LEFT).bPressed) {
     int mx = game->GetMouseX();
