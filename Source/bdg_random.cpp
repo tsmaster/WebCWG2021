@@ -1,3 +1,5 @@
+#include "bdg_random.h"
+
 #include <cstdio>
 #include <math.h>
 #include <stdlib.h>
@@ -69,4 +71,35 @@ void rand_sphere_point(float& outX, float& outY, float& outZ)
 
     return;
   }
+}
+
+std::vector<float> normalizeProbabilities(std::vector<float> inProbs)
+{
+  float sum = 0.0f;
+  for (float p : inProbs) {
+    sum += p;
+  }
+
+  std::vector<float> outProbs;
+  for (float p : inProbs) {
+    outProbs.push_back(p / sum);
+  }
+
+  return outProbs;
+}
+
+// assumes normalized distribution
+int randomFromDistribution(std::vector<float> probs)
+{
+  float r = float(rand()) / RAND_MAX;
+  
+  int i = 0;
+  for (float p : probs) {
+    if (r < p) {
+      return i;
+    }
+    r -= p;
+    ++i;
+  }
+  return -1;
 }

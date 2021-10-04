@@ -661,6 +661,19 @@ void BuildingGameMode::drawPerson(CarsWithGuns* game, int x, int y)
     {6, 0, -15}, // 18 - mouth
   };
 
+  std::vector<float> mouthProbabilities {
+    1.0f,
+    1.0f,
+    0.8f,
+    0.1f,
+    0.2f,
+    0.6f,
+    0.6f
+  };
+
+  mouthProbabilities = normalizeProbabilities(mouthProbabilities);
+  
+
   olc::Pixel::Mode currentPixelMode = game->GetPixelMode();
   game->SetPixelMode(olc::Pixel::MASK);
   float scale = 0.45f;
@@ -708,7 +721,7 @@ void BuildingGameMode::drawPerson(CarsWithGuns* game, int x, int y)
   SpriteCoords noseSpriteCoord = noseSprites[noseIndex];
   
   // mouth
-  int mouthIndex = randomrange(0, mouthSprites.size());
+  int mouthIndex = randomFromDistribution(mouthProbabilities);
   SpriteCoords mouthSpriteCoord = mouthSprites[mouthIndex];
   
   
