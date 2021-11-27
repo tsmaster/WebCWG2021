@@ -1,12 +1,15 @@
 #ifndef bdg_car_h
 #define bdg_car_h
 
+#include "bicycle_car_physics.h"
 #include "bdg_math.h"
 #include "carswithguns.h"
-#include "part_phys_syst.h"
+//#include "part_phys_syst.h"
+
 
 class Camera;
 class WorldQuad;
+class CarController;
 
 class Bdg_Car
 {
@@ -39,6 +42,8 @@ class Bdg_Car
   float getHeading() { return m_heading; }
 
   void stop();
+
+  void setController(CarController* inCtrl);
   
  private:
   Vec2f m_position;
@@ -46,24 +51,29 @@ class Bdg_Car
   Vec2f m_velocity;
   float m_speed = 0.0f;
   float m_heading = 0.0f;
+  olc::Decal* m_decal;
 
+  const float m_carLength = 4.0f;
+  const float m_carWidth = 2.0f;
+  
+  /*  
   float m_topSpeed;
   float m_acceleration;
   float m_braking;
 
-  olc::Decal* m_decal;
 
   float m_ctrlSteer = 0.0f;
   float m_ctrlThrottle = 0.0f;
   float m_ctrlBrake = 0.0f;
 
-  const float m_carLength = 4.0f;
-  const float m_carWidth = 2.0f;
-
   ParticlePhysicsSystem m_particles;
 
   const float m_throttleFactor = 20.0f;
   const float m_steerFactor = 0.05f;
+
+  */
+
+  BicycleCarPhysics m_bicyclePhysics;
 };
 
 #endif // bdg_car_h

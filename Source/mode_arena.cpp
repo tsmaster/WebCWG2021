@@ -48,7 +48,6 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6]));
   m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7]));
 
-
   for (float fx = -400.0f; fx < 400.0f; fx += 100.0f) {
     for (float fy = -400.0f; fy < 400.0f; fy += 100.0f) {
       m_floors.push_back(WorldQuad::MakeFromAABB(Vec2f(fx, fy + 100.0f),
@@ -153,6 +152,16 @@ bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
   return true;
 }
 
+void ArenaGameMode::setPlayerCar(int carNum)
+{
+  // remove old car control
+  m_cars[m_playerControlledCarIndex]->setController(NULL);
+
+  // set new car control
+  m_playerControlledCarIndex = carNum;
+  m_cars[m_playerControlledCarIndex]->setController(&m_gamepadController);  
+}
+
 void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
 {
   if (m_gamepad == NULL || !m_gamepad->stillConnected) {
@@ -161,40 +170,42 @@ void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
     m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::FACE_D);
 
     if (m_gamepad != NULL) {
-      return;
+      printf("Binding gamepad\n");
+      m_gamepadController.setGamepad(m_gamepad);
+      setPlayerCar(0);
     }
-
     return;
   }
 
   if (game->GetKey(olc::Key::K1).bPressed) {
-    m_playerControlledCarIndex = 0;
+    setPlayerCar(0);
   }
   else if (game->GetKey(olc::Key::K2).bPressed) {
-    m_playerControlledCarIndex = 1;
+    setPlayerCar(1);
   }
   else if (game->GetKey(olc::Key::K3).bPressed) {
-    m_playerControlledCarIndex = 2;
+    setPlayerCar(2);
   }
   else if (game->GetKey(olc::Key::K4).bPressed) {
-    m_playerControlledCarIndex = 3;
+    setPlayerCar(3);
   }
   else if (game->GetKey(olc::Key::K5).bPressed) {
-    m_playerControlledCarIndex = 4;
+    setPlayerCar(4);
   }
   else if (game->GetKey(olc::Key::K6).bPressed) {
-    m_playerControlledCarIndex = 5;
+    setPlayerCar(5);
   }
   else if (game->GetKey(olc::Key::K7).bPressed) {
-    m_playerControlledCarIndex = 6;
+    setPlayerCar(6);
   }
   else if (game->GetKey(olc::Key::K8).bPressed) {
-    m_playerControlledCarIndex = 7;
+    setPlayerCar(7);
   }
 
   Bdg_Car* car = m_cars[m_playerControlledCarIndex];
 
   if (m_gamepad) {
+    /*
     if (m_gamepad->getButton(olc::GPButtons::FACE_L).bPressed) {
       printf("stop!\n");
       car->stop();
@@ -212,6 +223,9 @@ void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
 	(inThrottle != 0) ||
 	(inBrake != 0)) {
     }
+    */
+
+    
 
     // update camera zoom, rot
     float inZoom = m_gamepad->getAxis(olc::GPAxes::RY);
@@ -219,9 +233,11 @@ void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
     float zps = z * elapsedSeconds + 1.0f;
     m_camera.setScale(m_camera.getScale() * zps);
   } else {
+    /*
     car->setSteer(0.0f);
     car->setThrottle(0.0f);
     car->setBrake(0.0f);
+    */
   }
 }
 

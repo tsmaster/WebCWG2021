@@ -8,6 +8,8 @@
 #include "camera.h"
 #include "world_geom.h"
 
+#include "bicycle_car_physics.h"
+
 class Bdg_Car;
 class CarsWithGuns;
 class City;
@@ -33,6 +35,10 @@ class ArenaGameMode
   void handleUserInput(CarsWithGuns* game, float elapsedSeconds);  
 
  private:
+  void setPlayerCar(int carNum);
+
+  
+  
   std::vector<olc::Sprite*> m_spriteVec;
   std::vector<olc::Decal*> m_decalVec;
 
@@ -53,6 +59,8 @@ class ArenaGameMode
   float m_physicsJuice = 0.0f;
   const float m_physicsFrameRate = 300.0f;
   const float m_physicsFrameTime = 1.0f / m_physicsFrameRate;
+
+  PlayerGamepadCarController m_gamepadController;
 };
 
 

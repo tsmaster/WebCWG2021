@@ -29,6 +29,18 @@ float fclamp(float val, float min, float max)
   return std::min(std::max(min, val), max);
 }
 
+float wrapAngle(float inRad)
+{
+  while (inRad > PI) {
+    inRad -= PI * 2.0f;
+  }
+  while (inRad < -PI) {
+    inRad += PI * 2.0f;
+  }
+  return inRad;
+}
+
+
 Vec2f::Vec2f(float ix, float iy) {
   x = ix;
   y = iy;

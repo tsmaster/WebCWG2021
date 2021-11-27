@@ -15,9 +15,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 #        $(COMPILE.c) $(OUTPUT_OPTION) $<
 
 
-_CWG_CPPS = astar.cpp bdg_car.cpp bdg_math.cpp bdg_random.cpp button.cpp camera.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_arena.cpp mode_building.cpp mode_city.cpp mode_highway.cpp mode_track.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp part_phys_syst.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp world_geom.cpp
-
-OLD_CWG_HS = astar.h bdg_car.h bdg_math.h bdg_random.h button.h camera.h carswithguns.h city.h citymap.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mission.h mode_arena.h mode_building.h mode_city.h mode_highway.h mode_track.h modemgr.h modes.h names.h node.h nodemgr.h olc_pgex_gamepad.h olc_pgex_sound.h olcPixelGameEngine.h part_phys_syst.h person.h popup_dialog.h primes.h screen_bg.h 
+_CWG_CPPS = astar.cpp bdg_car.cpp bdg_math.cpp bdg_random.cpp bicycle_car_physics.cpp button.cpp camera.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_arena.cpp mode_building.cpp mode_city.cpp mode_highway.cpp mode_track.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp part_phys_syst.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp world_geom.cpp
 
 _CWG_OBJS=$(_CWG_CPPS:.cpp=.o)
 

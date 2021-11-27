@@ -17,6 +17,8 @@ int clamp(int val, int min, int max);
 
 float fclamp(float val, float min, float max);
 
+float wrapAngle(float rad);
+
 class Vec2f
 {
  public:
@@ -38,11 +40,17 @@ class Vec2f
 
   float angle() const { return atan2(y, x); }
 
+  Vec2f normalized() const { float s = 1.0f / len(); return Vec2f(x * s, y * s); }
+
   static Vec2f makeAngleLength(float heading, float length) {
     return Vec2f(length * cos(heading),
 		 length * sin(heading));}
 
-  float dot(Vec2f other) const { return x * other.x + y * other.y; }
+  float dot(const Vec2f& other) const { return x * other.x + y * other.y; }
+
+  Vec2f lerp(const Vec2f& other, float frac) {
+    return Vec2f(fmap(frac, 0.0f, 1.0f, x, other.x),
+		 fmap(frac, 0.0f, 1.0f, y, other.y)); }
   
   float x;
   float y;

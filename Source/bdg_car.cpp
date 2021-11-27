@@ -7,11 +7,13 @@
 
 Bdg_Car::Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal):
   m_position(in_pos), m_velocity(Vec2f(0.0f, 0.0f)), m_speed(0.0f), m_heading(in_heading),
-  m_topSpeed(100.0f), m_acceleration(10.0f), m_braking(30.0f), m_decal(in_decal)
+  m_decal(in_decal)
+  // m_topSpeed(100.0f), m_acceleration(10.0f), m_braking(30.0f), 
 {
   Vec2f forward = Vec2f::makeAngleLength(in_heading, 2.0f);
   Vec2f left = Vec2f::makeAngleLength(in_heading + PIOVER2, 1.0f);
-  
+
+  /* move to particle physics system 
   
   m_particles.addParticle(in_pos - forward + left, 1.0f);
   m_particles.addParticle(in_pos + forward, 1.0f);
@@ -21,9 +23,14 @@ Bdg_Car::Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal):
   m_particles.linkParticles(0, 1, diag);
   m_particles.linkParticles(1, 2, diag);
   m_particles.linkParticles(2, 0, 2.0f);
+  */
+
+  m_bicyclePhysics.setPosition(in_pos);
+  m_bicyclePhysics.setHeading(in_heading);
 }
 
 
+/* now part of controller
 void Bdg_Car::setSteer(float steer)
 {
   m_ctrlSteer = steer;
@@ -44,6 +51,8 @@ void Bdg_Car::setBrake(float brake)
     m_ctrlBrake = 0.0f;
   }
 }
+
+*/
 
 /*
 void oldPhysics()
@@ -78,18 +87,8 @@ void oldPhysics()
   
     }*/
 
-float wrapAngle(float inRad)
-{
-  while (inRad > PI) {
-    inRad -= PI * 2.0f;
-  }
-  while (inRad < -PI) {
-    inRad += PI * 2.0f;
-  }
-  return inRad;
-}
-
-void Bdg_Car::updatePhysics(float elapsedSeconds, const std::vector<WorldQuad>& walls)
+/*
+void Bdg_Car::oldUpdatePhysics(float elapsedSeconds, const std::vector<WorldQuad>& walls)
 {
   Vec2f oldCenter = m_position;
 
@@ -174,6 +173,17 @@ void Bdg_Car::updatePhysics(float elapsedSeconds, const std::vector<WorldQuad>& 
     stop();
   }
 }
+*/
+
+void Bdg_Car::updatePhysics(float dt, const std::vector<WorldQuad>& inWalls)
+{
+  m_bicyclePhysics.tick(dt);
+
+  m_position = m_bicyclePhysics.getPosition();
+  m_heading = m_bicyclePhysics.getHeading();
+  m_velocity = m_bicyclePhysics.getVelocity();
+  m_speed = m_velocity.len();
+}
 
 void Bdg_Car::draw(CarsWithGuns* game, const Camera& inCam) const
 {
@@ -223,6 +233,7 @@ void Bdg_Car::draw(CarsWithGuns* game, const Camera& inCam) const
 
   // show particles
 
+  /*
   std::vector<Vec2f> particlePosns;
 
   for (int i = 0; i < m_particles.countParticles(); ++i) {
@@ -253,10 +264,19 @@ void Bdg_Car::draw(CarsWithGuns* game, const Camera& inCam) const
 				olc::GREEN,
 				olc::GREEN);
   }
+  */
 }
 
 void Bdg_Car::stop()
 {
+  /*
   m_particles.stop();
+  */
 }
 
+
+void Bdg_Car::setController(CarController* inCtrl)
+{
+  printf("setting physics controller %x\n", inCtrl);
+  m_bicyclePhysics.setController(inCtrl);
+}
