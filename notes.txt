@@ -6,7 +6,9 @@ source emsdk_env.sh
 Makefile
 
 https://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/
-
+https://stackoverflow.com/questions/42308/tool-to-track-include-dependencies
+https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
+http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
 
 OLC wiki
 

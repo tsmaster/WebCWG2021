@@ -16,6 +16,8 @@ enum GameMode {
   GM_ESC_MENU,
   GM_SETTINGS,
   GM_BUILDING,
+  GM_ARENA,
+  GM_TRACK,
 
   GM_LAST,
 };

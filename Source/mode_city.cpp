@@ -212,6 +212,7 @@ bool CityGameMode::handleUserInput(CarsWithGuns* game)
     ModeChangeRequest mcr = ModeChangeRequest::modeChangeRequestFactory(GameMode::GM_BUILDING);
     mcr.city = &m_city;
     mcr.buildingIndex = 0; // TODO fancier
+    mcr.buildingOwner = m_city.getPeople()[0];
     game->requestGameMode(mcr);
   }
 

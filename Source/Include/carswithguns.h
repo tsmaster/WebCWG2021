@@ -7,9 +7,11 @@
 #include "button.h"
 #include "mission.h"
 #include "modes.h"
+#include "mode_arena.h"
 #include "mode_building.h"
 #include "mode_city.h"
 #include "mode_highway.h"
+#include "mode_track.h"
 #include "modemgr.h"
 
 class CarsWithGuns : public olc::PixelGameEngine
@@ -61,6 +63,17 @@ class CarsWithGuns : public olc::PixelGameEngine
   void destroyBuildingMode();
   void drawBuildingMode();
   bool updateBuildingMode(float seconds);
+
+  void initArenaMode();
+  void destroyArenaMode();
+  void drawArenaMode();
+  bool updateArenaMode(float seconds);
+  
+  void initTrackMode();
+  void destroyTrackMode();
+  void drawTrackMode();
+  bool updateTrackMode(float seconds);
+  
   
   void initInstructionsMode();
   void updateInstructionsMode(float seconds);
@@ -81,13 +94,12 @@ private:
 
   bool m_showDecal = true;
 
-  //int m_sndPickupID = -1;
-  //int m_sndDropID = -1;
-
   ModeMgr m_modeMgr;
   HighwayGameMode m_highwayGameMode;
   CityGameMode m_cityGameMode;
   BuildingGameMode m_buildingGameMode;
+  ArenaGameMode m_arenaGameMode;
+  TrackGameMode m_trackGameMode;
 
   bool m_bIsPlaying = true;
 
@@ -101,6 +113,17 @@ private:
   olc::Sprite* m_shirtsSprite;
   olc::Sprite* m_shoesSprite;
   olc::Sprite* m_skinSprite;
+
+  olc::Sprite* m_car_00_sprite;
+  olc::Sprite* m_car_01_sprite;
+  olc::Sprite* m_car_02_sprite;
+  olc::Sprite* m_car_03_sprite;
+  olc::Sprite* m_car_04_sprite;
+  olc::Sprite* m_car_05_sprite;
+  olc::Sprite* m_car_06_sprite;
+  olc::Sprite* m_car_07_sprite;
+
+  olc::Sprite* m_arena_floor_sprite;
   
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;

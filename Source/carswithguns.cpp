@@ -27,9 +27,11 @@
 #include "hsv.h"
 #include "screen_bg.h"
 #include "modes.h"
+#include "mode_arena.h"
 #include "mode_building.h"
 #include "mode_city.h"
 #include "mode_highway.h"
+#include "mode_track.h"
 #include "modemgr.h"
 #include "node.h"
 
@@ -180,6 +182,35 @@ bool CarsWithGuns::OnUserCreate()
 					GameMode::GM_NONE,
 					GameMode::GM_NONE);
 
+  entt::entity eArenaMode = m_registry.create();
+  m_registry.emplace<ScreenBackgroundComponent>(eArenaMode,
+						olc::Pixel(100, 16, 16));
+
+  m_registry.emplace<GameModeComponent>(eArenaMode,
+					GameMode::GM_ARENA,
+					std::string(""),
+					olc::nDefaultPixel,
+					0.0f,
+					-1.0f,
+					-1.0f,
+					GameMode::GM_NONE,
+					GameMode::GM_NONE);
+
+  entt::entity eTrackMode = m_registry.create();
+  m_registry.emplace<ScreenBackgroundComponent>(eTrackMode,
+						olc::Pixel(16, 100, 16));
+
+  m_registry.emplace<GameModeComponent>(eTrackMode,
+					GameMode::GM_TRACK,
+					std::string(""),
+					olc::nDefaultPixel,
+					0.0f,
+					-1.0f,
+					-1.0f,
+					GameMode::GM_NONE,
+					GameMode::GM_NONE);
+  
+
 	
   // Construction (root menu is a 1x5 table)
   m_menu.SetTable(1, 5);
@@ -229,6 +260,17 @@ bool CarsWithGuns::OnUserCreate()
   m_shirtsSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_shirts.png");
   m_shoesSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_shoes.png");
   m_skinSprite = new olc::Sprite("Assets/Sprites/ModularCharacters/Spritesheet/sheet_skin.png");
+
+  m_car_00_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_00.png");
+  m_car_01_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_01.png");
+  m_car_02_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_02.png");
+  m_car_03_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_03.png");
+  m_car_04_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_04.png");
+  m_car_05_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_05.png");
+  m_car_06_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_06.png");
+  m_car_07_sprite = new olc::Sprite("Assets/Sprites/ArenaCars/car_07.png");
+
+  m_arena_floor_sprite = new olc::Sprite("Assets/Sprites/ArenaFloors/floor_grid.png");
 
   setGameMode(GameMode::GM_BDG);
 
@@ -293,6 +335,10 @@ void CarsWithGuns::drawCurrentMode() {
     drawBuildingMode();
   } else if (mode.modeID == GM_INSTRUCTIONS) {
     m_menuMgr.Draw(m_menuSprite, {30, 30});
+  } else if (mode.modeID == GM_ARENA) {
+    drawArenaMode();
+  } else if (mode.modeID == GM_TRACK) {
+    drawTrackMode();
   }
 }
 
@@ -356,6 +402,12 @@ void CarsWithGuns::updateCurrentMode(float fElapsedSeconds)
   case GM_INSTRUCTIONS:
     updateInstructionsMode(fElapsedSeconds);
     break;
+  case GM_ARENA:
+    updateArenaMode(fElapsedSeconds);
+    break;
+  case GM_TRACK:
+    updateTrackMode(fElapsedSeconds);
+    break;
   }
 }
 
@@ -391,6 +443,12 @@ void CarsWithGuns::setGameMode(GameMode newMode)
     case GameMode::GM_BUILDING:
       destroyBuildingMode();
       break;
+    case GameMode::GM_ARENA:
+      destroyArenaMode();
+      break;
+    case GameMode::GM_TRACK:
+      destroyTrackMode();
+      break;
     }
   }
 
@@ -424,6 +482,12 @@ void CarsWithGuns::setGameMode(GameMode newMode)
   case GameMode::GM_INSTRUCTIONS:
     initInstructionsMode();
     break;
+  case GameMode::GM_ARENA:
+    initArenaMode();
+    break;
+  case GameMode::GM_TRACK:
+    initTrackMode();
+    break;
   default:
     // do nothing
     break;
@@ -453,6 +517,10 @@ void CarsWithGuns::initMainMenuMode()
   button_top += button_advance;    
   Button buttonAbout(button_left, button_top, button_width, button_height, "about");
   button_top += button_advance;    
+  Button buttonArena(button_left, button_top, button_width, button_height, "arena");
+  button_top += button_advance;    
+  Button buttonTrack(button_left, button_top, button_width, button_height, "track");
+  button_top += button_advance;    
   Button buttonQuit(button_left, button_top, button_width, button_height, "quit");
 
   buttonContinue.setCallbackFunction([this] {setGameMode(GM_HIGHWAY);});
@@ -461,6 +529,8 @@ void CarsWithGuns::initMainMenuMode()
   buttonInstructions.setCallbackFunction([this] {setGameMode(GM_INSTRUCTIONS);});
   buttonSettings.setCallbackFunction([this] {setGameMode(GM_SETTINGS);});
   buttonAbout.setCallbackFunction([this] {setGameMode(GM_ABOUT);});
+  buttonArena.setCallbackFunction([this] {setGameMode(GM_ARENA);});
+  buttonTrack.setCallbackFunction([this] {setGameMode(GM_TRACK);});
   buttonQuit.setCallbackFunction([this] {this->m_bIsPlaying = false; printf("done\n");});
 
   printf("adding main menu buttons\n");
@@ -473,6 +543,8 @@ void CarsWithGuns::initMainMenuMode()
   m_buttons.push_back(buttonInstructions);
   m_buttons.push_back(buttonSettings);
   m_buttons.push_back(buttonAbout);
+  m_buttons.push_back(buttonArena);
+  m_buttons.push_back(buttonTrack);
   m_buttons.push_back(buttonQuit);    
 }
 
@@ -556,6 +628,66 @@ bool CarsWithGuns::updateBuildingMode(float elapsedSeconds)
   return m_buildingGameMode.update(this, elapsedSeconds);
 }
 
+//---
+
+void CarsWithGuns::initArenaMode()
+{
+  m_arenaGameMode.init(m_car_00_sprite,
+		       m_car_01_sprite,
+		       m_car_02_sprite,
+		       m_car_03_sprite,
+		       m_car_04_sprite,
+		       m_car_05_sprite,
+		       m_car_06_sprite,
+		       m_car_07_sprite,
+		       m_arena_floor_sprite);
+}
+
+void CarsWithGuns::destroyArenaMode()
+{
+}
+
+void CarsWithGuns::drawArenaMode()
+{
+  m_arenaGameMode.draw(this);
+}
+
+bool CarsWithGuns::updateArenaMode(float elapsedSeconds)
+{
+  return m_arenaGameMode.update(this, elapsedSeconds);
+}
+
+// --
+
+
+void CarsWithGuns::initTrackMode()
+{
+  m_trackGameMode.init(m_car_00_sprite,
+		       m_car_01_sprite,
+		       m_car_02_sprite,
+		       m_car_03_sprite,
+		       m_car_04_sprite,
+		       m_car_05_sprite,
+		       m_car_06_sprite,
+		       m_car_07_sprite);
+}
+
+void CarsWithGuns::destroyTrackMode()
+{
+}
+
+void CarsWithGuns::drawTrackMode()
+{
+  m_trackGameMode.draw(this);
+}
+
+bool CarsWithGuns::updateTrackMode(float elapsedSeconds)
+{
+  return m_trackGameMode.update(this, elapsedSeconds);
+}
+
+// --
+
 void CarsWithGuns::initInstructionsMode()
 {
   m_menuMgr.Open(&m_menu);
@@ -617,7 +749,15 @@ void CarsWithGuns::applyModeArguments(ModeChangeRequest mcr)
   case GameMode::GM_BUILDING:
     m_buildingGameMode.setCity(mcr.city);
     m_buildingGameMode.setBuildingIndex(mcr.buildingIndex);
+    m_buildingGameMode.setOwner(mcr.buildingOwner);
     break;
+  case GameMode::GM_ARENA:
+    // do nothing (for now?)
+    break;
+
+  case GameMode::GM_TRACK:
+    // do nothing (for now?)
+    break;    
   }
 }
 

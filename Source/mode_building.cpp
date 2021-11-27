@@ -45,16 +45,6 @@ void BuildingGameMode::handleUserInput(CarsWithGuns* game)
   if (game->GetKey(olc::Key::K2).bPressed) {
     m_bDrawPelvis = !m_bDrawPelvis;
   }
-
-  if (game->GetKey(olc::Key::RIGHT).bPressed) {
-    ++m_seed;
-  }
-
-  if (game->GetKey(olc::Key::LEFT).bPressed) {
-    --m_seed;
-  }
-
-  
 }
 
 void BuildingGameMode::draw(CarsWithGuns* game)
@@ -67,12 +57,15 @@ void BuildingGameMode::draw(CarsWithGuns* game)
   int pcx = sw / 2;
   int pcy = sh / 2;
   
-  drawPerson(game, pcx / 2, pcy);
+  drawPerson(game, pcx / 2, pcy, m_ownerPerson);
 }
 
-void BuildingGameMode::drawPerson(CarsWithGuns* game, int x, int y)
+void BuildingGameMode::drawPerson(CarsWithGuns* game, int x, int y, Person* person)
 {
-  srand(m_seed);
+  unsigned int seed = makeSeedKey(10, 12,
+				  person->getBuildingIndex(),
+				  person->m_preferredName.c_str());
+  srand(seed);
   
   std::vector<SpriteCoords> armSprites {
     {173, 608, 170, 136},  // tint1_arm.png

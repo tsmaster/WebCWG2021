@@ -1,0 +1,282 @@
+#include "mode_arena.h"
+
+#include "bdg_car.h"
+#include "bdg_math.h"
+#include "bdg_random.h"
+#include "carswithguns.h"
+
+
+void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
+			 olc::Sprite* car_01_Sprite,
+			 olc::Sprite* car_02_Sprite,
+			 olc::Sprite* car_03_Sprite,
+			 olc::Sprite* car_04_Sprite,
+			 olc::Sprite* car_05_Sprite,
+			 olc::Sprite* car_06_Sprite,
+			 olc::Sprite* car_07_Sprite,
+			 olc::Sprite* arena_floor_Sprite)
+{
+  m_spriteVec.push_back(car_00_Sprite);
+  m_spriteVec.push_back(car_01_Sprite);
+  m_spriteVec.push_back(car_02_Sprite);
+  m_spriteVec.push_back(car_03_Sprite);
+  m_spriteVec.push_back(car_04_Sprite);
+  m_spriteVec.push_back(car_05_Sprite);
+  m_spriteVec.push_back(car_06_Sprite);
+  m_spriteVec.push_back(car_07_Sprite);
+  m_arenaFloorSprite = arena_floor_Sprite;
+
+  m_decalVec.push_back(new olc::Decal(car_00_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_01_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_02_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_03_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_04_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_05_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_06_Sprite));
+  m_decalVec.push_back(new olc::Decal(car_07_Sprite));
+
+  m_arenaFloorDecal = new olc::Decal(arena_floor_Sprite);
+
+  m_cars.push_back(new Bdg_Car({0.0f, 350.0f}, degToRad(180 + 45), m_decalVec[0]));
+  //m_cars.push_back(new Bdg_Car({-290.0f, -300.0f}, degToRad(180), m_decalVec[1]));
+
+  m_cars.push_back(new Bdg_Car({0.0f, -120.0f}, 0.0f, m_decalVec[1]));
+  m_cars.push_back(new Bdg_Car({350.0f, 0.0f}, 0.0f, m_decalVec[2]));
+  m_cars.push_back(new Bdg_Car({-120.0f, 0.0f}, 0.0f, m_decalVec[3]));
+  m_cars.push_back(new Bdg_Car({0.0f, -350.0f}, 0.0f, m_decalVec[4]));
+  m_cars.push_back(new Bdg_Car({-120.0f, -240.0f}, 0.0f, m_decalVec[5]));
+  m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6]));
+  m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7]));
+
+
+  for (float fx = -400.0f; fx < 400.0f; fx += 100.0f) {
+    for (float fy = -400.0f; fy < 400.0f; fy += 100.0f) {
+      m_floors.push_back(WorldQuad::MakeFromAABB(Vec2f(fx, fy + 100.0f),
+						 Vec2f(fx + 100.0f, fy),
+						 m_arenaFloorDecal, olc::WHITE, 0));
+    }
+  }
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(100.0f,50.0f),
+					    Vec2f(200.0f,-50.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(-200.0f,50.0f),
+					    Vec2f(-100.0f,-50.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(-50.0f,100.0f),
+					    Vec2f(50.0f,200.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(50.0f,-100.0f),
+					    Vec2f(-50.0f,-200.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(-500.0f,500.0f),
+					    Vec2f(-400.0f,-500.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(500.0f,500.0f),
+					    Vec2f(400.0f,-500.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(-200.0f,-400.0f),
+					    Vec2f(200.0f,-500.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(-200.0f,400.0f),
+					    Vec2f(200.0f,500.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad(Vec2f(-500.0f, -100.0f),
+			      Vec2f(-100.0f, -500.0f),
+			      Vec2f(-100.0f, -600.0f),
+			      Vec2f(-500.0f, -600.0f),
+			      m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad(Vec2f(500.0f, -100.0f),
+			      Vec2f(100.0f, -500.0f),
+			      Vec2f(100.0f, -600.0f),
+			      Vec2f(500.0f, -600.0f),
+			      m_arenaFloorDecal, olc::BLACK, 1));
+  
+  m_walls.push_back(WorldQuad(Vec2f(-500.0f, 100.0f),
+			      Vec2f(-100.0f, 500.0f),
+			      Vec2f(-100.0f, 600.0f),
+			      Vec2f(-500.0f, 600.0f),
+			      m_arenaFloorDecal, olc::BLACK, 1));
+
+  m_walls.push_back(WorldQuad(Vec2f(500.0f, 100.0f),
+			      Vec2f(100.0f, 500.0f),
+			      Vec2f(100.0f, 600.0f),
+			      Vec2f(500.0f, 600.0f),
+			      m_arenaFloorDecal, olc::BLACK, 1));
+  
+
+
+  // init camera
+  //m_camera.setScale(2.5f);
+  //m_camera.setScale(25.0f);
+  m_camera.setScale(10.0f);
+  m_camera.setRotation(0.0f);
+
+  // TODO move this elsewhere
+  olc::GamePad::init();
+
+  printf("gamepad initted\n");
+
+  auto gamepads = olc::GamePad::getGamepads();
+
+  printf("gamepads size %ld\n", gamepads.size());
+
+  for (int gpi = 0; gpi < gamepads.size(); ++gpi) {
+    std::string gp_name = gamepads[gpi]->getName();
+    printf("[%02d] %s\n", gpi, gp_name.c_str());
+  }
+}
+
+bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
+{
+  handleUserInput(game, elapsedSeconds);
+
+  m_physicsJuice += elapsedSeconds;
+
+  while (m_physicsJuice > m_physicsFrameTime) {
+    for (Bdg_Car* car : m_cars) {
+      car->updatePhysics(m_physicsFrameTime, m_walls);
+    }
+
+    m_physicsJuice -= m_physicsFrameTime;
+  }
+
+  return true;
+}
+
+void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
+{
+  if (m_gamepad == NULL || !m_gamepad->stillConnected) {
+    m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::SELECT);
+
+    m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::FACE_D);
+
+    if (m_gamepad != NULL) {
+      return;
+    }
+
+    return;
+  }
+
+  if (game->GetKey(olc::Key::K1).bPressed) {
+    m_playerControlledCarIndex = 0;
+  }
+  else if (game->GetKey(olc::Key::K2).bPressed) {
+    m_playerControlledCarIndex = 1;
+  }
+  else if (game->GetKey(olc::Key::K3).bPressed) {
+    m_playerControlledCarIndex = 2;
+  }
+  else if (game->GetKey(olc::Key::K4).bPressed) {
+    m_playerControlledCarIndex = 3;
+  }
+  else if (game->GetKey(olc::Key::K5).bPressed) {
+    m_playerControlledCarIndex = 4;
+  }
+  else if (game->GetKey(olc::Key::K6).bPressed) {
+    m_playerControlledCarIndex = 5;
+  }
+  else if (game->GetKey(olc::Key::K7).bPressed) {
+    m_playerControlledCarIndex = 6;
+  }
+  else if (game->GetKey(olc::Key::K8).bPressed) {
+    m_playerControlledCarIndex = 7;
+  }
+
+  Bdg_Car* car = m_cars[m_playerControlledCarIndex];
+
+  if (m_gamepad) {
+    if (m_gamepad->getButton(olc::GPButtons::FACE_L).bPressed) {
+      printf("stop!\n");
+      car->stop();
+    }
+    
+    float inSteer = m_gamepad->getAxis(olc::GPAxes::LX);
+    float inThrottle = m_gamepad->getAxis(olc::GPAxes::TR);
+    float inBrake = m_gamepad->getAxis(olc::GPAxes::TL);
+
+    car->setSteer(inSteer);
+    car->setThrottle(inThrottle);
+    car->setBrake(inBrake);
+
+    if ((inSteer != 0) ||
+	(inThrottle != 0) ||
+	(inBrake != 0)) {
+    }
+
+    // update camera zoom, rot
+    float inZoom = m_gamepad->getAxis(olc::GPAxes::RY);
+    float z = fmap(inZoom, -1.0f, 1.0f, -0.1f, 0.1f);
+    float zps = z * elapsedSeconds + 1.0f;
+    m_camera.setScale(m_camera.getScale() * zps);
+  } else {
+    car->setSteer(0.0f);
+    car->setThrottle(0.0f);
+    car->setBrake(0.0f);
+  }
+}
+
+void ArenaGameMode::draw(CarsWithGuns* game)
+{
+  game->Clear(olc::GREEN);
+
+  // TODO move this to init
+  int sw = game->ScreenWidth();
+  int sh = game->ScreenHeight();
+
+  m_camera.setScreenSize(Vec2f(sw, sh));
+
+  Bdg_Car* playerCar = m_cars[m_playerControlledCarIndex];
+  m_camera.setPosition(playerCar->getPosition());
+
+  float floorScale = m_camera.getScale();
+  const float floorWidth = 800.0f * floorScale;
+  const float floorHeight = 800.0f * floorScale;
+
+  // draw floor(s)
+  for (WorldQuad& w : m_floors) {
+    w.draw(game, m_camera);
+  }
+
+  // draw cars
+  for (Bdg_Car* c : m_cars) {
+    c->draw(game, m_camera);
+  }
+
+  // draw walls
+  for (WorldQuad& w : m_walls) {
+    w.draw(game, m_camera);
+  }
+
+  // draw dashboard display
+  game->FillRectDecal({sw - 100.0f, sh - 100.0f}, {100.0f, 100.0f}, olc::BLACK);
+
+  char speedBuffer[40];
+  sprintf(speedBuffer, "SPD: %0.1f", m_cars[m_playerControlledCarIndex]->getSpeed());
+  std::string speedString(speedBuffer);
+  game->DrawStringDecal({sw- 80.0f, sh - 80.0f}, speedString, olc::GREEN);
+
+  char xBuffer[40];
+  sprintf(xBuffer, "X: %0.1f", m_cars[m_playerControlledCarIndex]->getPosition().x);
+  std::string xString(xBuffer);
+  game->DrawStringDecal({sw- 80.0f, sh - 60.0f}, xString, olc::GREEN);
+
+  char yBuffer[40];
+  sprintf(yBuffer, "Y: %0.1f", m_cars[m_playerControlledCarIndex]->getPosition().y);
+  std::string yString(yBuffer);
+  game->DrawStringDecal({sw- 80.0f, sh - 40.0f}, yString, olc::GREEN);
+
+  char aBuffer[40];
+  sprintf(aBuffer, "A: %0.1f", m_cars[m_playerControlledCarIndex]->getHeading());
+  std::string aString(aBuffer);
+  game->DrawStringDecal({sw- 80.0f, sh - 20.0f}, aString, olc::GREEN);
+}

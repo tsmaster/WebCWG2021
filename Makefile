@@ -5,9 +5,19 @@
 
 # make -j 4 <targets>
 
-_CWG_CPPS = astar.cpp bdg_math.cpp bdg_random.cpp button.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_building.cpp mode_city.cpp mode_highway.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp
+DEPDIR := Dependencies
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
-_CWG_HS = astar.h bdg_math.h bdg_random.h button.h carswithguns.h city.h citymap.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mission.h mode_building.h mode_city.h mode_highway.h modemgr.h modes.h names.h node.h nodemgr.h olc_pgex_sound.h olcPixelGameEngine.h person.h popup_dialog.h primes.h screen_bg.h 
+#COMPILE.c = $(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+
+#%.o : %.c
+#%.o : %.c $(DEPDIR)/%.d | $(DEPDIR)
+#        $(COMPILE.c) $(OUTPUT_OPTION) $<
+
+
+_CWG_CPPS = astar.cpp bdg_car.cpp bdg_math.cpp bdg_random.cpp button.cpp camera.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_arena.cpp mode_building.cpp mode_city.cpp mode_highway.cpp mode_track.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp part_phys_syst.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp world_geom.cpp
+
+OLD_CWG_HS = astar.h bdg_car.h bdg_math.h bdg_random.h button.h camera.h carswithguns.h city.h citymap.h constants.h coord.h entt.hpp gameclock.h hsv.h kruskal.h layers.h mission.h mode_arena.h mode_building.h mode_city.h mode_highway.h mode_track.h modemgr.h modes.h names.h node.h nodemgr.h olc_pgex_gamepad.h olc_pgex_sound.h olcPixelGameEngine.h part_phys_syst.h person.h popup_dialog.h primes.h screen_bg.h 
 
 _CWG_OBJS=$(_CWG_CPPS:.cpp=.o)
 
@@ -37,7 +47,7 @@ CDBGFLAGS = -std=c++17 -Og -ggdb -I$(IDIR)
 all: cwg cwg.html
 
 clean:
-	rm -f cwg cwg-opt cwg-dbg cwg.js cwg.html cwg.wasm cwg.data *~ Build/*.o
+	rm -f cwg cwg-opt cwg-dbg cwg.js cwg.html cwg.wasm cwg.data *~ Build/*.o Dependencies/*
 
 cwg-opt: $(CWG_CPPS) $(CWG_HS)
 	$(CXX) -o $@ $(CWG_CPPS) $(CLIBS) $(COPTFLAGS)
@@ -45,8 +55,8 @@ cwg-opt: $(CWG_CPPS) $(CWG_HS)
 cwg-dbg: $(CWG_CPPS) $(CWG_HS)
 	$(CXX) -o $@ $(CWG_CPPS) $(CLIBS) $(CDBGFLAGS)
 
-$(ODIR)/%.o: $(SDIR)/%.cpp $(CWG_HS)
-	$(CXX) -c -o $@ $< $(CFLAGS)
+$(ODIR)/%.o: $(SDIR)/%.cpp $(DEPDIR)/%.d | $(DEPDIR)
+	$(CXX) $(DEPFLAGS) -c -o $@ $< $(CFLAGS)
 
 cwg: $(CWG_OBJS)
 	$(CXX) -o $@ $^ $(CLIBS) $(CFLAGS)
@@ -61,3 +71,12 @@ run-cwg: cwg.html
 
 sound_test: $(SOUND_TEST_CPPS) $(SOUND_TEST_HS)
 	$(CXX) -o $@ $(SOUND_TEST_CPPS) -lX11 -lGL -lpthread -lpng -lstdc++fs -lopenal -std=c++17
+
+
+$(DEPDIR): ; @mkdir -p $@
+
+DEPFILES := $(_CWG_CPPS:%.cpp=$(DEPDIR)/%.d)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
+

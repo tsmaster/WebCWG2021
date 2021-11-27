@@ -8,6 +8,7 @@
 #include "modes.h"
 
 class City;
+class Person;
 
 class ModeChangeRequest
 {
@@ -25,6 +26,7 @@ class ModeChangeRequest
 
   City* city;
   int buildingIndex;
+  Person* buildingOwner;
 
   static ModeChangeRequest modeChangeRequestFactory(GameMode newGameMode);  
 };

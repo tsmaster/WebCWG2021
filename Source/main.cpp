@@ -4,6 +4,9 @@
 #define OLC_PGEX_POPUPMENU
 #include "olcPopupMenu.h"
 
+#define OLC_PGE_GAMEPAD
+#include "olc_pgex_gamepad.h"
+
 #ifdef __EMSCRIPTEN__
 #define USE_SOUND 0
 #else

@@ -44,5 +44,8 @@ cwg-dbg
 # Emacs
 *~
 
+# Python
+*.pyc
+
 # git token
 git.token

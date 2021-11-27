@@ -91,7 +91,7 @@ std::vector<float> normalizeProbabilities(std::vector<float> inProbs)
 // assumes normalized distribution
 int randomFromDistribution(std::vector<float> probs)
 {
-  float r = float(rand()) / RAND_MAX;
+  float r = float(rand()) / float(RAND_MAX - 1);
   
   int i = 0;
   for (float p : probs) {

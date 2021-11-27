@@ -3,6 +3,7 @@
 
 #include "olcPixelGameEngine.h"
 
+#include "person.h"
 
 class CarsWithGuns;
 class City;
@@ -39,6 +40,8 @@ class BuildingGameMode
 
   void setBuildingIndex(int idx) { m_buildingIndex = idx; }
 
+  void setOwner(Person* person) {m_ownerPerson = person; }
+
   bool update(CarsWithGuns* game, float elapsedSeconds);
 
   void draw(CarsWithGuns* game);
@@ -46,7 +49,7 @@ class BuildingGameMode
  protected:
   void handleUserInput(CarsWithGuns* game);
   
-  void drawPerson(CarsWithGuns* game, int x, int y);
+  void drawPerson(CarsWithGuns* game, int x, int y, Person* person);
 
   olc::vf2d calcScreenLocation(BoneFrame skeleton[],
 			       int boneIndex) const;
@@ -57,6 +60,8 @@ class BuildingGameMode
 
   bool m_bDrawTorso = true;
   bool m_bDrawPelvis = true;
+
+  Person* m_ownerPerson;
 
   olc::Sprite* m_menuSprite;
   olc::Sprite* m_faceSprite;

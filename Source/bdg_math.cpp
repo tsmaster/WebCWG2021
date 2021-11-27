@@ -24,11 +24,20 @@ int clamp(int val, int min, int max)
   return std::min(std::max(min, val), max-1);
 }
 
+float fclamp(float val, float min, float max)
+{
+  return std::min(std::max(min, val), max);
+}
+
 Vec2f::Vec2f(float ix, float iy) {
   x = ix;
   y = iy;
 }
 
+Vec2f Vec2f::rotate(float radiansCCW) const {
+  return Vec2f(x * cos(radiansCCW) - y * sin(radiansCCW),
+	       x * sin(radiansCCW) + y * cos(radiansCCW));		       
+}
 
 bool Vec2i::lessThan(const Vec2i& other) const
 {
