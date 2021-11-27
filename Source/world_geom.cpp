@@ -57,7 +57,7 @@ void WorldQuad::draw(CarsWithGuns* game, const Camera& inCam)
 
 }
 
-bool WorldQuad::pointInsideAABB(Vec2f v) const {
+float WorldQuad::distToWallAABB(const Vec2f& v) const {
   // using SDF for box-exact https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
   float cx = (xMax + xMin) * 0.5f;
   float cy = (yMax + yMin) * 0.5f;
@@ -75,10 +75,10 @@ bool WorldQuad::pointInsideAABB(Vec2f v) const {
     
   float dist = maxVec.len() + std::min(std::max(dx, dy), 0.0f);
 
-  return dist < 0.0f;  
+  return dist;  
 }
 
-bool WorldQuad::pointInsidePolygon(Vec2f v) const {
+float WorldQuad::distToWallPolygon(const Vec2f& v) const {
   // using "Polygon - exact" from https://iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
   float d = (v - m_corners[0]).lenSqr();
   int s = 1;
@@ -101,18 +101,22 @@ bool WorldQuad::pointInsidePolygon(Vec2f v) const {
   }
 
   float dist = float(s * sqrt(d));
-  return dist < 0.0f;
+  return dist;
 }
 
-bool WorldQuad::pointInside(Vec2f v) const {
+float WorldQuad::distanceToWall(const Vec2f& v) const {
   if (m_bIsAxisAlignedRectangle) {
-    return pointInsideAABB(v);
+    return distToWallAABB(v);
   } else {
-    return pointInsidePolygon(v);
-  }
+    return distToWallPolygon(v);
+  }  
 }
 
-Vec2f WorldQuad::projectToOutsideAABB(Vec2f v) const {
+bool WorldQuad::pointInside(const Vec2f& v) const {
+  return distanceToWall(v) < 0.0f;
+}
+
+Vec2f WorldQuad::closestPointAABB(const Vec2f& v) const {
   float cx = (xMax + xMin) * 0.5f;
   float cy = (yMax + yMin) * 0.5f;
   float bx = xMax - cx;
@@ -154,7 +158,7 @@ Vec2f WorldQuad::projectToOutsideAABB(Vec2f v) const {
   }
 }
 
-Vec2f WorldQuad::projectToOutsidePolygon(Vec2f v) const {
+Vec2f WorldQuad::closestPointPolygon(const Vec2f& v) const {
   float d = (v - m_corners[0]).lenSqr();
   Vec2f bestPoint = m_corners[0];
 
@@ -174,11 +178,11 @@ Vec2f WorldQuad::projectToOutsidePolygon(Vec2f v) const {
   return bestPoint;
 }
 
-Vec2f WorldQuad::projectToOutside(Vec2f v) const {
+Vec2f WorldQuad::closestPoint(const Vec2f& v) const {
   if (m_bIsAxisAlignedRectangle) {
-    return projectToOutsideAABB(v);
+    return closestPointAABB(v);
   } else {
-    return projectToOutsidePolygon(v);
+    return closestPointPolygon(v);
   }
 }
 
@@ -192,4 +196,23 @@ WorldQuad WorldQuad::MakeFromAABB(Vec2f ul, Vec2f lr, olc::Decal* inDecal, olc::
   return WorldQuad(Vec2f(left, upper), Vec2f(right, upper),
 		   Vec2f(right, lower), Vec2f(left, lower),
 		   inDecal, inColor, inLayerIndex);
+}
+
+bool WorldQuad::constrainsParticle(const Vec2f& p, float r) const
+{
+  return distanceToWall(p) < r;
+}
+
+Vec2f WorldQuad::pushOut(const Vec2f& p, float r) const
+{
+  float distToEdge = distanceToWall(p);
+  Vec2f pointOnEdge = closestPoint(p);
+
+  Vec2f outVec = p - pointOnEdge;
+  if (distToEdge < 0.0f) {
+    outVec = outVec * -1.0f;
+  }
+
+  Vec2f clearVec = pointOnEdge + outVec * r;
+  return clearVec;
 }

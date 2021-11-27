@@ -37,7 +37,7 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 
   m_arenaFloorDecal = new olc::Decal(arena_floor_Sprite);
 
-  m_cars.push_back(new Bdg_Car({0.0f, 350.0f}, degToRad(180 + 45), m_decalVec[0]));
+  m_cars.push_back(new Bdg_Car({-10.0f, -10.0f}, degToRad(45), m_decalVec[0]));
   //m_cars.push_back(new Bdg_Car({-290.0f, -300.0f}, degToRad(180), m_decalVec[1]));
 
   m_cars.push_back(new Bdg_Car({0.0f, -120.0f}, 0.0f, m_decalVec[1]));
@@ -56,6 +56,11 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
     }
   }
 
+  /*
+  m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(0.0f, 0.0f),
+					    Vec2f(50.0f, 50.0f),
+					    m_arenaFloorDecal, olc::BLACK, 1));*/
+  
   m_walls.push_back(WorldQuad::MakeFromAABB(Vec2f(100.0f,50.0f),
 					    Vec2f(200.0f,-50.0f),
 					    m_arenaFloorDecal, olc::BLACK, 1));
@@ -111,8 +116,6 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 			      Vec2f(100.0f, 600.0f),
 			      Vec2f(500.0f, 600.0f),
 			      m_arenaFloorDecal, olc::BLACK, 1));
-  
-
 
   // init camera
   //m_camera.setScale(2.5f);

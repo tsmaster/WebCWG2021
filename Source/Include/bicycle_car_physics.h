@@ -12,6 +12,8 @@
 
 #include "olcPixelGameEngine.h"
 #include "olc_pgex_gamepad.h"
+#include "world_geom.h"
+
 
 class CarController
 {
@@ -37,7 +39,7 @@ private:
 class BicycleCarPhysics
 {
 public:
-  void tick(float dt); // update the physics
+  void tick(float dt, const std::vector<WorldQuad>& inWalls); // update the physics
   
   void getInput();
 
@@ -54,6 +56,9 @@ public:
   float getHeading() const { return m_heading; }
 
   const Vec2f& getVelocity() const { return m_velocity; }
+
+protected:
+  void moveConstrained(float dt, const std::vector<WorldQuad>& inWalls);
 
 private:
   // parameters

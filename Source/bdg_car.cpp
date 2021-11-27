@@ -177,7 +177,7 @@ void Bdg_Car::oldUpdatePhysics(float elapsedSeconds, const std::vector<WorldQuad
 
 void Bdg_Car::updatePhysics(float dt, const std::vector<WorldQuad>& inWalls)
 {
-  m_bicyclePhysics.tick(dt);
+  m_bicyclePhysics.tick(dt, inWalls);
 
   m_position = m_bicyclePhysics.getPosition();
   m_heading = m_bicyclePhysics.getHeading();
@@ -206,7 +206,6 @@ void Bdg_Car::draw(CarsWithGuns* game, const Camera& inCam) const
   
   std::vector<olc::vf2d> cornerScratch;
   for (Vec2f v : cornerVecs) {
-    //printf("corner x %f corner y %f\n", v.x, v.y);
     cornerScratch.push_back(olc::vf2d(v.x, v.y));
   }
 
@@ -277,6 +276,5 @@ void Bdg_Car::stop()
 
 void Bdg_Car::setController(CarController* inCtrl)
 {
-  printf("setting physics controller %x\n", inCtrl);
   m_bicyclePhysics.setController(inCtrl);
 }

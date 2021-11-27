@@ -15,18 +15,22 @@ class WorldQuad
 
   void draw(CarsWithGuns* game, const Camera& inCam);
 
-  bool pointInside(Vec2f p) const;
+  bool pointInside(const Vec2f& p) const;
   
-  Vec2f projectToOutside(Vec2f p) const;
+  Vec2f closestPoint(const Vec2f& p) const;
 
   static WorldQuad MakeFromAABB(Vec2f ul, Vec2f lr, olc::Decal* inDecal, olc::Pixel inColor, int inLayerIndex);
 
- protected:
-  bool pointInsideAABB(Vec2f p) const;
-  bool pointInsidePolygon(Vec2f p) const;
+  bool constrainsParticle(const Vec2f& p, float r) const;
+  Vec2f pushOut(const Vec2f& p, float r) const;
+  float distanceToWall(const Vec2f& p) const;
 
-  Vec2f projectToOutsideAABB(Vec2f p) const;
-  Vec2f projectToOutsidePolygon(Vec2f p) const;
+ protected:
+  Vec2f closestPointAABB(const Vec2f& p) const;
+  Vec2f closestPointPolygon(const Vec2f& p) const;
+
+  float distToWallAABB(const Vec2f& p) const;
+  float distToWallPolygon(const Vec2f& p) const;
   
  private:
   std::vector<Vec2f> m_corners;
