@@ -117,6 +117,10 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 			      Vec2f(500.0f, 600.0f),
 			      m_arenaFloorDecal, olc::BLACK, 1));
 
+  printf("about to make waypoints\n");
+  makeWaypoints(-400.0f, 400.0f,
+		-400.0f, 400.0f, 50.0f);
+
   // init camera
   //m_camera.setScale(2.5f);
   //m_camera.setScale(25.0f);
@@ -135,6 +139,81 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   for (int gpi = 0; gpi < gamepads.size(); ++gpi) {
     std::string gp_name = gamepads[gpi]->getName();
     printf("[%02d] %s\n", gpi, gp_name.c_str());
+  }
+}
+
+void ArenaGameMode::makeWaypoints(float xMin, float xMax,
+				  float yMin, float yMax,
+				  float cellsize) {
+  for (int xi = 0; xi * cellsize + xMin <= xMax; ++ xi) {
+    float cellLeft = xi * cellsize + xMin;
+    float cellRight = cellLeft + cellsize;
+    for (int yi = 0; yi * cellsize + yMin <= yMax; ++ yi) {
+      float cellBottom = yi * cellsize + yMin;
+      float cellTop = cellBottom + cellsize;
+
+      float rx = rand_frange(cellLeft, cellRight);
+      float ry = rand_frange(cellBottom, cellTop);
+
+      //float rx = cellLeft;
+      //float ry = cellBottom;
+
+      //printf("making waypoint %f %f\n", rx, ry);
+
+      Vec2f newPoint(rx, ry);
+
+      bool inWall = false;
+      for (const WorldQuad& w : m_walls) {
+	if (w.pointInside(newPoint)) {
+	  inWall = true;
+	  break;
+	}
+      }
+
+      if (inWall) {
+	//printf("in wall\n");
+      } else {
+	m_waypoints.push_back(Vec2f(rx, ry));
+      }
+    }
+  }
+
+  for (int i = 0; i < m_waypoints.size(); ++i) {
+    Vec2f& wpi = m_waypoints[i];
+    for (int j = i+1; j < m_waypoints.size(); ++j) {
+      Vec2f& wpj = m_waypoints[j];
+
+      float dist = (wpj-wpi).len();
+      if (dist < 2.5 * cellsize) {
+	//printf("waypoints %d, %d dist %f\n", i, j, dist);
+	//printf("wp %d <%f %f>\n", i, wpi.x, wpi.y);
+	//printf("wp %d <%f %f>\n", j, wpj.x, wpj.y);
+
+	bool isObstructed = false;
+	Vec2f direction = wpj-wpi;
+	Vec2f outIntersection(0.0f,0.0f);
+	for (int wallIndex = 0; wallIndex < m_walls.size(); ++wallIndex) {
+	  //for (WorldQuad& wall : m_walls) {
+	  WorldQuad& wall = m_walls[wallIndex];
+	  //printf("=====\n");
+	  //printf("testing wall #%d\n", wallIndex);
+	  //wall.print();
+	  
+	  if (wall.raycast(wpi, direction, outIntersection)){
+	    isObstructed = true;
+	    //printf("obstructed by wall # %d\n", wallIndex);
+	    //wall.print();
+	    break;
+	  }
+	}
+	if (isObstructed) {
+	  //printf("obstructed\n");
+	} else {
+	  //printf("connected\n");
+	  m_waypointLinks.push_back(std::pair(i,j));
+	}
+      }
+    }
   }
 }
 
@@ -228,6 +307,11 @@ void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
     }
     */
 
+    // toggle debug waypoint display
+
+    if (m_gamepad->getButton(olc::GPButtons::FACE_U).bPressed) {
+      m_bDrawGrid = !m_bDrawGrid;
+    }
     
 
     // update camera zoom, rot
@@ -276,6 +360,38 @@ void ArenaGameMode::draw(CarsWithGuns* game)
     w.draw(game, m_camera);
   }
 
+  if (m_bDrawGrid) {
+    std::vector<Vec2f> screenWaypoints;
+    for (Vec2f& wp : m_waypoints) {
+      Vec2f screenPosn = m_camera.worldPosToScreenPos(wp);
+      screenWaypoints.push_back(screenPosn);
+    }
+  
+    for (std::pair<int, int> link: m_waypointLinks) {
+      int i = link.first;
+      int j = link.second;
+      Vec2f& vi = screenWaypoints[i];
+      Vec2f& vj = screenWaypoints[j];
+      
+      game->DrawLineDecal({vi.x, vi.y},
+  			{vj.x, vj.y},
+  			olc::GREEN);
+  			
+    }
+  
+    for (Vec2f& wp : m_waypoints) {
+      Vec2f screenPosn = m_camera.worldPosToScreenPos(wp);
+  
+      olc::vf2d ul = {screenPosn.x - 2,
+        screenPosn.y - 2};
+      olc::vf2d sz = {4, 4};
+      game->GradientFillRectDecal(ul, sz,
+  				olc::GREEN,
+  				olc::GREEN,
+  				olc::GREEN,
+  				olc::GREEN);
+    }
+  }
   // draw dashboard display
   game->FillRectDecal({sw - 100.0f, sh - 100.0f}, {100.0f, 100.0f}, olc::BLACK);
 

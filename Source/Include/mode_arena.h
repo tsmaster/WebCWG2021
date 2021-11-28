@@ -36,8 +36,9 @@ class ArenaGameMode
 
  private:
   void setPlayerCar(int carNum);
-
-  
+  void makeWaypoints(float xMin, float xMax,
+		     float yMin, float yMax,
+		     float cellSize);
   
   std::vector<olc::Sprite*> m_spriteVec;
   std::vector<olc::Decal*> m_decalVec;
@@ -61,6 +62,11 @@ class ArenaGameMode
   const float m_physicsFrameTime = 1.0f / m_physicsFrameRate;
 
   PlayerGamepadCarController m_gamepadController;
+
+  std::vector<Vec2f> m_waypoints;
+  std::vector<std::pair<int, int>> m_waypointLinks;
+
+  bool m_bDrawGrid = false;
 };
 
 

@@ -25,13 +25,27 @@ class WorldQuad
   Vec2f pushOut(const Vec2f& p, float r) const;
   float distanceToWall(const Vec2f& p) const;
 
+  bool raycast(const Vec2f& rayOrigin,
+	       const Vec2f& rayDirection,
+	       Vec2f& outIntersection) const;
+
+  void print() const;
+  
  protected:
   Vec2f closestPointAABB(const Vec2f& p) const;
   Vec2f closestPointPolygon(const Vec2f& p) const;
 
   float distToWallAABB(const Vec2f& p) const;
   float distToWallPolygon(const Vec2f& p) const;
-  
+
+  bool raycastAABB(const Vec2f& rayOrigin,
+		   const Vec2f& rayDirection,
+		   Vec2f& outIntersection) const;
+
+  bool raycastPolygon(const Vec2f& rayOrigin,
+		      const Vec2f& rayDirection,
+		      Vec2f& outIntersection) const;
+
  private:
   std::vector<Vec2f> m_corners;
 
