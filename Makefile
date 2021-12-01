@@ -15,7 +15,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 #        $(COMPILE.c) $(OUTPUT_OPTION) $<
 
 
-_CWG_CPPS = astar.cpp bdg_car.cpp bdg_math.cpp bdg_random.cpp bicycle_car_physics.cpp button.cpp camera.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_arena.cpp mode_building.cpp mode_city.cpp mode_highway.cpp mode_track.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp part_phys_syst.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp world_geom.cpp
+_CWG_CPPS = arena_barrel.cpp astar.cpp bdg_car.cpp bdg_math.cpp bdg_random.cpp bicycle_car_physics.cpp button.cpp camera.cpp carswithguns.cpp city.cpp citymap.cpp citynames.cpp coord.cpp gameclock.cpp hsv.cpp kruskal.cpp main.cpp mission.cpp mode_arena.cpp mode_building.cpp mode_city.cpp mode_highway.cpp mode_track.cpp modemgr.cpp names.cpp node.cpp nodemgr.cpp part_phys_syst.cpp person.cpp popup_dialog.cpp primes.cpp screen_bg.cpp world_geom.cpp
 
 _CWG_OBJS=$(_CWG_CPPS:.cpp=.o)
 

@@ -4,6 +4,7 @@
 #include "olcPixelGameEngine.h"
 #include "olc_pgex_gamepad.h"
 
+#include "arena_barrel.h"
 #include "bdg_math.h"
 #include "camera.h"
 #include "world_geom.h"
@@ -25,11 +26,14 @@ class ArenaGameMode
 	    olc::Sprite* car_05_sprite,
 	    olc::Sprite* car_06_sprite,
 	    olc::Sprite* car_07_sprite,
-	    olc::Sprite* arena_floor_sprite);
+	    olc::Sprite* arena_floor_sprite,
+	    olc::Sprite* barrel_sprite);
 
   bool update(CarsWithGuns* game, float elapsedSeconds);
 
   void draw(CarsWithGuns* game);
+
+  std::vector<ArenaBarrel *>& getBarrels() { return m_barrels; }
 
  protected:
   void handleUserInput(CarsWithGuns* game, float elapsedSeconds);  
@@ -39,6 +43,8 @@ class ArenaGameMode
   void makeWaypoints(float xMin, float xMax,
 		     float yMin, float yMax,
 		     float cellSize);
+
+  void addRandomBarrel();
   
   std::vector<olc::Sprite*> m_spriteVec;
   std::vector<olc::Decal*> m_decalVec;
@@ -67,6 +73,13 @@ class ArenaGameMode
   std::vector<std::pair<int, int>> m_waypointLinks;
 
   bool m_bDrawGrid = false;
+
+  olc::Sprite* m_barrelSprite;
+  olc::Decal* m_barrelDecal;
+
+  std::vector<ArenaBarrel*> m_barrels;
+
+  std::vector<WorldQuad> m_goals;
 };
 
 

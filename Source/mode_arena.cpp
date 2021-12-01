@@ -14,7 +14,8 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 			 olc::Sprite* car_05_Sprite,
 			 olc::Sprite* car_06_Sprite,
 			 olc::Sprite* car_07_Sprite,
-			 olc::Sprite* arena_floor_Sprite)
+			 olc::Sprite* arena_floor_Sprite,
+			 olc::Sprite* barrel_Sprite)
 {
   m_spriteVec.push_back(car_00_Sprite);
   m_spriteVec.push_back(car_01_Sprite);
@@ -36,6 +37,9 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   m_decalVec.push_back(new olc::Decal(car_07_Sprite));
 
   m_arenaFloorDecal = new olc::Decal(arena_floor_Sprite);
+
+  m_barrelSprite = barrel_Sprite;
+  m_barrelDecal = new olc::Decal(barrel_Sprite);
 
   m_cars.push_back(new Bdg_Car({-10.0f, -10.0f}, degToRad(45), m_decalVec[0]));
   //m_cars.push_back(new Bdg_Car({-290.0f, -300.0f}, degToRad(180), m_decalVec[1]));
@@ -117,6 +121,26 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 			      Vec2f(500.0f, 600.0f),
 			      m_arenaFloorDecal, olc::BLACK, 1));
 
+
+  olc::Pixel goalColor = olc::Pixel(128, 128, 128, 128);
+  //olc::Pixel goalColor = olc::DARK_GRAY;
+  
+  m_goals.push_back(WorldQuad::MakeFromAABB(Vec2f(-100, -10),
+					    Vec2f(-80, 10),
+					    m_arenaFloorDecal, goalColor, 2));
+    
+  m_goals.push_back(WorldQuad::MakeFromAABB(Vec2f(80, -10),
+					    Vec2f(100, 10),
+					    m_arenaFloorDecal, goalColor, 2));
+
+  m_goals.push_back(WorldQuad::MakeFromAABB(Vec2f(-10, -100),
+					    Vec2f(10, -80),
+					    m_arenaFloorDecal, goalColor, 2));
+    
+  m_goals.push_back(WorldQuad::MakeFromAABB(Vec2f(-10, 80),
+					    Vec2f(10, 100),
+					    m_arenaFloorDecal, goalColor, 2));
+    
   printf("about to make waypoints\n");
   makeWaypoints(-400.0f, 400.0f,
 		-400.0f, 400.0f, 50.0f);
@@ -139,6 +163,10 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   for (int gpi = 0; gpi < gamepads.size(); ++gpi) {
     std::string gp_name = gamepads[gpi]->getName();
     printf("[%02d] %s\n", gpi, gp_name.c_str());
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    addRandomBarrel();
   }
 }
 
@@ -225,11 +253,28 @@ bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
 
   while (m_physicsJuice > m_physicsFrameTime) {
     for (Bdg_Car* car : m_cars) {
-      car->updatePhysics(m_physicsFrameTime, m_walls);
+      car->updatePhysics(m_physicsFrameTime, m_walls, this);
+    }
+
+    for (ArenaBarrel* barrel : m_barrels) {
+      barrel->tickPhysics(m_physicsFrameTime);
     }
 
     m_physicsJuice -= m_physicsFrameTime;
   }
+
+  for (Bdg_Car* car : m_cars) {
+    if (car->canDropBarrel()) {
+      for (WorldQuad& w : m_goals) {
+	if (w.pointInside(car->getPosition())) {
+	  car->dropBarrel();
+	}
+      }
+    }
+  }
+
+
+  
 
   return true;
 }
@@ -247,7 +292,7 @@ void ArenaGameMode::setPlayerCar(int carNum)
 void ArenaGameMode::handleUserInput(CarsWithGuns* game, float elapsedSeconds)
 {
   if (m_gamepad == NULL || !m_gamepad->stillConnected) {
-    m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::SELECT);
+    //m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::SELECT);
 
     m_gamepad = olc::GamePad::selectWithButton(olc::GPButtons::FACE_D);
 
@@ -350,6 +395,16 @@ void ArenaGameMode::draw(CarsWithGuns* game)
     w.draw(game, m_camera);
   }
 
+  // draw goals
+  for (WorldQuad& w : m_goals) {
+    w.draw(game, m_camera);
+  }
+
+  // draw barrels
+  for (ArenaBarrel* b : m_barrels) {
+    b->draw(game, m_camera);
+  }
+
   // draw cars
   for (Bdg_Car* c : m_cars) {
     c->draw(game, m_camera);
@@ -414,4 +469,14 @@ void ArenaGameMode::draw(CarsWithGuns* game)
   sprintf(aBuffer, "A: %0.1f", m_cars[m_playerControlledCarIndex]->getHeading());
   std::string aString(aBuffer);
   game->DrawStringDecal({sw- 80.0f, sh - 20.0f}, aString, olc::GREEN);
+}
+
+void ArenaGameMode::addRandomBarrel()
+{
+  float x = rand_frange(-100.0f, 100.0f);
+  float y = rand_frange(-100.0f, 100.0f);
+
+  printf("placing barrel at %f %f\n", x, y);
+
+  m_barrels.push_back(new ArenaBarrel(Vec2f(x,y), m_barrelDecal));
 }

@@ -6,17 +6,6 @@
 class CarsWithGuns;
 class City;
 
-/*
-struct SpriteCoords
-{
-public:
-  int x;
-  int y;
-  int width;
-  int height;
-};
-*/
-
 class TrackGameMode
 {
  public:

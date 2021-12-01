@@ -272,6 +272,8 @@ bool CarsWithGuns::OnUserCreate()
 
   m_arena_floor_sprite = new olc::Sprite("Assets/Sprites/ArenaFloors/floor_grid.png");
 
+  m_barrel_sprite = new olc::Sprite("Assets/Sprites/KenneyRacingPack/PNG/Objects/barrel_blue.png");
+
   setGameMode(GameMode::GM_BDG);
 
   return true;
@@ -640,7 +642,8 @@ void CarsWithGuns::initArenaMode()
 		       m_car_05_sprite,
 		       m_car_06_sprite,
 		       m_car_07_sprite,
-		       m_arena_floor_sprite);
+		       m_arena_floor_sprite,
+		       m_barrel_sprite);
 }
 
 void CarsWithGuns::destroyArenaMode()

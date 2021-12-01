@@ -175,7 +175,9 @@ void Bdg_Car::oldUpdatePhysics(float elapsedSeconds, const std::vector<WorldQuad
 }
 */
 
-void Bdg_Car::updatePhysics(float dt, const std::vector<WorldQuad>& inWalls)
+void Bdg_Car::updatePhysics(float dt,
+			    const std::vector<WorldQuad>& inWalls,
+			    ArenaGameMode* inGameMode)
 {
   m_bicyclePhysics.tick(dt, inWalls);
 
@@ -183,6 +185,19 @@ void Bdg_Car::updatePhysics(float dt, const std::vector<WorldQuad>& inWalls)
   m_heading = m_bicyclePhysics.getHeading();
   m_velocity = m_bicyclePhysics.getVelocity();
   m_speed = m_velocity.len();
+
+  for (ArenaBarrel* b : inGameMode->getBarrels()) {
+    if (!b->getIsAlive()) {
+      continue;
+    }
+    if (inPickupRange(b->getPosition()) && (b->getOwningCar() != this)) {
+      addBarrel(b);
+    }
+  }
+
+  if (m_barrelDropoffTimer > 0) {
+    m_barrelDropoffTimer = std::max(0.0f, m_barrelDropoffTimer - dt);
+  }
 }
 
 void Bdg_Car::draw(CarsWithGuns* game, const Camera& inCam) const
@@ -277,4 +292,56 @@ void Bdg_Car::stop()
 void Bdg_Car::setController(CarController* inCtrl)
 {
   m_bicyclePhysics.setController(inCtrl);
+}
+
+Vec2f Bdg_Car::getTowPoint() const
+{
+  return m_position - Vec2f::makeAngleLength(m_heading, m_carLength * 0.5);
+}
+
+void Bdg_Car::addBarrel(ArenaBarrel* barrel)
+{
+  printf("in addBarrel\n");
+  ArenaBarrel* lastBarrel = NULL;
+
+  if (m_downstreamBarrel != NULL) {
+    printf("has downstream barrel\n");
+    for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
+      printf("step, next is %x\n", lastBarrel->getDownstreamBarrel());
+    }
+    printf("found end\n");
+  }
+
+  if (lastBarrel != NULL) {
+    printf("attaching to last barrel\n");
+    lastBarrel->setDownstreamBarrel(barrel);
+    barrel->setUpstreamBarrel(lastBarrel);
+  } else {
+    printf("attaching to car\n");
+    m_downstreamBarrel = barrel;
+    barrel->setUpstreamCar(this);
+  }
+}
+
+void Bdg_Car::dropBarrel()
+{
+  m_barrelDropoffTimer = m_barrelDropoffTimerLength;
+
+  printf("dropping barrel\n");
+
+  if (m_downstreamBarrel != NULL) {
+    m_downstreamBarrel->setIsAlive(false);
+    m_downstreamBarrel->detach();
+    ArenaBarrel* nextBarrel = m_downstreamBarrel->getDownstreamBarrel();
+    m_downstreamBarrel = nextBarrel;
+    if (m_downstreamBarrel != NULL) {
+      m_downstreamBarrel->setUpstreamBarrel(NULL);
+      m_downstreamBarrel->setUpstreamCar(this);
+    }
+  }
+}
+
+bool Bdg_Car::canDropBarrel()
+{
+  return ((m_downstreamBarrel != NULL) && (m_barrelDropoffTimer == 0.0f));
 }

@@ -32,7 +32,7 @@ class Bdg_Car
 
   // calculate the effect of controls (steering/throttle/brake) on
   // the physical state (acceleration, velocity, position, heading)
-  void updatePhysics(float elapsedSeconds, const std::vector<WorldQuad>& walls);
+  void updatePhysics(float elapsedSeconds, const std::vector<WorldQuad>& walls, ArenaGameMode* in_mode);
 
   // draw the car to the screen
   void draw(CarsWithGuns* game, const Camera& inCam) const;
@@ -44,6 +44,15 @@ class Bdg_Car
   void stop();
 
   void setController(CarController* inCtrl);
+
+  Vec2f getTowPoint() const;
+
+  bool inPickupRange(Vec2f target) const { return (target - m_position).len() < m_pickupRange; }
+
+  void addBarrel(ArenaBarrel* b);
+  void dropBarrel();
+
+  bool canDropBarrel();
   
  private:
   Vec2f m_position;
@@ -55,6 +64,13 @@ class Bdg_Car
 
   const float m_carLength = 4.0f;
   const float m_carWidth = 2.0f;
+  
+  const float m_pickupRange = 5.0f;
+
+  ArenaBarrel* m_downstreamBarrel = NULL;
+
+  float m_barrelDropoffTimer = 0.0f;
+  const float m_barrelDropoffTimerLength = 1.5f;
   
   /*  
   float m_topSpeed;

@@ -124,6 +124,8 @@ private:
   olc::Sprite* m_car_07_sprite;
 
   olc::Sprite* m_arena_floor_sprite;
+
+  olc::Sprite* m_barrel_sprite;
   
   olc::popup::Menu m_menu;
   olc::popup::Manager m_menuMgr;
