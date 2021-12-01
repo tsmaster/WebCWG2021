@@ -96,3 +96,23 @@ Bdg_Car* ArenaBarrel::getOwningCar()
   }
   return b->getUpstreamCar();
 }
+
+void ArenaBarrel::detach(bool propagate)
+{
+  if (m_upstreamCar != NULL) {
+    m_upstreamCar->detachBarrelChain();
+  }
+
+  if (m_upstreamBarrel) {
+    m_upstreamBarrel->setDownstreamBarrel(NULL);
+  }
+  
+  m_upstreamCar = NULL; m_upstreamBarrel = NULL;
+
+  ArenaBarrel* oldDownstream = m_downstreamBarrel;
+  m_downstreamBarrel = NULL;
+
+  if ((propagate) && (oldDownstream != NULL)) {
+    oldDownstream->detach(true);
+  }
+}

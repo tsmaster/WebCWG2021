@@ -17,7 +17,7 @@ class ArenaBarrel
 
   void attachToCar(Bdg_Car* inUpstreamCar) { m_upstreamCar = inUpstreamCar; }
   void attachToBarrel(ArenaBarrel* inUpstreamBarrel) { m_upstreamBarrel = inUpstreamBarrel; }
-  void detach() { m_upstreamCar = NULL; m_upstreamBarrel = NULL; }
+  void detach(bool propagate);
 
   bool hasUpstreamAttachment() { return ((m_upstreamCar != NULL) || (m_upstreamBarrel != NULL)); }
 

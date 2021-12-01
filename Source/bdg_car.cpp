@@ -5,9 +5,9 @@
 #include "part_phys_syst.h"
 #include "world_geom.h"
 
-Bdg_Car::Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal):
+Bdg_Car::Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal, const char* in_name):
   m_position(in_pos), m_velocity(Vec2f(0.0f, 0.0f)), m_speed(0.0f), m_heading(in_heading),
-  m_decal(in_decal)
+  m_decal(in_decal), m_name(std::string(in_name))
   // m_topSpeed(100.0f), m_acceleration(10.0f), m_braking(30.0f), 
 {
   Vec2f forward = Vec2f::makeAngleLength(in_heading, 2.0f);
@@ -191,12 +191,26 @@ void Bdg_Car::updatePhysics(float dt,
       continue;
     }
     if (inPickupRange(b->getPosition()) && (b->getOwningCar() != this)) {
-      addBarrel(b);
+      Bdg_Car* oldOwningCar = b->getOwningCar();
+      
+      if ((oldOwningCar == NULL) ||
+	  (oldOwningCar->canBeStolenFrom())) {
+	b->detach(false);
+	addBarrel(b);
+	startStolenFromTimer();
+	if (oldOwningCar != NULL) {
+	  oldOwningCar->startStolenFromTimer();
+	}
+      }
     }
   }
 
   if (m_barrelDropoffTimer > 0) {
     m_barrelDropoffTimer = std::max(0.0f, m_barrelDropoffTimer - dt);
+  }
+
+  if (m_stolenFromTimer > 0) {
+    m_stolenFromTimer = std::max(0.0f, m_stolenFromTimer - dt);
   }
 }
 
@@ -304,6 +318,9 @@ void Bdg_Car::addBarrel(ArenaBarrel* barrel)
   printf("in addBarrel\n");
   ArenaBarrel* lastBarrel = NULL;
 
+  barrel->setUpstreamBarrel(NULL);
+  barrel->setUpstreamCar(NULL);
+
   if (m_downstreamBarrel != NULL) {
     printf("has downstream barrel\n");
     for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
@@ -315,11 +332,14 @@ void Bdg_Car::addBarrel(ArenaBarrel* barrel)
   if (lastBarrel != NULL) {
     printf("attaching to last barrel\n");
     lastBarrel->setDownstreamBarrel(barrel);
+    printf("set last barrel downstream to this\n");	   
     barrel->setUpstreamBarrel(lastBarrel);
+    printf("set this upstream to last barrel\n");
   } else {
-    printf("attaching to car\n");
+    printf("attaching to car %s\n", m_name.c_str());
     m_downstreamBarrel = barrel;
     barrel->setUpstreamCar(this);
+    printf("attached to car\n");
   }
 }
 
@@ -327,12 +347,12 @@ void Bdg_Car::dropBarrel()
 {
   m_barrelDropoffTimer = m_barrelDropoffTimerLength;
 
-  printf("dropping barrel\n");
+  printf("car %s dropping barrel\n", m_name.c_str());
 
   if (m_downstreamBarrel != NULL) {
-    m_downstreamBarrel->setIsAlive(false);
-    m_downstreamBarrel->detach();
     ArenaBarrel* nextBarrel = m_downstreamBarrel->getDownstreamBarrel();
+    m_downstreamBarrel->setIsAlive(false);
+    m_downstreamBarrel->detach(false);
     m_downstreamBarrel = nextBarrel;
     if (m_downstreamBarrel != NULL) {
       m_downstreamBarrel->setUpstreamBarrel(NULL);
@@ -344,4 +364,14 @@ void Bdg_Car::dropBarrel()
 bool Bdg_Car::canDropBarrel()
 {
   return ((m_downstreamBarrel != NULL) && (m_barrelDropoffTimer == 0.0f));
+}
+
+bool Bdg_Car::canBeStolenFrom()
+{
+  return ((m_downstreamBarrel != NULL) && (m_stolenFromTimer == 0.0f));  
+}
+
+void Bdg_Car::startStolenFromTimer()
+{
+  m_stolenFromTimer = m_stolenFromTimerLength;
 }

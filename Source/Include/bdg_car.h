@@ -19,7 +19,7 @@ class Bdg_Car
      in_heading, rotation in radians where 0 is east
      in_decal, a decal to draw the car
    **/
-  Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal);
+  Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal, const char* name);
 
   // sets steering between -1.0f (full left) to 1.0f (full right)
   void setSteer(float steer);
@@ -51,10 +51,18 @@ class Bdg_Car
 
   void addBarrel(ArenaBarrel* b);
   void dropBarrel();
+  void detachBarrelChain() { m_downstreamBarrel = NULL; }
 
   bool canDropBarrel();
+
+  bool canBeStolenFrom();
+  void startStolenFromTimer();
+
+  void setName(std::string name) { m_name = name; }
   
  private:
+  std::string m_name = std::string("Car");
+  
   Vec2f m_position;
 
   Vec2f m_velocity;
@@ -70,7 +78,10 @@ class Bdg_Car
   ArenaBarrel* m_downstreamBarrel = NULL;
 
   float m_barrelDropoffTimer = 0.0f;
-  const float m_barrelDropoffTimerLength = 1.5f;
+  const float m_barrelDropoffTimerLength = 0.5f;
+
+  float m_stolenFromTimer = 0.0f;
+  const float m_stolenFromTimerLength = 0.2f;
   
   /*  
   float m_topSpeed;

@@ -41,16 +41,16 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   m_barrelSprite = barrel_Sprite;
   m_barrelDecal = new olc::Decal(barrel_Sprite);
 
-  m_cars.push_back(new Bdg_Car({-10.0f, -10.0f}, degToRad(45), m_decalVec[0]));
+  m_cars.push_back(new Bdg_Car({0.0f, 0.0f}, degToRad(90), m_decalVec[0], "Player"));
   //m_cars.push_back(new Bdg_Car({-290.0f, -300.0f}, degToRad(180), m_decalVec[1]));
 
-  m_cars.push_back(new Bdg_Car({0.0f, -120.0f}, 0.0f, m_decalVec[1]));
-  m_cars.push_back(new Bdg_Car({350.0f, 0.0f}, 0.0f, m_decalVec[2]));
-  m_cars.push_back(new Bdg_Car({-120.0f, 0.0f}, 0.0f, m_decalVec[3]));
-  m_cars.push_back(new Bdg_Car({0.0f, -350.0f}, 0.0f, m_decalVec[4]));
-  m_cars.push_back(new Bdg_Car({-120.0f, -240.0f}, 0.0f, m_decalVec[5]));
-  m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6]));
-  m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7]));
+  m_cars.push_back(new Bdg_Car({0.0f, -50.0f}, 0.0f, m_decalVec[1], "Black"));
+  m_cars.push_back(new Bdg_Car({50.0f, 0.0f}, 0.0f, m_decalVec[2], "Two White"));
+  m_cars.push_back(new Bdg_Car({0.0f, 50.0f}, 0.0f, m_decalVec[3], "Three Yellow Green"));
+  m_cars.push_back(new Bdg_Car({-50.0f, 0.0f}, 0.0f, m_decalVec[4], "Four Blue Green"));
+  m_cars.push_back(new Bdg_Car({-120.0f, -240.0f}, 0.0f, m_decalVec[5], "Five"));
+  m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6], "Six"));
+  m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7], "Seven"));
 
   for (float fx = -400.0f; fx < 400.0f; fx += 100.0f) {
     for (float fy = -400.0f; fy < 400.0f; fy += 100.0f) {
