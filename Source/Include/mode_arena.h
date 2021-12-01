@@ -35,6 +35,8 @@ class ArenaGameMode
 
   std::vector<ArenaBarrel *>& getBarrels() { return m_barrels; }
 
+  void score(int carIndex, int points);
+
  protected:
   void handleUserInput(CarsWithGuns* game, float elapsedSeconds);  
 
@@ -80,6 +82,8 @@ class ArenaGameMode
   std::vector<ArenaBarrel*> m_barrels;
 
   std::vector<WorldQuad> m_goals;
+
+  std::map<int, int> m_scores;
 };
 
 

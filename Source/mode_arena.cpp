@@ -263,18 +263,17 @@ bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
     m_physicsJuice -= m_physicsFrameTime;
   }
 
-  for (Bdg_Car* car : m_cars) {
+  for (int carIndex = 0; carIndex < m_cars.size(); ++carIndex) {
+    Bdg_Car* car = m_cars[carIndex];
     if (car->canDropBarrel()) {
       for (WorldQuad& w : m_goals) {
 	if (w.pointInside(car->getPosition())) {
 	  car->dropBarrel();
+	  score(carIndex, 1);
 	}
       }
     }
   }
-
-
-  
 
   return true;
 }
@@ -479,4 +478,22 @@ void ArenaGameMode::addRandomBarrel()
   printf("placing barrel at %f %f\n", x, y);
 
   m_barrels.push_back(new ArenaBarrel(Vec2f(x,y), m_barrelDecal));
+}
+
+void ArenaGameMode::score(int carIndex, int points)
+{
+  if (m_scores.find(carIndex) == m_scores.end()) {
+    m_scores[carIndex] = points;
+  } else {
+    m_scores[carIndex] += points;
+  }
+
+  for (int i = 0; i < m_cars.size(); ++i) {
+    int score = 0;
+    if (m_scores.find(i) != m_scores.end()) {
+      score = m_scores[i];
+    }
+
+    printf("Car [%d] %s : %d\n", i, m_cars[i]->getName().c_str(), score);
+  }
 }

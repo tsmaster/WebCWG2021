@@ -59,6 +59,7 @@ class Bdg_Car
   void startStolenFromTimer();
 
   void setName(std::string name) { m_name = name; }
+  const std::string& getName() const { return m_name; }
   
  private:
   std::string m_name = std::string("Car");
