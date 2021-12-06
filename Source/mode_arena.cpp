@@ -1,5 +1,6 @@
 #include "mode_arena.h"
 
+#include "arena_ai_controller.h"
 #include "bdg_car.h"
 #include "bdg_math.h"
 #include "bdg_random.h"
@@ -57,6 +58,15 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
       m_floors.push_back(WorldQuad::MakeFromAABB(Vec2f(fx, fy + 100.0f),
 						 Vec2f(fx + 100.0f, fy),
 						 m_arenaFloorDecal, olc::WHITE, 0));
+    }
+  }
+
+  for (int i = 0; i < 8; ++i) {
+    m_aiController[i].setMode(this);
+    m_aiController[i].setCar(m_cars[i]);
+
+    if (i != 0) {
+      m_cars[i]->setController(&(m_aiController[i]));
     }
   }
 
@@ -252,6 +262,13 @@ bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
   m_physicsJuice += elapsedSeconds;
 
   while (m_physicsJuice > m_physicsFrameTime) {
+    for (Bdg_Car* car : m_cars) {
+      CarController* cc = car->getController();
+      if (cc != NULL) {
+	cc->tick(m_physicsFrameTime);
+      }	
+    }
+    
     for (Bdg_Car* car : m_cars) {
       car->updatePhysics(m_physicsFrameTime, m_walls, this);
     }

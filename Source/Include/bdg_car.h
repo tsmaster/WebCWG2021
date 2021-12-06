@@ -37,13 +37,14 @@ class Bdg_Car
   // draw the car to the screen
   void draw(CarsWithGuns* game, const Camera& inCam) const;
 
-  Vec2f getPosition() { return m_position; }
+  Vec2f& getPosition() { return m_position; }
   float getSpeed() { return m_speed; }
   float getHeading() { return m_heading; }
 
   void stop();
 
   void setController(CarController* inCtrl);
+  CarController* getController() { return m_controller; }
 
   Vec2f getTowPoint() const;
 
@@ -101,6 +102,7 @@ class Bdg_Car
 
   */
 
+  CarController* m_controller = NULL;
   BicycleCarPhysics m_bicyclePhysics;
 };
 

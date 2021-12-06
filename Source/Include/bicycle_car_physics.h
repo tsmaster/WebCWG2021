@@ -21,6 +21,8 @@ public:
   virtual float getSteer() = 0;
   virtual float getThrottle() = 0;
   virtual float getBrake() = 0;
+
+  virtual void tick(float dt) {}
 };
 
 class PlayerGamepadCarController : public CarController

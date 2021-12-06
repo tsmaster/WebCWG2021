@@ -305,6 +305,7 @@ void Bdg_Car::stop()
 
 void Bdg_Car::setController(CarController* inCtrl)
 {
+  m_controller = inCtrl;
   m_bicyclePhysics.setController(inCtrl);
 }
 

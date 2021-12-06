@@ -4,12 +4,13 @@
 #include "olcPixelGameEngine.h"
 #include "olc_pgex_gamepad.h"
 
+#include "arena_ai_controller.h"
 #include "arena_barrel.h"
 #include "bdg_math.h"
+#include "bicycle_car_physics.h"
 #include "camera.h"
 #include "world_geom.h"
 
-#include "bicycle_car_physics.h"
 
 class Bdg_Car;
 class CarsWithGuns;
@@ -70,6 +71,7 @@ class ArenaGameMode
   const float m_physicsFrameTime = 1.0f / m_physicsFrameRate;
 
   PlayerGamepadCarController m_gamepadController;
+  ArenaAiContextCarController m_aiController[8];
 
   std::vector<Vec2f> m_waypoints;
   std::vector<std::pair<int, int>> m_waypointLinks;
