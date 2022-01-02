@@ -324,11 +324,9 @@ void Bdg_Car::addBarrel(ArenaBarrel* barrel)
 
   if (m_downstreamBarrel != NULL) {
     printf("has downstream barrel\n");
-    /*
       for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
-      printf("step, next is %x\n", lastBarrel->getDownstreamBarrel());
+	//printf("step, next is %x\n", lastBarrel->getDownstreamBarrel());
     }
-    */
     printf("found end\n");
   }
 

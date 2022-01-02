@@ -48,10 +48,10 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
   m_cars.push_back(new Bdg_Car({0.0f, -50.0f}, 0.0f, m_decalVec[1], "Black"));
   m_cars.push_back(new Bdg_Car({50.0f, 0.0f}, 0.0f, m_decalVec[2], "Two White"));
   m_cars.push_back(new Bdg_Car({0.0f, 50.0f}, 0.0f, m_decalVec[3], "Three Yellow Green"));
-  //m_cars.push_back(new Bdg_Car({-50.0f, 0.0f}, 0.0f, m_decalVec[4], "Four Blue Green"));
-  //m_cars.push_back(new Bdg_Car({-120.0f, -240.0f}, 0.0f, m_decalVec[5], "Five"));
-  //m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6], "Six"));
-  //m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7], "Seven"));
+  m_cars.push_back(new Bdg_Car({-50.0f, 0.0f}, 0.0f, m_decalVec[4], "Four Blue Green"));
+  m_cars.push_back(new Bdg_Car({-120.0f, -240.0f}, 0.0f, m_decalVec[5], "Five"));
+  m_cars.push_back(new Bdg_Car({-350.0f, -0.0f}, 0.0f, m_decalVec[6], "Six"));
+  m_cars.push_back(new Bdg_Car({-240.0f, -120.0f}, 0.0f, m_decalVec[7], "Seven"));
 
   for (float fx = -400.0f; fx < 400.0f; fx += 100.0f) {
     for (float fy = -400.0f; fy < 400.0f; fy += 100.0f) {
@@ -156,7 +156,8 @@ void ArenaGameMode::init(olc::Sprite* car_00_Sprite,
 		-400.0f, 400.0f, 50.0f);
 
   // init camera
-  m_camera.setScale(2.5f);
+  //m_camera.setScale(2.5f);
+  m_camera.setScale(3.0f);
   //m_camera.setScale(25.0f);
 
   //m_camera.setScale(10.0f);
