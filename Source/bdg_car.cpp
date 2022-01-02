@@ -7,7 +7,7 @@
 
 Bdg_Car::Bdg_Car(Vec2f in_pos, float in_heading, olc::Decal* in_decal, const char* in_name):
   m_position(in_pos), m_velocity(Vec2f(0.0f, 0.0f)), m_speed(0.0f), m_heading(in_heading),
-  m_decal(in_decal), m_name(std::string(in_name))
+  m_decal(in_decal), m_name(std::string(in_name)), m_targetPos(0.0f, 0.0f)
   // m_topSpeed(100.0f), m_acceleration(10.0f), m_braking(30.0f), 
 {
   Vec2f forward = Vec2f::makeAngleLength(in_heading, 2.0f);
@@ -324,9 +324,11 @@ void Bdg_Car::addBarrel(ArenaBarrel* barrel)
 
   if (m_downstreamBarrel != NULL) {
     printf("has downstream barrel\n");
-    for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
+    /*
+      for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
       printf("step, next is %x\n", lastBarrel->getDownstreamBarrel());
     }
+    */
     printf("found end\n");
   }
 

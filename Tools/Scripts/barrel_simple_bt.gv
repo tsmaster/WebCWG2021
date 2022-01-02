@@ -1,0 +1,21 @@
+graph BarrelSimple {
+	selector_root
+	sequence_have_barrel
+	sensor_have_barrel
+	sequence_local_delivery
+	sort_los_to_goals
+	nav_to_goal
+	sequence_local_delivery -- sort_los_to_goals
+	sequence_local_delivery -- nav_to_goal
+	sequence_have_barrel -- sensor_have_barrel
+	sequence_have_barrel -- sequence_local_delivery
+	sequence_get_barrel
+	sequence_get_local
+	sort_los_to_barrels
+	nav_to_barrel
+	sequence_get_local -- sort_los_to_barrels
+	sequence_get_local -- nav_to_barrel
+	sequence_get_barrel -- sequence_get_local
+	selector_root -- sequence_have_barrel
+	selector_root -- sequence_get_barrel
+}

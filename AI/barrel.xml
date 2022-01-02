@@ -1,0 +1,31 @@
+<selector name="root">
+  <sequence name="have barrel">
+    <sensor_have_barrel />
+    <selector name="deliver barrel">
+      <sequence name="local delivery">
+	<sort_los_to_goals />
+	<nav_to_goal />
+      </sequence>
+      <sequence name="long distance delivery">
+	<a_star_to_goal />
+	<follow_a_star name="to goal" />
+      </sequence>
+    </selector>
+  </sequence>
+  <sequence name="get barrel">
+    <selector>
+      <sequence name="get local">
+	<sort_los_to_barrels />
+	<nav_to_barrel />
+      </sequence>
+      <sequence name="get remote">
+	<a_star_to_barrels />
+	<follow_a_star name="to barrel" />
+      </sequence>
+    </selector>
+  </sequence>
+  <sequence name="patrol">
+    <a_star_to_patrol_points />
+    <follow_a_star name="to patrol point" />
+  </sequence>
+</selector>

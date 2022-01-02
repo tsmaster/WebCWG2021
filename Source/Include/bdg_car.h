@@ -6,6 +6,7 @@
 #include "carswithguns.h"
 //#include "part_phys_syst.h"
 
+#include "gen_barrelSimple.h"
 
 class Camera;
 class WorldQuad;
@@ -54,6 +55,8 @@ class Bdg_Car
   void dropBarrel();
   void detachBarrelChain() { m_downstreamBarrel = NULL; }
 
+  bool hasBarrel() { return m_downstreamBarrel != NULL; }
+
   bool canDropBarrel();
 
   bool canBeStolenFrom();
@@ -61,6 +64,10 @@ class Bdg_Car
 
   void setName(std::string name) { m_name = name; }
   const std::string& getName() const { return m_name; }
+
+  // Should this be part of a brain class?
+  Vec2f getTargetPos() { return m_targetPos; }
+  void setTargetPos(Vec2f targetPos) { m_targetPos = targetPos; }
   
  private:
   std::string m_name = std::string("Car");
@@ -104,6 +111,8 @@ class Bdg_Car
 
   CarController* m_controller = NULL;
   BicycleCarPhysics m_bicyclePhysics;
+
+  Vec2f m_targetPos;
 };
 
 #endif // bdg_car_h

@@ -4,6 +4,7 @@
 
 void ArenaAiContextCarController::tick(float dt)
 {
+  /*
   float closestDistance = -1.0f;
   Vec2f closestPos = Vec2f(0, 0);
 
@@ -27,6 +28,9 @@ void ArenaAiContextCarController::tick(float dt)
   }
 
   steerToPos(closestPos);
+  */
+  // TODO pass in CarsWithGuns ptr
+  m_simpleAi.tick(NULL, m_mode, m_car, dt);
 }
 
 void ArenaAiContextCarController::steerToPos(const Vec2f& target)
@@ -39,5 +43,4 @@ void ArenaAiContextCarController::steerToPos(const Vec2f& target)
   m_steering = fmap(relHeading, -PI, PI, 1.0f, -1.0f);
   m_throttle = 1.0f;
   m_brake = 0.0f;
-
 }

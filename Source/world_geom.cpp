@@ -495,3 +495,21 @@ void WorldQuad::print() const
     printf("\n");
   }
 }
+
+Vec2f WorldQuad::centerPoint() const
+{
+  if (m_bIsAxisAlignedRectangle) {
+    return Vec2f((xMin + xMax) / 2.0f,
+		 (yMin + yMax) / 2.0f);
+  } else {
+    float xAcc = 0.0f;
+    float yAcc = 0.0f;
+    
+    for (const Vec2f& c : m_corners) {
+      xAcc += c.x;
+      yAcc += c.y;
+    }
+    return Vec2f(xAcc, yAcc) * (1.0f / m_corners.size());
+  }
+
+}

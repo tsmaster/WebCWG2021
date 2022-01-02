@@ -1,0 +1,43 @@
+graph BT {
+	"selector (root)"
+	"sequence (have barrel)"
+	sensor_have_barrel
+	"selector (deliver barrel)"
+	"sequence (local delivery)"
+	sort_los_to_goals
+	nav_to_goal
+	"sequence (local delivery)" -- sort_los_to_goals
+	"sequence (local delivery)" -- nav_to_goal
+	"sequence (long distance delivery)"
+	a_star_to_goal
+	"follow_a_star (to goal)"
+	"sequence (long distance delivery)" -- a_star_to_goal
+	"sequence (long distance delivery)" -- "follow_a_star (to goal)"
+	"selector (deliver barrel)" -- "sequence (local delivery)"
+	"selector (deliver barrel)" -- "sequence (long distance delivery)"
+	"sequence (have barrel)" -- sensor_have_barrel
+	"sequence (have barrel)" -- "selector (deliver barrel)"
+	"sequence (get barrel)"
+	selector
+	"sequence (get local)"
+	sort_los_to_barrels
+	nav_to_barrel
+	"sequence (get local)" -- sort_los_to_barrels
+	"sequence (get local)" -- nav_to_barrel
+	"sequence (get remote)"
+	a_star_to_barrels
+	"follow_a_star (to barrel)"
+	"sequence (get remote)" -- a_star_to_barrels
+	"sequence (get remote)" -- "follow_a_star (to barrel)"
+	selector -- "sequence (get local)"
+	selector -- "sequence (get remote)"
+	"sequence (get barrel)" -- selector
+	"sequence (patrol)"
+	a_star_to_patrol_points
+	"follow_a_star (to patrol point)"
+	"sequence (patrol)" -- a_star_to_patrol_points
+	"sequence (patrol)" -- "follow_a_star (to patrol point)"
+	"selector (root)" -- "sequence (have barrel)"
+	"selector (root)" -- "sequence (get barrel)"
+	"selector (root)" -- "sequence (patrol)"
+}

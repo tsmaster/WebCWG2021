@@ -19,6 +19,8 @@ class WorldQuad
   
   Vec2f closestPoint(const Vec2f& p) const;
 
+  Vec2f centerPoint() const;
+
   static WorldQuad MakeFromAABB(Vec2f ul, Vec2f lr, olc::Decal* inDecal, olc::Pixel inColor, int inLayerIndex);
 
   bool constrainsParticle(const Vec2f& p, float r) const;

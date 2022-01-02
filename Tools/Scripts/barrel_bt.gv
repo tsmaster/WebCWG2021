@@ -1,0 +1,43 @@
+graph Barrel {
+	selector_root
+	sequence_have_barrel
+	sensor_have_barrel
+	selector_deliver_barrel
+	sequence_local_delivery
+	sort_los_to_goals
+	nav_to_goal
+	sequence_local_delivery -- sort_los_to_goals
+	sequence_local_delivery -- nav_to_goal
+	sequence_long_distance_delivery
+	a_star_to_goal
+	follow_a_star_to_goal
+	sequence_long_distance_delivery -- a_star_to_goal
+	sequence_long_distance_delivery -- follow_a_star_to_goal
+	selector_deliver_barrel -- sequence_local_delivery
+	selector_deliver_barrel -- sequence_long_distance_delivery
+	sequence_have_barrel -- sensor_have_barrel
+	sequence_have_barrel -- selector_deliver_barrel
+	sequence_get_barrel
+	selector
+	sequence_get_local
+	sort_los_to_barrels
+	nav_to_barrel
+	sequence_get_local -- sort_los_to_barrels
+	sequence_get_local -- nav_to_barrel
+	sequence_get_remote
+	a_star_to_barrels
+	follow_a_star_to_barrel
+	sequence_get_remote -- a_star_to_barrels
+	sequence_get_remote -- follow_a_star_to_barrel
+	selector -- sequence_get_local
+	selector -- sequence_get_remote
+	sequence_get_barrel -- selector
+	sequence_patrol
+	a_star_to_patrol_points
+	follow_a_star_to_patrol_point
+	sequence_patrol -- a_star_to_patrol_points
+	sequence_patrol -- follow_a_star_to_patrol_point
+	selector_root -- sequence_have_barrel
+	selector_root -- sequence_get_barrel
+	selector_root -- sequence_patrol
+}

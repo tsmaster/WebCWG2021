@@ -3,6 +3,8 @@
 
 #include "bicycle_car_physics.h"
 
+#include "gen_barrelSimple.h"
+
 class ArenaGameMode;
 class Bdg_Car;
 
@@ -17,9 +19,10 @@ class ArenaAiContextCarController : public CarController
 
   virtual void setMode(ArenaGameMode* mode) {m_mode = mode;}
   virtual void setCar(Bdg_Car* car) {m_car = car;}
+
+  void steerToPos(const Vec2f& target);
   
  private:
-  void steerToPos(const Vec2f& target);
   
   
   ArenaGameMode* m_mode;
@@ -28,6 +31,8 @@ class ArenaAiContextCarController : public CarController
   float m_steering;
   float m_throttle;
   float m_brake;
+
+  BarrelSimpleAI m_simpleAi;
 };
 
 #endif //arena_ai_controller_h

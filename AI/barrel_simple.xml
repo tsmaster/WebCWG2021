@@ -1,0 +1,15 @@
+<selector name="root">
+  <sequence name="have barrel">
+    <sensor_have_barrel />
+    <sequence name="local delivery">
+      <sort_los_to_goals />
+      <nav_to_goal />
+    </sequence>
+  </sequence>
+  <sequence name="get barrel">
+    <sequence name="get local">
+      <sort_los_to_barrels />
+      <nav_to_barrel />
+    </sequence>
+  </sequence>
+</selector>

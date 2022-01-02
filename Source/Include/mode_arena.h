@@ -38,6 +38,8 @@ class ArenaGameMode
 
   void score(int carIndex, int points);
 
+  std::vector<WorldQuad>& getGoals() { return m_goals; }
+
  protected:
   void handleUserInput(CarsWithGuns* game, float elapsedSeconds);  
 
