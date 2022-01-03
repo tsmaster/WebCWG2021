@@ -55,6 +55,9 @@ class Node:
         #hash(self.idStr))
         return "node_{0}".format(self.idStr)
 
+    def getArgumentString(self):
+        return None
+
 unknownTags = set()
 
 def makeNode(tag, attribs, depth):
@@ -150,5 +153,14 @@ class SortLosNode(Node):
 
     def getCppClassName(self):
         return "SortLosNode"
+
+    def getArgumentString(self):
+        if self.dest == 'barrels':
+            return "BarrelModeFeature::BMF_Barrel"
+        elif self.dest == 'goals':
+            return "BarrelModeFeature::BMF_Goal"
+        else:
+            return "???"+self.dest+"???"
+        
 
 

@@ -41,6 +41,13 @@ void ArenaAiContextCarController::steerToPos(const Vec2f& target)
   float relHeading = wrapAngle(absHeading - m_car->getHeading());
 
   m_steering = fmap(relHeading, -PI, PI, 1.0f, -1.0f);
-  m_throttle = 1.0f;
+
+  float distToTarget = delta.len();
+
+  if (distToTarget > m_fullSpeedRadius) {
+    m_throttle = 1.0f;
+  } else {
+    m_throttle = fmap(distToTarget, 0.0f, m_fullSpeedRadius, 0, 1.0f);
+  }
   m_brake = 0.0f;
 }

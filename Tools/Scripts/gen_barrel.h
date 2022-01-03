@@ -1,5 +1,5 @@
-#ifndef GEN_BARRELSIMPLEAI
-#define GEN_BARRELSIMPLEAI
+#ifndef GEN_BARRELAI
+#define GEN_BARRELAI
 
 // Behavior Tree Declaration
 
@@ -11,12 +11,12 @@
 class CarsWithGuns;
 class Bdg_Car;
 
-class BarrelSimpleAI {
+class BarrelAI {
   public:
-    BarrelSimpleAI();
+    BarrelAI();
     BtResult tick(CarsWithGuns* game, ArenaGameMode* mode, Bdg_Car* car, float dt);
   private:
     std::unique_ptr<SelectorNode> m_root;
 };
 
-#endif // GEN_BARRELSIMPLEAI
+#endif // GEN_BARRELAI
