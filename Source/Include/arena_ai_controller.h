@@ -32,8 +32,8 @@ class ArenaAiContextCarController : public CarController
   float m_throttle;
   float m_brake;
 
-  float m_fullSpeedRadius = 20.0f;
-  float m_minThrottle = 0.2f;
+  float m_tooCloseRadius = 30.0f;
+  float m_tooCloseDegrees = 45.0f;
 
   BarrelSimpleAI m_simpleAi;
 };

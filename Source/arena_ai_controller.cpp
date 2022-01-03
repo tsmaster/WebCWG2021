@@ -4,32 +4,6 @@
 
 void ArenaAiContextCarController::tick(float dt)
 {
-  /*
-  float closestDistance = -1.0f;
-  Vec2f closestPos = Vec2f(0, 0);
-
-  Vec2f myPos = m_car->getPosition();
-  
-  for (ArenaBarrel* b : m_mode->getBarrels()) {
-    if (!b->getIsAlive()) {
-      continue;
-    }
-    if (b->getOwningCar() == m_car) {
-      continue;
-    }
-    Vec2f deltaToBarrel = myPos - b->getPosition();
-    
-    float dist = deltaToBarrel.len();
-    if ((closestDistance < 0.0f) ||
-	(dist < closestDistance)) {
-      closestDistance = dist;
-      closestPos = b->getPosition();
-    }
-  }
-
-  steerToPos(closestPos);
-  */
-  // TODO pass in CarsWithGuns ptr
   m_simpleAi.tick(NULL, m_mode, m_car, dt);
 }
 
@@ -44,10 +18,17 @@ void ArenaAiContextCarController::steerToPos(const Vec2f& target)
 
   float distToTarget = delta.len();
 
-  if (distToTarget > m_fullSpeedRadius) {
-    m_throttle = 1.0f;
+  if ((distToTarget < m_tooCloseRadius) &&
+      (abs(radToDeg(relHeading)) > m_tooCloseDegrees)) {
+    m_throttle = -1.0f;
+    if (relHeading < 0.0f) {
+      m_steering = -1.0f;
+    } else {
+      m_steering = 1.0f;
+    }
   } else {
-    m_throttle = fmap(distToTarget, 0.0f, m_fullSpeedRadius, 0, 1.0f);
+    m_throttle = 1.0f;
   }
+  
   m_brake = 0.0f;
 }

@@ -152,6 +152,11 @@ BtResult SortLosNode::tick(CarsWithGuns* game, ArenaGameMode* mode, Bdg_Car* car
 	  continue;
 	}
 
+	if ((barrelOwner != NULL) &&
+	    (!barrelOwner->canBeStolenFrom())) {
+	  continue;
+	}
+
 	if (!barrel->getIsAlive()) {
 	  continue;
 	}
