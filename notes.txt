@@ -16,3 +16,13 @@ https://github.com/OneLoneCoder/olcPixelGameEngine/wiki
 
 ENTT
 https://github.com/skypjack/entt
+
+
+
+
+
+Recording
+ffmpeg -t 60 -video_size 1280x1024 -framerate 25 -f x11grab -i :1 output_jan_05.mp4
+
+Editing
+kdenlive

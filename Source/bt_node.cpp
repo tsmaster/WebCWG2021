@@ -161,10 +161,13 @@ BtResult SortLosNode::tick(CarsWithGuns* game, ArenaGameMode* mode, Bdg_Car* car
 	  continue;
 	}
 
-	// TODO verify LOS
-	
 	Vec2f barrelPos = barrel->getPosition();
 
+	Vec2f unusedIntersection(0,0);
+	if (mode->raycastWalls(carPos, barrelPos, unusedIntersection)) {
+	  continue;
+	}
+	
 	Vec2f delta = barrelPos - carPos;
 	
 	float deltaLen = delta.len();
@@ -190,9 +193,12 @@ BtResult SortLosNode::tick(CarsWithGuns* game, ArenaGameMode* mode, Bdg_Car* car
       Vec2f bestDest(0.0f, 0.0f);
       
       for (WorldQuad& goal : mode->getGoals()) {
-	// TODO verify LOS
-
 	Vec2f nearPoint = goal.centerPoint();
+
+	Vec2f unusedIntersection(0,0);
+	if (mode->raycastWalls(carPos, nearPoint, unusedIntersection)) {
+	  continue;
+	}
 
 	Vec2f delta = nearPoint - carPos;
 	

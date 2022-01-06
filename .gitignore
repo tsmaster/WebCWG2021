@@ -49,3 +49,6 @@ cwg-dbg
 
 # git token
 git.token
+
+# screen captures
+Captures/*

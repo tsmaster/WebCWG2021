@@ -40,6 +40,10 @@ class ArenaGameMode
 
   std::vector<WorldQuad>& getGoals() { return m_goals; }
 
+  std::vector<WorldQuad>& getWalls() { return m_walls; }
+
+  bool raycastWalls(Vec2f& start, Vec2f& end, Vec2f& outIntersection) const;
+
  protected:
   void handleUserInput(CarsWithGuns* game, float elapsedSeconds);  
 

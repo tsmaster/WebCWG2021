@@ -516,3 +516,17 @@ void ArenaGameMode::score(int carIndex, int points)
     printf("Car [%d] %s : %d\n", i, m_cars[i]->getName().c_str(), score);
   }
 }
+
+bool ArenaGameMode::raycastWalls(Vec2f& start, Vec2f& end, Vec2f& outIntersection) const
+{
+  Vec2f direction = end - start;
+  for (const WorldQuad& wall : m_walls) {
+    Vec2f intersection(0.0f, 0.0f);
+    if (wall.raycast(start, direction, intersection)) {
+      outIntersection = intersection;
+      return true;
+    }
+  }
+
+  return false;
+}
