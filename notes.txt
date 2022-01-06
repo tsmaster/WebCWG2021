@@ -26,3 +26,9 @@ ffmpeg -t 60 -video_size 1280x1024 -framerate 25 -f x11grab -i :1 output_jan_05.
 
 Editing
 kdenlive
+
+Things to do:
+use X to cut the video clip at the beginning
+use S to select video clips
+Use the effects pane (middle pane, ish) to find edge crop effect
+use edge crop effect to crop to the actual window

@@ -4,7 +4,6 @@
 #include "bicycle_car_physics.h"
 #include "bdg_math.h"
 #include "carswithguns.h"
-//#include "part_phys_syst.h"
 
 #include "gen_barrelSimple.h"
 
@@ -41,8 +40,6 @@ class Bdg_Car
   Vec2f& getPosition() { return m_position; }
   float getSpeed() { return m_speed; }
   float getHeading() { return m_heading; }
-
-  void stop();
 
   void setController(CarController* inCtrl);
   CarController* getController() { return m_controller; }
@@ -92,23 +89,6 @@ class Bdg_Car
   float m_stolenFromTimer = 0.0f;
   const float m_stolenFromTimerLength = 0.2f;
   
-  /*  
-  float m_topSpeed;
-  float m_acceleration;
-  float m_braking;
-
-
-  float m_ctrlSteer = 0.0f;
-  float m_ctrlThrottle = 0.0f;
-  float m_ctrlBrake = 0.0f;
-
-  ParticlePhysicsSystem m_particles;
-
-  const float m_throttleFactor = 20.0f;
-  const float m_steerFactor = 0.05f;
-
-  */
-
   CarController* m_controller = NULL;
   BicycleCarPhysics m_bicyclePhysics;
 
