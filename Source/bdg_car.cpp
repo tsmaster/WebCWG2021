@@ -114,31 +114,22 @@ Vec2f Bdg_Car::getTowPoint() const
 
 void Bdg_Car::addBarrel(ArenaBarrel* barrel)
 {
-  printf("in addBarrel\n");
   ArenaBarrel* lastBarrel = NULL;
 
   barrel->setUpstreamBarrel(NULL);
   barrel->setUpstreamCar(NULL);
 
   if (m_downstreamBarrel != NULL) {
-    printf("has downstream barrel\n");
-      for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel()) {
-	//printf("step, next is %x\n", lastBarrel->getDownstreamBarrel());
-    }
-    printf("found end\n");
+    // determine last barrel
+    for (lastBarrel = m_downstreamBarrel; lastBarrel->getDownstreamBarrel() != NULL; lastBarrel = lastBarrel->getDownstreamBarrel());
   }
 
   if (lastBarrel != NULL) {
-    printf("attaching to last barrel\n");
     lastBarrel->setDownstreamBarrel(barrel);
-    printf("set last barrel downstream to this\n");	   
     barrel->setUpstreamBarrel(lastBarrel);
-    printf("set this upstream to last barrel\n");
   } else {
-    printf("attaching to car %s\n", m_name.c_str());
     m_downstreamBarrel = barrel;
     barrel->setUpstreamCar(this);
-    printf("attached to car\n");
   }
 }
 

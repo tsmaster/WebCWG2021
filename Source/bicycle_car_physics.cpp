@@ -93,7 +93,9 @@ void BicycleCarPhysics::calculateSteering(float dt)
   Vec2f frontWheelPos = m_position + halfBaseVec;
 
   Vec2f newRearWheel = rearWheelPos + m_velocity * dt;
-  Vec2f newFrontWheel = frontWheelPos + Vec2f::makeAngleLength(m_heading +m_steeringAngleRadCurr, m_velocity.len()) * dt;
+  Vec2f newFrontWheel = frontWheelPos +
+    Vec2f::makeAngleLength(m_heading +
+			   m_steeringAngleRadCurr, m_velocity.len()) * dt;
   
   Vec2f newForward = (newFrontWheel - newRearWheel).normalized();
 
@@ -106,6 +108,62 @@ void BicycleCarPhysics::calculateSteering(float dt)
     m_velocity = newForward * -1.0f * std::min(m_velocity.len(), m_maxSpeedReverse);
   }
   m_heading = newForward.angle();
+}
+
+float BicycleCarPhysics::calculateTurningRadius(float speed) const
+{
+  if (speed <= 0.0f) {
+    return -1.0f;
+  }
+  
+  // lift code from the calculateSteering method, above
+
+  Vec2f startPosition(0, 0);
+  
+  Vec2f halfBaseVec = Vec2f::makeAngleLength(0, m_wheelBase * 0.5f);
+  Vec2f rearWheelPos = startPosition - halfBaseVec;
+  Vec2f frontWheelPos = startPosition + halfBaseVec;
+
+  // arbitrarily use 100Hz
+  float dt = 1.0f / 100.0f;
+
+  float startHeading = 0.0f;
+  Vec2f velocity = Vec2f::makeAngleLength(startHeading, speed);
+
+  float maximumSteerAngleRadians = degToRad(m_steerAngleDegMax);
+  
+  Vec2f newRearWheel = rearWheelPos + velocity * dt;
+  Vec2f newFrontWheel = frontWheelPos +
+    Vec2f::makeAngleLength(startHeading + maximumSteerAngleRadians,
+			   speed) * dt;
+  
+  Vec2f newForward = (newFrontWheel - newRearWheel).normalized();
+
+  float newAngle = newForward.angle();
+
+  if (newAngle <= 0.0f) {
+    return -1.0f;
+  }
+
+  Vec2f newCenterPos = (newFrontWheel + newRearWheel) * 0.5f;
+
+  float distanceTraveled = (newCenterPos - startPosition).len();
+
+  /*
+    Ok, this calculation isn't obvious:
+
+  float fracOfCircle = newAngle / TAU;
+
+  float estimatedCircumference = distanceTraveled / fracOfCircle;
+  circ = distanceTraveled * TAU / newAngle;
+
+  float estimatedRadius = estimatedCircumference / TAU;
+  rad = circ / TAU
+  rad = distanceTraveled / newAngle // critically, angle in radians
+  */
+
+  float turningRadius = distanceTraveled / newAngle;
+  return turningRadius;
 }
 
 

@@ -279,6 +279,9 @@ bool ArenaGameMode::update(CarsWithGuns* game, float elapsedSeconds)
       barrel->tickPhysics(m_physicsFrameTime);
     }
 
+    float turnRad = m_cars[0]->getTurningRadius();
+    printf("radius: %f\n", turnRad);
+
     m_physicsJuice -= m_physicsFrameTime;
   }
 

@@ -65,6 +65,8 @@ class Bdg_Car
   // Should this be part of a brain class?
   Vec2f getTargetPos() { return m_targetPos; }
   void setTargetPos(Vec2f targetPos) { m_targetPos = targetPos; }
+
+  float getTurningRadius() { return m_bicyclePhysics.calculateTurningRadius(m_speed); }
   
  private:
   std::string m_name = std::string("Car");

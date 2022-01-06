@@ -59,6 +59,8 @@ public:
 
   const Vec2f& getVelocity() const { return m_velocity; }
 
+  float calculateTurningRadius(float speed) const;
+
 protected:
   void moveConstrained(float dt, const std::vector<WorldQuad>& inWalls);
 
